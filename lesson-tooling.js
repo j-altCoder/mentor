@@ -49,7 +49,6 @@ module.exports = {
 // Running ESLint
 // npx eslint src/          — find all problems
 // npx eslint src/ --fix    — auto-fix what it can`
-      }
     },
 
     // ── Prettier ──
