@@ -84,7 +84,6 @@ const parsed    = parseISO('2024-03-15');       // safe, consistent parsing
 // const meeting = Temporal.ZonedDateTime.from('2024-03-15T14:00[America/New_York]');
 // const inTokyo = meeting.withTimeZone('Asia/Tokyo');
 // Immutable: all operations return new instances, never mutate`
-      }
     },
 
     // ── UTC everywhere ──
@@ -146,7 +145,6 @@ const toUTCForAPI = (localDateStr, userTimeZone) => {
   const { zonedTimeToUtc } = require('date-fns-tz');
   return zonedTimeToUtc(localDateStr, userTimeZone).toISOString();
 };`
-      }
     },
 
     // ── Timestamps vs DateTimes ──
@@ -196,7 +194,7 @@ if ('March 15' < 'March 16') { ... }      // does NOT work — lexicographic, no
 // Sorting by date in MongoDB — always use Date type, not strings
 const recent = await Event.find().sort({ startsAt: -1 }).limit(20);
 // If startsAt were stored as "March 15, 2024" strings — sort would be wrong`
-      }
+      
     },
 
     // ── Timezones in depth ──
@@ -274,7 +272,7 @@ const salesForTimezone = await Order.aggregate([
   }},
   { $sort: { _id: -1 } }
 ]);`
-      }
+      
     },
 
     // ── DST and edge cases ──
@@ -326,7 +324,7 @@ if (!isValid(utc)) throw new ValidationError('This time does not exist due to DS
 // TZ=UTC node src/index.js
 // Or in ecosystem.config.js: env: { TZ: 'UTC' }
 // Without this: new Date().toLocaleDateString() uses the server's OS timezone`
-      }
+      
     },
 
     // ── Date validation and parsing ──
@@ -386,7 +384,7 @@ const calculateAge = (birthDate) => {
 };
 // ❌ Never do: Math.floor((Date.now() - birthDate) / (365.25 * 24 * 60 * 60 * 1000))
 // Breaks on leap years and near birthday boundaries`
-      }
+      
     },
 
     // ── Practical patterns ──
@@ -437,7 +435,7 @@ const oneHourAgo     = subHours(new Date(), 1);
 const minutesUntil   = differenceInMinutes(appointment.startsAt, new Date());
 const todayStart     = startOfDay(new Date());   // midnight UTC (with TZ=UTC on server)
 const todayEnd       = endOfDay(new Date());     // 23:59:59 UTC`
-      }
+      
     },
 
     {
