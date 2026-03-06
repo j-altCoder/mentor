@@ -499,6 +499,17 @@ header p {
   transition: color 0.12s, background 0.12s;
 }
 .fav-entry-del:hover { color: var(--cat5); background: rgba(251,113,133,0.1); }
+.fav-entry-lesson {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--cat5);
+  opacity: 0.7;
+  margin-bottom: 0.2rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
 .fav-clear {
   margin: 0.6rem 0.8rem 1rem;
   padding: 0.4rem 0.6rem;
@@ -898,6 +909,7 @@ function renderFavPanel() {
 
   const items = favs.map((f, i) => `
     <div class="fav-entry" onclick="jumpToFav('${f.id}')">
+      ${f.lessonIdx !== undefined && LESSONS[f.lessonIdx] ? `<span class="fav-entry-lesson">${esc(LESSONS[f.lessonIdx].tag)}</span>` : ''}
       <span class="fav-entry-text">${esc(f.text)}</span>
       <button class="fav-entry-del" onclick="deleteFav(event,${i})" title="Remove">✕</button>
     </div>`).join('');
@@ -933,19 +945,137 @@ function removeHighlight(id) {
 }
 
 function jumpToFav(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  el.classList.add('flash');
-  setTimeout(() => el.classList.remove('flash'), 900);
+  // Find which lesson this fav belongs to
+  const fav = favs.find(f => f.id === id);
+  if (!fav) return;
+
+  const doScroll = () => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 900);
+  };
+
+  if (fav.lessonIdx !== currentIdx) {
+    // Navigate to the correct lesson first, then scroll after render
+    selectLesson(fav.lessonIdx);
+    // reapplyFavHighlights runs inside selectLesson; wait for DOM + scroll-to-top to settle
+    setTimeout(doScroll, 400);
+  } else {
+    // Already on the right lesson — mark might need re-injection if page was refreshed
+    if (!document.getElementById(id)) {
+      injectHighlight(document.getElementById('lessonView'), fav.text, id);
+    }
+    doScroll();
+  }
 }
 
 // Re-apply highlights after lesson navigation (highlights live in rendered HTML
 // which gets replaced on lesson change — we store the text & regenerate)
 function reapplyFavHighlights() {
-  // Highlights are ephemeral per-lesson-load; the panel entries remain.
-  // On re-entering the same lesson they won't be there — that's acceptable.
-  // For a stateless single-HTML deployment this is the right tradeoff.
+  // Re-inject <mark> nodes for any favorites that belong to the current lesson.
+  // We find the saved text in the rendered DOM using TreeWalker and wrap it.
+  const view = document.getElementById('lessonView');
+  if (!view) return;
+
+  const lessonFavs = favs.filter(f => f.lessonIdx === currentIdx);
+  if (!lessonFavs.length) return;
+
+  lessonFavs.forEach(fav => {
+    // Don't double-wrap if already present
+    if (document.getElementById(fav.id)) return;
+    injectHighlight(view, fav.text, fav.id);
+  });
+}
+
+function injectHighlight(root, searchText, id) {
+  // Walk all text nodes inside root, find searchText, wrap first match in <mark>
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      // Skip nodes already inside a fav-mark (avoid double-wrap)
+      if (node.parentElement && node.parentElement.closest('.fav-mark')) return NodeFilter.FILTER_REJECT;
+      // Skip code blocks — text there is raw and selection is unreliable
+      if (node.parentElement && node.parentElement.closest('.code-body'))  return NodeFilter.FILTER_SKIP;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+
+  // Collect all text nodes and their cumulative positions
+  const nodes = [];
+  let   full  = '';
+  let   node;
+  while ((node = walker.nextNode())) {
+    nodes.push({ node, start: full.length });
+    full += node.textContent;
+  }
+
+  // Normalise whitespace for matching (selections collapse whitespace)
+  const normFull   = full.replace(/\s+/g, ' ');
+  const normSearch = searchText.replace(/\s+/g, ' ').trim();
+  const matchIdx   = normFull.indexOf(normSearch);
+  if (matchIdx === -1) return; // text not found in this render
+
+  // Map match position back to original text offset
+  let origStart = mapNormToOrig(full, matchIdx);
+  let origEnd   = mapNormToOrig(full, matchIdx + normSearch.length);
+
+  // Find which text nodes span origStart..origEnd
+  const range = document.createRange();
+  let placed  = false;
+
+  for (let i = 0; i < nodes.length; i++) {
+    const { node: n, start } = nodes[i];
+    const end = start + n.textContent.length;
+
+    if (!placed && origStart >= start && origStart < end) {
+      range.setStart(n, origStart - start);
+      placed = true;
+    }
+    if (placed && origEnd >= start && origEnd <= end) {
+      range.setEnd(n, origEnd - start);
+      break;
+    }
+  }
+
+  if (!placed) return;
+
+  try {
+    const mark = document.createElement('mark');
+    mark.className = 'fav-mark';
+    mark.id        = id;
+    mark.title     = 'Favorited — click to jump here';
+    mark.addEventListener('click', () => jumpToFav(id));
+    try {
+      range.surroundContents(mark);
+    } catch (_) {
+      const fragment = range.extractContents();
+      mark.appendChild(fragment);
+      range.insertNode(mark);
+    }
+  } catch(err) {
+    // Silently fail — panel entry still works for cross-lesson navigation
+  }
+}
+
+function mapNormToOrig(orig, normPos) {
+  // Given a position in the whitespace-collapsed string, return the
+  // corresponding position in the original string.
+  let o = 0; // orig cursor
+  let n = 0; // norm cursor
+  while (o < orig.length && n < normPos) {
+    if (/\s/.test(orig[o])) {
+      // Skip all consecutive whitespace in orig, count as one in norm
+      while (o < orig.length && /\s/.test(orig[o])) o++;
+      n++;
+    } else {
+      o++;
+      n++;
+    }
+  }
+  // Skip leading whitespace in orig if we're at the start of a ws run
+  while (o < orig.length && /\s/.test(orig[o])) o++;
+  return o;
 }
 
 function esc(str) {
@@ -1079,7 +1209,7 @@ saveBtn.addEventListener('click', function(e) {
     console.warn('Could not highlight selection:', err);
   }
 
-  favs.unshift({ id, text });
+  favs.unshift({ id, text, lessonIdx: currentIdx });
   saveFavs(favs);
   renderFavPanel();
   hideToolbar();
