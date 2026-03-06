@@ -582,6 +582,144 @@ header p {
     padding: 2rem 1.2rem 5rem;
   }
 }
+
+/* ── FAVORITES PANEL ── */
+.fav-panel {
+  width: 240px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 180px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  display: flex;
+  flex-direction: column;
+}
+.fav-panel-header {
+  padding: 1.2rem 1rem 0.6rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.fav-panel-header span.fav-count {
+  background: var(--cat5);
+  color: #000;
+  font-size: 0.55rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 1rem;
+  letter-spacing: 0;
+}
+.fav-empty {
+  padding: 1.5rem 1rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-style: italic;
+  text-align: center;
+  line-height: 1.5;
+}
+.fav-list {
+  padding: 0.6rem 0;
+  flex: 1;
+}
+.fav-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+}
+.fav-item:hover {
+  background: var(--card);
+  border-left-color: var(--cat5);
+}
+.fav-item-text {
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.4;
+  flex: 1;
+  word-break: break-word;
+}
+.fav-item-remove {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+  flex-shrink: 0;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+.fav-item-remove:hover { opacity: 1; color: var(--cat5); }
+
+/* ── SELECTION TOOLBAR ── */
+#selectionToolbar {
+  position: fixed;
+  z-index: 9999;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.4rem;
+  display: none;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  pointer-events: all;
+  transform: translateX(-50%) translateY(calc(-100% - 8px));
+}
+#selectionToolbar.visible { display: flex; }
+.toolbar-btn {
+  background: var(--cat5);
+  color: #000;
+  border: none;
+  border-radius: 0.3rem;
+  padding: 0.28rem 0.65rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.toolbar-btn:hover { opacity: 0.85; }
+.toolbar-tip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  padding: 0 0.2rem;
+}
+
+/* ── HIGHLIGHTED FAVORITES ── */
+.fav-highlight {
+  background: rgba(251,113,133,0.18);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.fav-highlight:hover { background: rgba(251,113,133,0.35); }
+
+/* ── LAYOUT: add fav panel to grid ── */
+@media (min-width: 1100px) {
+  .app {
+    grid-template-columns: 260px 1fr 240px;
+  }
+}
+@media (max-width: 1099px) {
+  .fav-panel { display: none; }
+}
+
 </style>
 </head>
 <body>
@@ -615,27 +753,63 @@ header p {
   </main>
 </div>
 
+<!-- Favorites Panel -->
+<aside class="fav-panel" id="favPanel">
+  <div class="fav-panel-header">
+    ⭐ Favorites <span class="fav-count" id="favCount">0</span>
+  </div>
+  <div id="favList">
+    <div class="fav-empty" id="favEmpty">Select any text while reading and tap <strong>★ Favorite</strong> to save it here.</div>
+    <div class="fav-list" id="favItems"></div>
+  </div>
+</aside>
+
+<!-- Selection Toolbar -->
+<div id="selectionToolbar">
+  <button class="toolbar-btn" id="favBtn" onclick="favoriteSelection()">★ Favorite</button>
+  <span class="toolbar-tip">Save this term</span>
+</div>
+
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 <button class="mobile-nav-toggle" onclick="toggleSidebar()">☰ Lessons</button>
 
-<script src="lesson-auth.js"></script>
-<script src="lesson-tooling.js"></script>
-<!-- <script src="lesson-packages.js"></script>
-<script src="lesson-backend-libs.js"></script>
-<script src="lesson-scaling.js"></script>
-<script src="lesson-performance.js"></script>
-<script src="lesson-mongodb.js"></script>
-<script src="lesson-security.js"></script>
-<script src="lesson-devops.js"></script>
-<script src="lesson-observability.js"></script>
-<script src="lesson-distributed.js"></script>
-<script src="lesson-code-quality.js"></script>
-<script src="lesson-debugging.js"></script> -->
+<script src="lesson-auth.js" onerror="console.warn('lesson-auth.js not found')"></script>
+<script src="lesson-tooling.js" onerror="console.warn('lesson-tooling.js not found')"></script>
+<script src="lesson-packages.js" onerror="console.warn('lesson-packages.js not found')"></script>
+<script src="lesson-backend-libs.js" onerror="console.warn('lesson-backend-libs.js not found')"></script>
+<script src="lesson-scaling.js" onerror="console.warn('lesson-scaling.js not found')"></script>
+<script src="lesson-performance.js" onerror="console.warn('lesson-performance.js not found')"></script>
+<script src="lesson-mongodb.js" onerror="console.warn('lesson-mongodb.js not found')"></script>
+<script src="lesson-security.js" onerror="console.warn('lesson-security.js not found')"></script>
+<script src="lesson-devops.js" onerror="console.warn('lesson-devops.js not found')"></script>
+<script src="lesson-observability.js" onerror="console.warn('lesson-observability.js not found')"></script>
+<script src="lesson-distributed.js" onerror="console.warn('lesson-distributed.js not found')"></script>
+<script src="lesson-code-quality.js" onerror="console.warn('lesson-code-quality.js not found')"></script>
+<script src="lesson-debugging.js" onerror="console.warn('lesson-debugging.js not found')"></script>
+<script src="lesson-datetime.js" onerror="console.warn('lesson-datetime.js not found')"></script>
+<script src="lesson-code-review.js" onerror="console.warn('lesson-code-review.js not found')"></script>
+<script src="lesson-api-design.js" onerror="console.warn('lesson-api-design.js not found')"></script>
 <script>
-// const LESSONS = [LESSON_AUTH, LESSON_TOOLING, LESSON_PACKAGES, LESSON_BACKEND_LIBS, LESSON_SCALING, LESSON_PERFORMANCE, LESSON_MONGODB, LESSON_SECURITY, LESSON_DEVOPS, LESSON_OBSERVABILITY, LESSON_DISTRIBUTED, LESSON_CODE_QUALITY, LESSON_DEBUGGING];
-const LESSONS = [LESSON_AUTH, LESSON_TOOLING];
-
-  const CATEGORIES = [
+const _ALL_LESSONS = [
+  typeof LESSON_AUTH          !== 'undefined' ? LESSON_AUTH          : null,
+  typeof LESSON_TOOLING       !== 'undefined' ? LESSON_TOOLING       : null,
+  typeof LESSON_PACKAGES      !== 'undefined' ? LESSON_PACKAGES      : null,
+  typeof LESSON_BACKEND_LIBS  !== 'undefined' ? LESSON_BACKEND_LIBS  : null,
+  typeof LESSON_SCALING       !== 'undefined' ? LESSON_SCALING       : null,
+  typeof LESSON_PERFORMANCE   !== 'undefined' ? LESSON_PERFORMANCE   : null,
+  typeof LESSON_MONGODB       !== 'undefined' ? LESSON_MONGODB       : null,
+  typeof LESSON_SECURITY      !== 'undefined' ? LESSON_SECURITY      : null,
+  typeof LESSON_DEVOPS        !== 'undefined' ? LESSON_DEVOPS        : null,
+  typeof LESSON_OBSERVABILITY !== 'undefined' ? LESSON_OBSERVABILITY : null,
+  typeof LESSON_DISTRIBUTED   !== 'undefined' ? LESSON_DISTRIBUTED   : null,
+  typeof LESSON_CODE_QUALITY  !== 'undefined' ? LESSON_CODE_QUALITY  : null,
+  typeof LESSON_DEBUGGING     !== 'undefined' ? LESSON_DEBUGGING     : null,
+  typeof LESSON_DATETIME      !== 'undefined' ? LESSON_DATETIME      : null,
+  typeof LESSON_CODE_REVIEW   !== 'undefined' ? LESSON_CODE_REVIEW   : null,
+  typeof LESSON_API_DESIGN    !== 'undefined' ? LESSON_API_DESIGN    : null,
+];
+const LESSONS = _ALL_LESSONS.filter(Boolean);
+const CATEGORIES = [
   "Language & Framework Fundamentals",
   "Architecture & System Design",
   "Scalability & Performance",
@@ -799,6 +973,147 @@ function closeSidebar() {
 buildSidebar();
 // Auto-open first lesson
 if (LESSONS.length > 0) selectLesson(0);
+
+// ══════════════════════════════════════
+//  FAVORITES SYSTEM
+// ══════════════════════════════════════
+let favorites = JSON.parse(localStorage.getItem('coderoom-favs') || '[]');
+let favCounter = 0;
+
+function saveFavs() {
+  try { localStorage.setItem('coderoom-favs', JSON.stringify(favorites)); } catch(e) {}
+}
+
+function renderFavPanel() {
+  const count   = favorites.length;
+  const countEl = document.getElementById('favCount');
+  const emptyEl = document.getElementById('favEmpty');
+  const listEl  = document.getElementById('favItems');
+  if (countEl) countEl.textContent = count;
+  if (emptyEl) emptyEl.style.display = count === 0 ? 'block' : 'none';
+  if (!listEl) return;
+  listEl.innerHTML = favorites.map((fav, i) => `
+    <div class="fav-item" onclick="scrollToFav('${fav.id}')" title="Click to scroll to this term">
+      <span class="fav-item-text">${escHtml(fav.text)}</span>
+      <button class="fav-item-remove" onclick="removeFav(event,${i})" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+function removeFav(e, idx) {
+  e.stopPropagation();
+  const fav = favorites[idx];
+  if (fav) {
+    // Remove highlight span from DOM
+    const el = document.getElementById(fav.id);
+    if (el) {
+      const parent = el.parentNode;
+      while (el.firstChild) parent.insertBefore(el.firstChild, el);
+      parent.removeChild(el);
+    }
+  }
+  favorites.splice(idx, 1);
+  saveFavs();
+  renderFavPanel();
+}
+
+function scrollToFav(id) {
+  // Try current lesson view first, then re-highlight if needed
+  let el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Flash highlight
+  el.style.background = 'rgba(251,113,133,0.55)';
+  setTimeout(() => { el.style.background = ''; }, 1200);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Selection toolbar ──
+const toolbar = document.getElementById('selectionToolbar');
+let pendingRange = null;
+let pendingText  = '';
+
+document.addEventListener('mouseup', (e) => {
+  // Don't trigger when clicking toolbar itself
+  if (toolbar.contains(e.target)) return;
+
+  const sel = window.getSelection();
+  const text = sel ? sel.toString().trim() : '';
+
+  if (!text || text.length < 2) {
+    hideToolbar();
+    return;
+  }
+
+  // Only trigger inside the lesson view
+  const lessonView = document.getElementById('lessonView');
+  if (!lessonView) { hideToolbar(); return; }
+  const range = sel.getRangeAt(0);
+  if (!lessonView.contains(range.commonAncestorContainer)) { hideToolbar(); return; }
+
+  pendingText  = text;
+  pendingRange = range.cloneRange();
+
+  // Position toolbar above the selection
+  const rect = range.getBoundingClientRect();
+  toolbar.style.left = (rect.left + rect.width / 2 + window.scrollX) + 'px';
+  toolbar.style.top  = (rect.top  + window.scrollY) + 'px';
+  toolbar.classList.add('visible');
+});
+
+document.addEventListener('mousedown', (e) => {
+  if (!toolbar.contains(e.target)) hideToolbar();
+});
+
+function hideToolbar() {
+  toolbar.classList.remove('visible');
+  pendingRange = null;
+  pendingText  = '';
+}
+
+function favoriteSelection() {
+  if (!pendingRange || !pendingText) return;
+
+  // Check for duplicate text
+  if (favorites.some(f => f.text === pendingText)) {
+    hideToolbar();
+    return;
+  }
+
+  const id = 'fav-' + (++favCounter) + '-' + Date.now();
+
+  // Wrap the selected range in a highlight span
+  try {
+    const span = document.createElement('mark');
+    span.className = 'fav-highlight';
+    span.id = id;
+    span.title = 'Favorited — click to highlight';
+    span.onclick = () => scrollToFav(id);
+    pendingRange.surroundContents(span);
+  } catch(e) {
+    // surroundContents fails if selection crosses element boundaries
+    // Fall back: just store without highlight
+  }
+
+  favorites.unshift({ id, text: pendingText.slice(0, 120) });
+  saveFavs();
+  renderFavPanel();
+  hideToolbar();
+
+  // Clear browser selection
+  window.getSelection()?.removeAllRanges();
+}
+
+// Re-render favs panel whenever a lesson loads
+const _origSelectLesson = selectLesson;
+// We hook in after the original via a post-render call
+const _origRenderScene = renderScene;
+
+// Init favorites panel
+renderFavPanel();
+
 </script>
 </body>
 </html>
