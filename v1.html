@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Coderoom — Senior Dev Mentorship</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Lora:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f13;
+    --surface: #15171d;
+    --card: #1c1f28;
+    --border: #2a2d3a;
+    --accent: #f5a623;
+    --accent2: #4fc9a4;
+    --accent3: #e05c7a;
+    --text: #e8e6df;
+    --muted: #6e7187;
+    --raj: #f5a623;
+    --you: #4fc9a4;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lora', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  header {
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #1a1c24 0%, var(--bg) 100%);
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #f5a623, #e05c7a 60%, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p {
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 0.8rem;
+    font-size: 1rem;
+  }
+
+  .characters {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .char-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  .char-badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* Nav */
+  nav {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1.2rem 2rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar { display: none; }
+
+  .nav-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 1rem;
+    border-radius: 0.4rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover { color: var(--text); border-color: var(--accent); }
+  .nav-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Main */
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+  }
+
+  .lesson { display: none; animation: fadeIn 0.4s ease; }
+  .lesson.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .lesson-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .lesson-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 0.6rem;
+  }
+
+  .lesson-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .lesson-intro {
+    margin-top: 0.8rem;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  /* Scene */
+  .scene {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scene::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--accent);
+    border-radius: 1rem 0 0 1rem;
+  }
+
+  .scene.you-scene::before { background: var(--you); }
+  .scene.note-scene::before { background: var(--accent3); }
+
+  .speaker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .speaker.raj { color: var(--raj); }
+  .speaker.you { color: var(--you); }
+  .speaker.note { color: var(--accent3); }
+
+  .speaker::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .dialogue {
+    line-height: 1.85;
+    font-size: 1rem;
+    color: var(--text);
+  }
+
+  .dialogue em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .dialogue strong { color: var(--accent2); }
+
+  /* Code block */
+  .code-block {
+    background: #0a0b0f;
+    border: 1px solid var(--border);
+    border-radius: 0.6rem;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: #c9d1d9;
+  }
+
+  .code-block .cmt { color: #4e5566; font-style: italic; }
+  .code-block .kw { color: #c792ea; }
+  .code-block .fn { color: #82aaff; }
+  .code-block .str { color: #c3e88d; }
+  .code-block .num { color: #f78c6c; }
+  .code-block .tag { color: #f07178; }
+  .code-block .attr { color: #ffcb6b; }
+
+  /* Analogy box */
+  .analogy {
+    background: linear-gradient(135deg, rgba(245,166,35,0.07), rgba(79,201,164,0.07));
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: 0.7rem;
+    padding: 1.2rem 1.4rem;
+    margin: 1.2rem 0;
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: #c9c4b8;
+  }
+
+  .analogy-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  /* Summary */
+  .summary-box {
+    background: var(--surface);
+    border: 1px solid var(--accent2);
+    border-radius: 0.7rem;
+    padding: 1.4rem;
+    margin-top: 2rem;
+  }
+
+  .summary-box h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+  }
+
+  .summary-box ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .summary-box li {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text);
+    padding-left: 1.2rem;
+    position: relative;
+  }
+
+  .summary-box li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent2);
+  }
+
+  /* Progress */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    gap: 1rem;
+  }
+
+  .nav-arrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0.7rem 1.4rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav-arrow:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-arrow.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-arrow.primary:hover { opacity: 0.85; color: #000; }
+
+  @media (max-width: 600px) {
+    main { padding: 2rem 1rem 5rem; }
+    .scene { padding: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">The Coderoom Series</p>
+  <h1>Senior Dev Mentorship</h1>
+  <p>Real talk. Real code. Raj explains it all to you — the junior dev who just joined the team.</p>
+  <div class="characters">
+    <div class="char-badge"><span class="dot" style="background:#f5a623"></span> Raj — Senior Dev, 10 yrs</div>
+    <div class="char-badge"><span class="dot" style="background:#4fc9a4"></span> You — Junior Dev, Day 1 back</div>
+  </div>
+</header>
+
+<nav id="topNav"></nav>
+
+<main>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+  <div id="lessons"></div>
+  <div class="bottom-nav">
+    <button class="nav-arrow" id="prevBtn" onclick="changeLesson(-1)" disabled>← Prev</button>
+    <button class="nav-arrow primary" id="nextBtn" onclick="changeLesson(1)">Next →</button>
+  </div>
+</main>
+
+<script>
+const lessons = [
+  {
+    tag: "Git & Version Control",
+    title: "The Time Machine You Never Knew You Had",
+    intro: "It's your first day back. Raj pulls up a chair next to you.",
+    scenes: [
+      { speaker: "raj", text: `"So, you're back! Good. First thing — before you touch <em>any</em> code today, let's talk Git. Think of Git as a <strong>time machine for your code</strong>. Every time you make a save — we call it a <em>commit</em> — Git takes a snapshot of your entire project. If something breaks tomorrow, you can jump back to any snapshot."` },
+      { speaker: "you", text: `"Okay, I know commits and branches. But what about merge vs rebase? I always confuse those."` },
+      { speaker: "raj", text: `"Perfect. Imagine two train tracks that split apart and then need to come back together. <em>Merge</em> is like welding the two tracks together — it creates a new 'merge commit' that says 'hey, these two lines of work joined here.' <em>Rebase</em> is different — it picks up all your commits and replants them on top of the other branch, like you were working from there all along. It makes history look <strong>cleaner and linear</strong>."` },
+      {
+        type: "analogy",
+        text: "Merge = two rivers joining and you can see where they met. Rebase = you pick up your work and pretend you started from where the other river already is."
+      },
+      { speaker: "raj", text: `"Now, stash. You're mid-feature, boss calls and says 'fix this bug NOW.' You're not ready to commit your half-done work. You run <em>git stash</em> — it's like sweeping your desk into a drawer. Your working directory goes clean, you fix the bug, and then you run <em>git stash pop</em> to get your stuff back out."` },
+      {
+        type: "code",
+        text: `<span class="cmt"># You're in the middle of something...</span>\ngit stash          <span class="cmt"># sweep it away</span>\ngit checkout main  <span class="cmt"># fix the urgent bug</span>\ngit stash pop      <span class="cmt"># bring your work back</span>`
+      },
+      { speaker: "raj", text: `"And cherry-pick? Sometimes you merged a big feature branch but you only want ONE specific commit from it. Cherry-pick lets you grab exactly that commit and apply it to another branch. Like picking one donut from the box."` },
+      {
+        type: "summary",
+        points: ["git stash = temporary drawer for unfinished work", "merge = join branches, keeps full history", "rebase = replay your commits on top of another branch, cleaner history", "cherry-pick = grab one specific commit and apply it elsewhere", "git fetch = download changes but DON'T apply them. git pull = fetch + merge in one shot"]
+      }
+    ]
+  },
+  {
+    tag: "React",
+    title: "Why Is the UI Slow? Let's Find Out",
+    intro: "You've pushed a React component. Raj opens your code and raises an eyebrow.",
+    scenes: [
+      { speaker: "raj", text: `"This component re-renders every single time. See that function you're passing as a prop? Every render creates a brand new function. The child component sees a new reference, thinks something changed, and re-renders too. That's your lag."` },
+      { speaker: "you", text: `"So... I should use useCallback?"` },
+      { speaker: "raj", text: `"Exactly. <em>useCallback</em> memoizes the function itself. It says 'only give me a new function if these dependencies change.' <em>useMemo</em> does the same but for <strong>values</strong>, not functions. If you have a complex calculation — say, filtering a 10,000 item list — you wrap it in useMemo so it only recalculates when the list data actually changes."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// Without useCallback — new function every render</span>\n<span class="kw">const</span> <span class="fn">handleClick</span> = () => doSomething(id);\n\n<span class="cmt">// With useCallback — same function unless id changes</span>\n<span class="kw">const</span> <span class="fn">handleClick</span> = <span class="fn">useCallback</span>(() => doSomething(id), [id]);\n\n<span class="cmt">// useMemo for expensive value</span>\n<span class="kw">const</span> filtered = <span class="fn">useMemo</span>(() => bigList.filter(x => x.active), [bigList]);`
+      },
+      { speaker: "raj", text: `"Now the Virtual DOM. React doesn't touch the real browser DOM every render — that's slow. Instead it builds a <em>virtual copy in memory</em>, compares it to the previous version (this is called <strong>diffing</strong>), and only updates the parts that actually changed. It's like editing a Word doc by comparing two versions and only retyping the changed sentences."` },
+      { speaker: "raj", text: `"For forms, forget writing your own state for every input. Use <em>React Hook Form</em> — it's performant because it doesn't re-render on every keystroke unlike controlled components. For global state, use <em>Context API</em> for simple stuff like theme or user info. Use <em>Redux</em> only when your state is complex, shared across many components, and needs time-travel debugging."` },
+      {
+        type: "analogy",
+        text: "Context API = a shared noticeboard in the office (simple, everyone can read). Redux = a full filing system with a receptionist who controls all changes (powerful, but more setup)."
+      },
+      {
+        type: "summary",
+        points: ["Virtual DOM = fast in-memory comparison before touching real DOM", "useCallback = memoize functions so child components don't needlessly re-render", "useMemo = memoize expensive calculated values", "React Hook Form / Formik = handle forms without manual state for each field", "Context API for simple shared state, Redux for complex multi-component state", "Lazy loading = load components only when needed using React.lazy + Suspense"]
+      }
+    ]
+  },
+  {
+    tag: "Node.js & Express",
+    title: "Building the Engine Room",
+    intro: "You're writing backend routes. Raj leans over and asks how you're handling auth.",
+    scenes: [
+      { speaker: "you", text: `"I was just going to store the user ID in a session..."` },
+      { speaker: "raj", text: `"Sessions work, but for APIs — especially mobile or third-party clients — use <em>JWT (JSON Web Tokens)</em>. When a user logs in, the server signs a token with a secret key and sends it back. Every future request, the client sends that token in the header. The server just verifies the signature — <strong>no database lookup needed</strong>. It's stateless."` },
+      {
+        type: "analogy",
+        text: "Session = stamp on your hand at the club (server has to check the list every time). JWT = a signed ticket with your details on it — the bouncer just reads and verifies the signature."
+      },
+      {
+        type: "code",
+        text: `<span class="cmt">// Signing a token on login</span>\n<span class="kw">const</span> token = jwt.<span class="fn">sign</span>({ userId: user._id }, <span class="str">'your-secret'</span>, { expiresIn: <span class="str">'7d'</span> });\n\n<span class="cmt">// Middleware to protect routes</span>\n<span class="kw">const</span> <span class="fn">authMiddleware</span> = (req, res, next) => {\n  <span class="kw">const</span> token = req.headers.authorization?.<span class="fn">split</span>(<span class="str">' '</span>)[<span class="num">1</span>];\n  <span class="kw">if</span> (!token) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Unauthorized'</span> });\n  req.user = jwt.<span class="fn">verify</span>(token, <span class="str">'your-secret'</span>);\n  <span class="fn">next</span>();\n};`
+      },
+      { speaker: "raj", text: `"See that <em>next()</em> call? That's <strong>middleware</strong> in a nutshell. Middleware is just a function that sits between the request and your route handler. It can check auth, log stuff, parse the request body, handle errors. You can chain as many as you want. Express runs them in order."` },
+      { speaker: "raj", text: `"For file uploads, use <em>Multer</em> — it's a middleware that handles multipart/form-data. It saves the file to disk or memory and sticks the info on req.file. For environment variables — never hardcode secrets in code. Use a <em>.env file</em> and the <em>dotenv</em> package. It loads them into process.env. And that .env file should always be in .gitignore."` },
+      { speaker: "raj", text: `"The event loop — Node is single-threaded but handles thousands of requests. How? It delegates slow stuff like file reads and DB queries to the OS, moves on to other requests, and when the OS is done it gets a callback. If you write CPU-heavy synchronous code, you block the entire loop. That's why we always use async/await or callbacks for I/O."` },
+      {
+        type: "summary",
+        points: ["JWT = stateless auth token, signed by server, sent by client on every request", "Middleware = functions in a chain between request and response — auth, logging, error handling", "Multer = middleware for handling file uploads", ".env + dotenv = keep secrets out of code", "Event loop = Node handles I/O concurrently by not waiting — never block it with heavy sync code"]
+      }
+    ]
+  },
+  {
+    tag: "MongoDB",
+    title: "The Database That Thinks in JSON",
+    intro: "You're designing a data model. Raj asks how you're structuring the users and their orders.",
+    scenes: [
+      { speaker: "you", text: `"I was going to put the order IDs in an array on the user document..."` },
+      { speaker: "raj", text: `"That's embedding a reference. You have two choices in Mongo — <em>embed</em> the data directly inside the document, or store a <strong>reference</strong> (like a foreign key) and use populate later. Embed when the data is small, always needed together, and doesn't change often — like a user's address. Reference when the related data is large, shared across documents, or queried on its own — like orders."` },
+      {
+        type: "analogy",
+        text: "Embedding = stapling the receipt to the order form. Referencing = keeping receipts in a separate folder and writing 'see folder #42' on the form."
+      },
+      { speaker: "raj", text: `"Now, find() vs aggregate(). <em>find()</em> is your basic query — get me all users where age > 25. <em>aggregate()</em> is a pipeline — it's for when you need to <strong>transform, group, join, or calculate</strong>. Like 'give me total revenue per product category this month.' You couldn't do that with just find()."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// Simple find</span>\nUser.<span class="fn">find</span>({ age: { $gt: <span class="num">25</span> } })\n\n<span class="cmt">// Aggregate: total orders per user</span>\nOrder.<span class="fn">aggregate</span>([\n  { $<span class="fn">group</span>: { _id: <span class="str">"$userId"</span>, total: { $sum: <span class="str">"$amount"</span> } } },\n  { $<span class="fn">sort</span>: { total: <span class="num">-1</span> } }\n])\n\n<span class="cmt">// $lookup = like a JOIN in SQL</span>\n{ $<span class="fn">lookup</span>: { from: <span class="str">"products"</span>, localField: <span class="str">"productId"</span>, \n  foreignField: <span class="str">"_id"</span>, as: <span class="str">"product"</span> } }`
+      },
+      { speaker: "raj", text: `"<em>$lookup</em> is MongoDB's version of a SQL JOIN. Use it inside aggregate when you need to pull in data from another collection. Mongoose's <em>populate()</em> does the same thing but in application code — it's easier to write but does multiple queries under the hood. $lookup happens in one DB call. For performance on large datasets, prefer $lookup."` },
+      { speaker: "raj", text: `"And indexes — without them, Mongo scans every single document to find what you need. With an index on the field you query most, it's like having a sorted index at the back of a book. Create indexes on fields you query, sort, or filter by often. Check slow queries with <em>.explain('executionStats')</em>."` },
+      {
+        type: "summary",
+        points: ["Embed data when it's small and always used together. Reference when it's large or shared.", "find() = simple queries. aggregate() = transform, group, join, calculate", "$lookup = JOIN inside aggregate pipeline (one DB call)", "populate() = Mongoose convenience method (multiple DB calls)", "Always add indexes on frequently queried fields or Mongo does full collection scans"]
+      }
+    ]
+  },
+  {
+    tag: "MySQL",
+    title: "Tables, Joins, and Why ORDER Matters",
+    intro: "Raj hands you a schema and asks you to write a query for the sales report.",
+    scenes: [
+      { speaker: "raj", text: `"The classic confusion — <em>WHERE</em> vs <em>HAVING</em>. Think of it this way: WHERE filters rows <strong>before</strong> grouping. HAVING filters groups <strong>after</strong> grouping. So if you want 'all orders where amount > 100', that's WHERE. But 'show me only customers who have placed more than 5 orders total' — that's HAVING because you're filtering on an aggregated count."` },
+      {
+        type: "code",
+        text: `<span class="cmt">-- WHERE: filters individual rows</span>\n<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders <span class="kw">WHERE</span> amount > <span class="num">100</span>;\n\n<span class="cmt">-- HAVING: filters on grouped results</span>\n<span class="kw">SELECT</span> customer_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_orders\n<span class="kw">FROM</span> orders\n<span class="kw">GROUP BY</span> customer_id\n<span class="kw">HAVING</span> total_orders > <span class="num">5</span>;`
+      },
+      { speaker: "raj", text: `"JOINs. <em>INNER JOIN</em> — only rows that match on both sides. <em>LEFT JOIN</em> — all rows from the left table, and matching rows from the right. If there's no match on the right, you get NULLs. <em>RIGHT JOIN</em> is the opposite. Use LEFT JOIN most of the time when you want 'all customers, and their orders if any.'"` },
+      {
+        type: "analogy",
+        text: "INNER JOIN = only people who are on BOTH the guest list AND RSVPed. LEFT JOIN = everyone on the guest list, and mark who RSVPed. If they didn't RSVP, the RSVP column is blank (NULL)."
+      },
+      { speaker: "raj", text: `"Indexes in MySQL work like a book index — instead of scanning every row, MySQL jumps straight to the relevant rows. Add indexes on columns you JOIN on, filter by in WHERE, or ORDER BY. But don't index everything — each index slows down INSERT and UPDATE slightly because MySQL has to update the index too."` },
+      { speaker: "raj", text: `"Normalization — 1NF means no repeating groups, each cell has one value. 2NF means no partial dependencies (every column depends on the whole primary key, not just part of it). 3NF means no transitive dependencies — columns should depend only on the primary key, not on other non-key columns. Basically, <em>don't store the same data in two places</em>."` },
+      { speaker: "raj", text: `"Stored procedures are precompiled SQL you save in the database and call by name. Think of it like a function. Useful when you want complex logic to run server-side without sending big queries over the network, or when multiple apps share the same database logic."` },
+      {
+        type: "summary",
+        points: ["WHERE = filter before grouping. HAVING = filter after grouping (on aggregates)", "INNER JOIN = only matching rows. LEFT JOIN = all left rows + matched right (NULLs if no match)", "Indexes = fast lookups, but slow down writes — index what you query, not everything", "Normalization = organize tables to eliminate redundancy (1NF → 2NF → 3NF)", "Stored procedures = reusable SQL logic stored in the database, called like a function"]
+      }
+    ]
+  },
+  {
+    tag: "Tools & Deployment",
+    title: "Shipping It Without Breaking It",
+    intro: "It's 4pm. You've got a working feature. Raj asks — 'How are you testing and deploying this?'",
+    scenes: [
+      { speaker: "you", text: `"I was just going to push to main and see what happens..."` },
+      { speaker: "raj", text: `"Ha. No. We never push directly to main. But let's back up — <em>Postman</em> first. Before you even write frontend code, test your API endpoints in Postman. Set up an <strong>Environment</strong> — that's a set of variables like base URL and auth token. Then when you switch from local to staging to production, you just change the environment, not every request."` },
+      { speaker: "raj", text: `"<em>CORS</em> — Cross-Origin Resource Sharing. When your React app on port 3000 calls your Express API on port 5000, the browser blocks it because they're different origins. On the server side, you use the <em>cors</em> npm package and whitelist your frontend URL. This is purely a browser security rule — Postman doesn't have this restriction, which is why your API works in Postman but fails in the browser."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// In your Express app</span>\n<span class="kw">const</span> cors = <span class="fn">require</span>(<span class="str">'cors'</span>);\napp.<span class="fn">use</span>(<span class="fn">cors</span>({\n  origin: <span class="str">'http://localhost:3000'</span>, <span class="cmt">// or your production frontend URL</span>\n  credentials: <span class="kw">true</span>\n}));`
+      },
+      { speaker: "raj", text: `"<em>Docker</em> — imagine you build the app, it works on your machine, then breaks on the server because the server has a different Node version. Docker packages your app <strong>with its entire environment</strong> into a container. Same container runs identically on your laptop, staging, and production. Docker Compose is for running multiple containers together — like your Node app + MongoDB + Redis all starting with one command."` },
+      {
+        type: "analogy",
+        text: "Docker = shipping container. Your app and all its dependencies go inside the container. Every ship (server) receives the exact same container and runs it identically."
+      },
+      { speaker: "raj", text: `"For pagination — never send 10,000 records at once. Two approaches: <em>offset pagination</em> (page=2&limit=20 → SKIP 20 rows) or <em>cursor pagination</em> (after=lastId → more efficient for large datasets, no duplicate/missing records when data changes). For most cases, offset is fine. For feeds and infinite scroll, use cursor."` },
+      { speaker: "raj", text: `"REST vs GraphQL — REST has fixed endpoints, each returns a fixed shape. GraphQL has one endpoint and the client specifies exactly what fields it wants. GraphQL shines when you have many different clients (mobile, web) needing different shapes of data. REST is simpler, more cacheable, and fine for most apps."` },
+      {
+        type: "summary",
+        points: ["Postman Environments = variable sets for local/staging/production", "CORS = browser security rule; fix server-side with the cors npm package", "Docker = consistent environment packed with your app; no 'works on my machine'", "Docker Compose = spin up multiple services (app + DB + cache) with one command", "Pagination: offset (simple, page-based) vs cursor (efficient, for large/live data)", "REST = fixed endpoints, simple. GraphQL = flexible queries, one endpoint, better for varied clients"]
+      }
+    ]
+  }
+,
+  {
+    tag: "Testing",
+    title: "How Do You Know It Actually Works?",
+    intro: "You push a fix. Ten minutes later, Raj gets a Slack ping — something else broke. He walks over calmly.",
+    scenes: [
+      { speaker: "raj", text: `"This is exactly why we write tests. You fixed one thing and broke another — we call that a <em>regression</em>. Tests catch this automatically before it hits production. Let me walk you through the three levels."` },
+      { speaker: "raj", text: `"<em>Unit tests</em> test one tiny piece in isolation — a single function. Does this function return the right value given this input? No database, no server. Fast. <em>Integration tests</em> test how multiple pieces work together — does my auth middleware correctly protect this route? <em>End-to-end tests</em> simulate a real user in a browser — click login, fill the form, does the dashboard appear? Slowest but most realistic."` },
+      {
+        type: "analogy",
+        text: "Unit = test if each brick is solid. Integration = test if the wall holds together. E2E = test if someone can actually live in the house."
+      },
+      { speaker: "you", text: `"We use Jest right? How do I mock an API call so the test doesn't actually hit the database?"` },
+      { speaker: "raj", text: `"Good question. In Jest you use <em>jest.mock()</em> or <em>jest.spyOn()</em> to replace real functions with fake ones. For HTTP calls, mock the module — like axios — so instead of calling the real API, it returns whatever fake data you tell it to. Your test stays fast, predictable, and doesn't depend on network or DB being up."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// Unit test with Jest</span>\n<span class="fn">test</span>(<span class="str">'adds two numbers'</span>, () => {\n  <span class="fn">expect</span>(<span class="fn">add</span>(<span class="num">2</span>, <span class="num">3</span>)).<span class="fn">toBe</span>(<span class="num">5</span>);\n});\n\n<span class="cmt">// Mocking an API call</span>\njest.<span class="fn">mock</span>(<span class="str">'axios'</span>);\naxios.get.<span class="fn">mockResolvedValue</span>({ data: { user: <span class="str">'Raj'</span> } });\n\n<span class="cmt">// Now your function that calls axios gets fake data</span>\n<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">fetchUser</span>(<span class="num">1</span>);\n<span class="fn">expect</span>(result.user).<span class="fn">toBe</span>(<span class="str">'Raj'</span>);`
+      },
+      { speaker: "raj", text: `"Test coverage is a percentage — how much of your code is executed by tests. Run <em>jest --coverage</em> and it gives you a report. 80% is a healthy target. But don't chase 100% blindly — some code like config files isn't worth testing. Focus coverage on business logic, utility functions, and API handlers."` },
+      { speaker: "raj", text: `"For React components, use <em>React Testing Library</em>. It encourages testing from the user's perspective — does this button appear, does clicking it show the right text — rather than testing internal implementation details like state variables."` },
+      {
+        type: "summary",
+        points: ["Unit = one function in isolation. Integration = multiple parts together. E2E = full user flow in browser", "jest.mock() = replace real modules/APIs with fake controlled versions", "jest --coverage = shows what % of your code is covered by tests", "Aim for ~80% coverage, focused on business logic not boilerplate", "React Testing Library = test components from user perspective, not implementation details"]
+      }
+    ]
+  },
+  {
+    tag: "Performance",
+    title: "The App Is Slow — Where Do You Even Start?",
+    intro: "A user complaint comes in: 'The dashboard takes 8 seconds to load.' Raj turns to you.",
+    scenes: [
+      { speaker: "raj", text: `"Rule one — don't guess. <em>Measure first</em>. Use Chrome DevTools Network tab to see which API calls are slow. Use the Performance tab to see if it's rendering. Use <em>EXPLAIN</em> in your SQL or <em>.explain()</em> in Mongo to see what the database is doing. Most slow apps have one bottleneck — find it first."` },
+      { speaker: "you", text: `"There's also a search input that fires an API call on every keystroke. That can't be right."` },
+      { speaker: "raj", text: `"Classic. That's where <em>debouncing</em> saves you. Debounce means: wait until the user stops typing for X milliseconds, then fire. So if they type 'javascript', you fire once — not 10 times. <em>Throttling</em> is different — it fires at most once every X milliseconds regardless. Use debounce for search inputs. Use throttle for scroll events, resize events — things that fire rapidly but you just need to sample."` },
+      {
+        type: "analogy",
+        text: "Debounce = elevator that waits for everyone to get in before going. Throttle = elevator that leaves every 30 seconds no matter what."
+      },
+      {
+        type: "code",
+        text: `<span class="cmt">// Debounce — wait 300ms after last keystroke</span>\n<span class="kw">const</span> <span class="fn">debouncedSearch</span> = <span class="fn">useCallback</span>(\n  <span class="fn">debounce</span>((query) => <span class="fn">fetchResults</span>(query), <span class="num">300</span>),\n  []\n);\n\n<span class="cmt">// Throttle — fire at most once per 500ms</span>\n<span class="kw">const</span> <span class="fn">throttledScroll</span> = <span class="fn">throttle</span>(() => <span class="fn">updatePosition</span>(), <span class="num">500</span>);`
+      },
+      { speaker: "raj", text: `"Now — the <em>N+1 problem</em>. This one kills performance silently. You fetch 100 users, then for each user you fire a separate DB query to get their orders. That's 1 + 100 = 101 queries. The fix is to fetch all data in one query using a JOIN or $lookup, or batch the IDs and do one WHERE IN query."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// N+1 BAD — 101 queries for 100 users</span>\n<span class="kw">const</span> users = <span class="kw">await</span> User.<span class="fn">find</span>();\n<span class="kw">for</span> (<span class="kw">const</span> user <span class="kw">of</span> users) {\n  user.orders = <span class="kw">await</span> Order.<span class="fn">find</span>({ userId: user._id }); <span class="cmt">// 1 query per user!</span>\n}\n\n<span class="cmt">// GOOD — 2 queries total</span>\n<span class="kw">const</span> users = <span class="kw">await</span> User.<span class="fn">find</span>();\n<span class="kw">const</span> userIds = users.<span class="fn">map</span>(u => u._id);\n<span class="kw">const</span> orders = <span class="kw">await</span> Order.<span class="fn">find</span>({ userId: { $in: userIds } });`
+      },
+      { speaker: "raj", text: `"For repeated expensive operations — like fetching config data or popular product lists — use <em>caching</em>. Redis is an in-memory store that returns data in microseconds. You store the result of a slow DB query in Redis with an expiry time. Next request? Serve from Redis, skip the DB entirely. For simple cases, even a JS object in memory works as a short-lived cache."` },
+      { speaker: "raj", text: `"Memory leaks in Node — usually caused by storing things in global variables or arrays that never get cleared, event listeners that never get removed, or holding references to closed database connections. Use <em>node --inspect</em> and Chrome DevTools heap snapshots to find what's growing over time."` },
+      {
+        type: "summary",
+        points: ["Always measure before optimizing — use DevTools, EXPLAIN, and logs", "Debounce = wait for user to stop, then fire. Throttle = fire at max rate regardless", "N+1 problem = querying in a loop. Fix with joins, $lookup, or batch WHERE IN", "Redis caching = store slow query results in memory, serve instantly, set expiry", "Memory leaks = watch for growing globals, unremoved event listeners, unclosed connections"]
+      }
+    ]
+  },
+  {
+    tag: "Security",
+    title: "How to Not Get Hacked on Your First Week",
+    intro: "Raj does a quick code review of your login form and raises two red flags immediately.",
+    scenes: [
+      { speaker: "raj", text: `"First — you're storing the plain password in the database. If this DB ever leaks, every user's password is exposed. <em>Never store plain passwords</em>. Use <em>bcrypt</em> to hash them. Bcrypt adds a random <em>salt</em> before hashing so two users with the same password get different hashes. When they log in, you hash what they typed and compare — you never decrypt the stored hash."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// Hashing on signup</span>\n<span class="kw">const</span> bcrypt = <span class="fn">require</span>(<span class="str">'bcrypt'</span>);\n<span class="kw">const</span> hash = <span class="kw">await</span> bcrypt.<span class="fn">hash</span>(password, <span class="num">12</span>); <span class="cmt">// 12 = salt rounds</span>\n<span class="kw">await</span> User.<span class="fn">create</span>({ email, password: hash });\n\n<span class="cmt">// Comparing on login</span>\n<span class="kw">const</span> isMatch = <span class="kw">await</span> bcrypt.<span class="fn">compare</span>(enteredPassword, user.password);\n<span class="kw">if</span> (!isMatch) <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid credentials'</span> });`
+      },
+      { speaker: "raj", text: `"Second red flag — you're putting the JWT in localStorage. Don't. If your app has any <em>XSS</em> vulnerability — Cross-Site Scripting, where malicious JavaScript runs on your page — the attacker can read localStorage and steal the token. Store JWTs in <em>HTTP-only cookies</em> instead. The browser sends them automatically with every request, but JavaScript can't read them at all."` },
+      {
+        type: "analogy",
+        text: "localStorage = leaving your house key under the doormat. HTTP-only cookie = key that's built into the door — the door opens, but nobody can pick up the key."
+      },
+      { speaker: "you", text: `"What about SQL injection? I've heard of it but never actually seen it."` },
+      { speaker: "raj", text: `"Imagine your query is: SELECT * FROM users WHERE email = '[input]'. If someone types <em>' OR '1'='1</em> as their email, your query becomes: WHERE email = '' OR '1'='1' — which is always true. They just bypassed login. The fix: never concatenate user input into SQL strings. Use <em>parameterized queries</em> or an ORM like Sequelize — they escape the input automatically."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// DANGEROUS — SQL injection possible</span>\n<span class="kw">const</span> query = <span class="str">\`SELECT * FROM users WHERE email = '\${email}'\`</span>;\n\n<span class="cmt">// SAFE — parameterized query</span>\n<span class="kw">const</span> query = <span class="str">'SELECT * FROM users WHERE email = ?'</span>;\ndb.<span class="fn">execute</span>(query, [email]);\n\n<span class="cmt">// Or with Sequelize ORM (auto-escaped)</span>\nUser.<span class="fn">findOne</span>({ where: { email } });`
+      },
+      { speaker: "raj", text: `"<em>XSS</em> — if your app renders user-supplied content as HTML without sanitizing it, an attacker can inject a script tag. That script runs for every visitor and can steal cookies, redirect users, anything. Fix: sanitize all user input before rendering. In React, JSX auto-escapes — but if you ever use <em>dangerouslySetInnerHTML</em>, sanitize with a library like DOMPurify first."` },
+      { speaker: "raj", text: `"<em>CSRF</em> — Cross-Site Request Forgery. A malicious website tricks your logged-in user's browser into making a request to your API. Since cookies are sent automatically, the request looks legit. Defence: use <em>CSRF tokens</em> (a secret value in forms that your server verifies) or use <em>SameSite=Strict</em> on your cookies so they're not sent from other sites."` },
+      {
+        type: "summary",
+        points: ["bcrypt = hash + salt passwords. Never store plain text. Never decrypt — only compare.", "HTTP-only cookies = safe JWT storage. JS can't read them, so XSS can't steal them.", "SQL injection = fix with parameterized queries or ORMs. Never concatenate user input into SQL.", "XSS = sanitize user-generated HTML. React JSX auto-escapes — avoid dangerouslySetInnerHTML.", "CSRF = use CSRF tokens or SameSite=Strict cookie attribute to block cross-site requests."]
+      }
+    ]
+  },
+  {
+    tag: "System Design & CI/CD",
+    title: "Thinking Big and Shipping Smart",
+    intro: "It's your first system design discussion. Raj sketches a box on the whiteboard and says — 'Design me a URL shortener.'",
+    scenes: [
+      { speaker: "you", text: `"Okay... I'd have a form that takes a long URL, generate a short code, save it to a database, and redirect when someone visits the short link?"` },
+      { speaker: "raj", text: `"Exactly right. Now think about scale. If this is bit.ly with millions of redirects per second, that DB read on every click becomes a bottleneck. You'd add <em>Redis caching</em> — cache the shortCode→longURL mapping in memory. 99% of reads never touch the DB. For generating the short code, use base62 encoding of an auto-incremented ID — gives you unique, short, URL-safe strings."` },
+      {
+        type: "analogy",
+        text: "URL shortener = a post office redirect. You give the post office a short address. They look it up in their book and forward your mail to the real address."
+      },
+      { speaker: "raj", text: `"Horizontal vs vertical scaling — <em>vertical</em> means buying a bigger server (more RAM, more CPU). Simple but has a ceiling. <em>Horizontal</em> means adding more servers and spreading the load between them with a <em>load balancer</em>. Horizontal scales infinitely in theory. Your app needs to be stateless (no session stored on one server) for horizontal scaling to work — which is another reason JWTs beat sessions."` },
+      { speaker: "raj", text: `"<em>Message queues</em> — like RabbitMQ or Bull (for Node). When a user uploads a video, you don't want to process it synchronously — it could take minutes. Instead, you drop a job into a queue and return 'upload received' instantly. A separate worker process picks up the job and processes it. The user gets notified when done. Queues decouple slow background work from fast user-facing responses."` },
+      {
+        type: "analogy",
+        text: "Message queue = restaurant order ticket system. Waiter takes your order (API responds instantly), puts the ticket in the queue, kitchen processes it at their pace. You don't stand at the counter waiting."
+      },
+      { speaker: "raj", text: `"Now <em>CI/CD</em> — Continuous Integration, Continuous Deployment. CI means every time you push code, an automated pipeline runs your tests. If tests fail, the push is blocked. CD means after tests pass, the code is automatically deployed to staging or production. Tools like GitHub Actions, CircleCI, or Jenkins run this pipeline. You define it in a YAML config file."` },
+      {
+        type: "code",
+        text: `<span class="cmt"># .github/workflows/deploy.yml — GitHub Actions</span>\n<span class="attr">on:</span> [push]\n<span class="attr">jobs:</span>\n  <span class="attr">test-and-deploy:</span>\n    <span class="attr">runs-on:</span> ubuntu-latest\n    <span class="attr">steps:</span>\n      - <span class="fn">uses:</span> actions/checkout@v3\n      - <span class="attr">run:</span> npm install\n      - <span class="attr">run:</span> npm test       <span class="cmt"># fails here = no deploy</span>\n      - <span class="attr">run:</span> npm run deploy  <span class="cmt"># only runs if tests pass</span>`
+      },
+      { speaker: "raj", text: `"For secrets in production — never put API keys in your code or even in your CI YAML. Use your platform's <em>secret manager</em> — GitHub Secrets, AWS Secrets Manager, Heroku config vars. They inject the secrets as environment variables at runtime. Your code reads process.env.API_KEY and never sees the actual value in plain text."` },
+      { speaker: "raj", text: `"SQL vs NoSQL — SQL (MySQL, Postgres) is for structured data with clear relationships, strong consistency requirements, and complex queries. NoSQL (MongoDB) is for flexible schemas, fast iteration, hierarchical data, or massive horizontal scale. Most real apps actually use both — SQL for transactions and financials, NoSQL for user activity, content, logs."` },
+      {
+        type: "summary",
+        points: ["URL shortener core: generate code → store in DB → Redis cache for hot reads → redirect", "Vertical scaling = bigger machine. Horizontal = more machines + load balancer (needs stateless app)", "Message queues = offload slow background tasks so API responds instantly", "CI/CD = automated test + deploy pipeline on every push. Failing tests block deployment.", "Secrets = never in code. Use platform secret managers injected as environment variables.", "SQL = structured + relational + consistent. NoSQL = flexible + scalable + hierarchical."]
+      }
+    ]
+  },
+  {
+    tag: "JS Fundamentals",
+    title: "The Stuff Hiding Under the Hood",
+    intro: "You pass the first interview round. But the second interviewer starts asking 'why' questions — and Raj warned you this would happen.",
+    scenes: [
+      { speaker: "raj", text: `"JS fundamentals. This is where experienced devs get caught out after a break. Everyone can write the code — interviewers test if you understand <em>why</em> it behaves the way it does. Start with the event loop."` },
+      { speaker: "raj", text: `"JavaScript is single-threaded — one thing at a time. The <em>call stack</em> is where your code runs. When you call a function, it goes on the stack. When it returns, it comes off. But async stuff like setTimeout, fetch, or Promises don't block the stack — they're handed off to browser APIs. When they're done, their callbacks go into a <em>queue</em>. The event loop constantly checks — is the stack empty? Yes? Pull the next item from the queue and run it."` },
+      {
+        type: "analogy",
+        text: "Call stack = a chef cooking one dish at a time. Browser APIs = kitchen helpers doing prep work in parallel. Queue = the pass where finished dishes wait. Event loop = the chef checking the pass whenever their hands are free."
+      },
+      { speaker: "raj", text: `"<em>Microtasks</em> vs <em>macrotasks</em> — Promises go into the microtask queue. setTimeout goes into the macrotask queue. Microtasks are always drained completely before the next macrotask runs. So a chain of resolved Promises will run before your setTimeout callback, even if the setTimeout delay is 0."` },
+      {
+        type: "code",
+        text: `<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'1'</span>);\n\n<span class="fn">setTimeout</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'2'</span>), <span class="num">0</span>);  <span class="cmt">// macrotask</span>\n\nPromise.<span class="fn">resolve</span>().<span class="fn">then</span>(() => <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'3'</span>));  <span class="cmt">// microtask</span>\n\n<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'4'</span>);\n\n<span class="cmt">// Output: 1, 4, 3, 2</span>\n<span class="cmt">// Synchronous first, then microtasks, then macrotasks</span>`
+      },
+      { speaker: "raj", text: `"<em>Closures</em> — a function that remembers the variables from its outer scope even after that outer function has returned. Every time you write a function inside another function, you're creating a closure. They power things like private state, factory functions, and callbacks. The memory leak risk: if you keep references to large objects inside closures that never get cleaned up."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// Closure — counter remembers 'count'</span>\n<span class="kw">function</span> <span class="fn">makeCounter</span>() {\n  <span class="kw">let</span> count = <span class="num">0</span>;\n  <span class="kw">return</span> () => ++count; <span class="cmt">// this inner fn closes over 'count'</span>\n}\n<span class="kw">const</span> counter = <span class="fn">makeCounter</span>();\n<span class="fn">counter</span>(); <span class="cmt">// 1</span>\n<span class="fn">counter</span>(); <span class="cmt">// 2 — 'count' is still alive in memory</span>`
+      },
+      { speaker: "raj", text: `"<em>this</em> keyword — the most confusing thing in JS. In a regular function, <em>this</em> is determined by <strong>how</strong> the function is called, not where it's defined. In an arrow function, <em>this</em> is inherited from the surrounding scope at definition time. That's why React event handlers and class methods often use arrow functions — to lock in the right <em>this</em>."` },
+      { speaker: "raj", text: `"<em>== vs ===</em>. Double equals does type coercion — it converts types before comparing. So 0 == false is true, '' == false is true, null == undefined is true. Triple equals compares value AND type — no surprises. Always use === unless you specifically need coercion, which is almost never."` },
+      { speaker: "raj", text: `"For async errors — with Promises, always add <em>.catch()</em> or you get unhandled rejection. With async/await, wrap in <em>try/catch</em>. And if you're running multiple independent async operations, use <em>Promise.all()</em> to run them in parallel rather than awaiting them one by one."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// Sequential — slow, waits for each</span>\n<span class="kw">const</span> a = <span class="kw">await</span> <span class="fn">fetchA</span>();\n<span class="kw">const</span> b = <span class="kw">await</span> <span class="fn">fetchB</span>();\n\n<span class="cmt">// Parallel — fast, runs together</span>\n<span class="kw">const</span> [a, b] = <span class="kw">await</span> Promise.<span class="fn">all</span>([<span class="fn">fetchA</span>(), <span class="fn">fetchB</span>()]);\n\n<span class="cmt">// If any one fails, Promise.all rejects</span>\n<span class="cmt">// Use Promise.allSettled() if you want all results regardless</span>`
+      },
+      {
+        type: "summary",
+        points: ["Event loop = stack runs sync code, async callbacks wait in queue, event loop connects them", "Microtasks (Promises) run before macrotasks (setTimeout) — even with 0ms delay", "Closures = inner functions remember outer scope variables after outer function returns", "this = depends on call site in regular functions. Arrow functions inherit this from definition scope.", "=== always. == does type coercion and causes subtle bugs.", "Promise.all() = run async tasks in parallel. try/catch = handle async/await errors."]
+      }
+    ]
+  },
+  {
+    tag: "React Advanced",
+    title: "React Knows More Than You Think",
+    intro: "An interviewer asks: 'Why do React keys matter?' You pause. Raj had covered this last week.",
+    scenes: [
+      { speaker: "raj", text: `"React's <em>reconciliation</em> algorithm — called Fiber — is how React decides what to update in the DOM. When state changes, React builds a new virtual DOM tree and compares it to the previous one. This comparison is called <em>diffing</em>. React assumes elements at the same position in the tree are the same component — so if the type changes, it unmounts and remounts entirely."` },
+      { speaker: "raj", text: `"<em>Keys</em> are how you help React track items in a list across renders. Without keys, if you prepend an item to a list, React thinks everything shifted and re-renders the whole list. With a stable unique key, React knows exactly which item is which — it only renders the new one. <strong>Never use array indexes as keys</strong> if the list can be reordered or filtered — the keys change and you lose component state."` },
+      {
+        type: "analogy",
+        text: "Keys are like name tags at a party. Without them, if someone new walks in at the front, React thinks everyone shifted and re-introduces everyone. With name tags, React knows exactly who's new and who's the same."
+      },
+      {
+        type: "code",
+        text: `<span class="cmt">// BAD — index as key breaks when list changes order</span>\n{items.<span class="fn">map</span>((item, index) => <span class="tag">&lt;Card</span> <span class="attr">key</span>={index} />)}\n\n<span class="cmt">// GOOD — stable unique ID</span>\n{items.<span class="fn">map</span>(item => <span class="tag">&lt;Card</span> <span class="attr">key</span>={item.id} />)}`
+      },
+      { speaker: "raj", text: `"<em>Controlled vs uncontrolled components</em>. Controlled means React is the source of truth — you store the input value in state and pass it back as value prop. Every keystroke updates state. Uncontrolled means the DOM manages its own state — you use a ref to read the value when needed, like on form submit. Controlled gives you more control and validation. Uncontrolled is simpler for basic forms."` },
+      { speaker: "raj", text: `"<em>useRef</em> — most people only know it for accessing DOM elements. But its real superpower is storing a mutable value that <strong>doesn't trigger a re-render when changed</strong>. Useful for storing previous values, timer IDs, or whether a component is mounted. It's like instance variables in class components."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// useRef for DOM access</span>\n<span class="kw">const</span> inputRef = <span class="fn">useRef</span>(null);\n<span class="tag">&lt;input</span> <span class="attr">ref</span>={inputRef} />\ninputRef.current.<span class="fn">focus</span>(); <span class="cmt">// imperative DOM access</span>\n\n<span class="cmt">// useRef for mutable value (no re-render)</span>\n<span class="kw">const</span> timerRef = <span class="fn">useRef</span>(null);\ntimerRef.current = <span class="fn">setTimeout</span>(() => {}, <span class="num">1000</span>);\n<span class="cmt">// Changing timerRef.current won't re-render component</span>`
+      },
+      { speaker: "raj", text: `"<em>Custom hooks</em> — when you find yourself copy-pasting the same useState + useEffect combo across components, extract it into a custom hook. It's just a function whose name starts with 'use'. It can call other hooks inside. Common examples: useLocalStorage, useDebounce, useFetch, useWindowSize."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// Custom hook — reusable fetch logic</span>\n<span class="kw">function</span> <span class="fn">useFetch</span>(url) {\n  <span class="kw">const</span> [data, setData] = <span class="fn">useState</span>(null);\n  <span class="kw">const</span> [loading, setLoading] = <span class="fn">useState</span>(<span class="kw">true</span>);\n\n  <span class="fn">useEffect</span>(() => {\n    <span class="fn">fetch</span>(url).<span class="fn">then</span>(r => r.<span class="fn">json</span>()).<span class="fn">then</span>(d => {\n      <span class="fn">setData</span>(d); <span class="fn">setLoading</span>(<span class="kw">false</span>);\n    });\n  }, [url]);\n\n  <span class="kw">return</span> { data, loading };\n}`
+      },
+      { speaker: "raj", text: `"<em>Error boundaries</em> — by default, if a component throws an error during rendering, the whole app crashes. Error boundaries are class components that catch errors in their child tree and show a fallback UI instead. You can't write them as function components yet — but you can use the <em>react-error-boundary</em> library for a hook-friendly wrapper."` },
+      {
+        type: "summary",
+        points: ["Fiber/reconciliation = React diffs virtual DOM trees and only updates what changed", "Keys = help React track list items. Never use array index if list can reorder.", "Controlled = React owns input value via state. Uncontrolled = DOM owns it, read via ref.", "useRef = DOM access OR mutable value that doesn't trigger re-renders", "Custom hooks = extract reusable stateful logic into 'use...' functions", "Error boundaries = catch render errors in child tree and show fallback UI"]
+      }
+    ]
+  },
+  {
+    tag: "API Design",
+    title: "What Makes an API Actually Good?",
+    intro: "You build an endpoint called /getUser. Raj sees it and winces slightly.",
+    scenes: [
+      { speaker: "raj", text: `"REST naming conventions — resources are <em>nouns</em>, not verbs. The HTTP method is the verb. So it's <em>GET /users</em> not <em>/getUsers</em>. <em>POST /users</em> creates one. <em>PUT /users/123</em> replaces it. <em>PATCH /users/123</em> partially updates it. <em>DELETE /users/123</em> removes it. Nested resources: <em>/users/123/orders</em> for a user's orders."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// BAD — verbs in URLs</span>\nGET  /getUsers\nPOST /createUser\nGET  /deleteUser?id=123\n\n<span class="cmt">// GOOD — nouns + HTTP methods</span>\nGET    /users          <span class="cmt">→ list all</span>\nPOST   /users          <span class="cmt">→ create one</span>\nGET    /users/123      <span class="cmt">→ get one</span>\nPATCH  /users/123      <span class="cmt">→ partial update</span>\nDELETE /users/123      <span class="cmt">→ delete</span>`
+      },
+      { speaker: "raj", text: `"HTTP status codes — use them correctly or debugging becomes a nightmare. <em>200</em> OK. <em>201</em> Created (after POST). <em>204</em> No Content (after DELETE). <em>400</em> Bad Request (invalid input from client). <em>401</em> Unauthorized (not logged in). <em>403</em> Forbidden (logged in but no permission). <em>404</em> Not Found. <em>500</em> Internal Server Error. Returning 200 with an error message inside is a common bad habit — don't do it."` },
+      { speaker: "you", text: `"What about versioning? I've seen /api/v1/ in URLs before."` },
+      { speaker: "raj", text: `"Yes — <em>API versioning</em> lets you make breaking changes without breaking existing clients. URI versioning (<em>/v1/users</em>) is most common and visible. When you need to change a response shape or remove a field, you create v2 and keep v1 running for existing clients. Give clients a migration timeline, then deprecate v1."` },
+      { speaker: "raj", text: `"<em>Rate limiting</em> — you limit how many requests a client can make in a time window. Without it, one bad actor can flood your server and bring it down for everyone. In Express, use the <em>express-rate-limit</em> package. When a client exceeds the limit, return <em>429 Too Many Requests</em>."` },
+      {
+        type: "code",
+        text: `<span class="kw">const</span> rateLimit = <span class="fn">require</span>(<span class="str">'express-rate-limit'</span>);\n\n<span class="kw">const</span> limiter = <span class="fn">rateLimit</span>({\n  windowMs: <span class="num">15</span> * <span class="num">60</span> * <span class="num">1000</span>, <span class="cmt">// 15 minutes</span>\n  max: <span class="num">100</span>,               <span class="cmt">// 100 requests per window</span>\n  message: <span class="str">'Too many requests'</span>\n});\n\napp.<span class="fn">use</span>(<span class="str">'/api/'</span>, limiter);`
+      },
+      { speaker: "raj", text: `"<em>Idempotency</em> — an operation is idempotent if calling it multiple times has the same effect as calling it once. GET, PUT, DELETE are idempotent. POST is not — calling POST /orders three times creates three orders. This matters in unreliable networks where clients retry requests. For payments especially, use an idempotency key — a unique token the client sends with the request, and the server stores it to detect duplicates."` },
+      {
+        type: "analogy",
+        text: "Idempotency = pressing an elevator button multiple times. The elevator still comes once — pressing again doesn't summon two elevators. POST without idempotency = every press orders a pizza."
+      },
+      {
+        type: "summary",
+        points: ["REST URLs = nouns not verbs. HTTP method is the verb (GET/POST/PUT/PATCH/DELETE)", "Status codes matter: 201 for created, 400 for bad input, 401 vs 403, 404, 429 for rate limit", "API versioning = /v1/ in URL. Keep old version alive while clients migrate to new.", "Rate limiting = cap requests per time window. Use express-rate-limit, return 429.", "Idempotency = same result no matter how many times you call it. Critical for payments & retries."]
+      }
+    ]
+  },
+  {
+    tag: "DSA Basics",
+    title: "The Whiteboard Round Is Coming",
+    intro: "Raj slides a blank piece of paper across the desk. 'Write me a function that finds duplicates in an array.'",
+    scenes: [
+      { speaker: "you", text: `"I'd loop through it... compare each element to every other element?"` },
+      { speaker: "raj", text: `"That works, but it's O(n²) — for 1000 elements, you do a million comparisons. Interviewers want to see if you think about efficiency. Before you code, state the <em>Big O</em> of your approach. Time complexity is how runtime grows with input size. Space complexity is how much memory you use."` },
+      {
+        type: "analogy",
+        text: "O(1) = finding your name on a name tag you're wearing. O(log n) = binary search in a phone book. O(n) = scanning every name in the book. O(n²) = comparing every person to every other person at a party."
+      },
+      {
+        type: "code",
+        text: `<span class="cmt">// O(n²) — nested loops, slow</span>\n<span class="kw">function</span> <span class="fn">hasDuplicate</span>(arr) {\n  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < arr.length; i++)\n    <span class="kw">for</span> (<span class="kw">let</span> j = i+<span class="num">1</span>; j < arr.length; j++)\n      <span class="kw">if</span> (arr[i] === arr[j]) <span class="kw">return</span> <span class="kw">true</span>;\n  <span class="kw">return</span> <span class="kw">false</span>;\n}\n\n<span class="cmt">// O(n) — hashmap, fast</span>\n<span class="kw">function</span> <span class="fn">hasDuplicate</span>(arr) {\n  <span class="kw">const</span> seen = <span class="kw">new</span> <span class="fn">Set</span>();\n  <span class="kw">for</span> (<span class="kw">const</span> val <span class="kw">of</span> arr) {\n    <span class="kw">if</span> (seen.<span class="fn">has</span>(val)) <span class="kw">return</span> <span class="kw">true</span>;\n    seen.<span class="fn">add</span>(val);\n  }\n  <span class="kw">return</span> <span class="kw">false</span>;\n}`
+      },
+      { speaker: "raj", text: `"The <em>hashmap / Set trick</em> solves a huge number of interview problems. Whenever you find yourself doing nested loops to compare or look up values — stop and think: can I store what I've seen in a Set or Map and look it up in O(1) instead? Two Sum, finding duplicates, grouping anagrams — all hashmap problems."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// Two Sum — find two numbers that add to target</span>\n<span class="kw">function</span> <span class="fn">twoSum</span>(nums, target) {\n  <span class="kw">const</span> map = <span class="kw">new</span> Map(); <span class="cmt">// value → index</span>\n  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < nums.length; i++) {\n    <span class="kw">const</span> complement = target - nums[i];\n    <span class="kw">if</span> (map.<span class="fn">has</span>(complement)) <span class="kw">return</span> [map.<span class="fn">get</span>(complement), i];\n    map.<span class="fn">set</span>(nums[i], i);\n  }\n}`
+      },
+      { speaker: "raj", text: `"<em>Recursion</em> — a function that calls itself. Every recursive solution needs a <em>base case</em> (when to stop) and a <em>recursive case</em> (breaking the problem down). Classic examples: factorial, Fibonacci, traversing nested objects/trees. The mental model: trust that your function works for a smaller input, and build the bigger solution on top of that."` },
+      {
+        type: "code",
+        text: `<span class="cmt">// Recursion — flatten nested array</span>\n<span class="kw">function</span> <span class="fn">flatten</span>(arr) {\n  <span class="kw">return</span> arr.<span class="fn">reduce</span>((flat, item) =>\n    flat.<span class="fn">concat</span>(Array.<span class="fn">isArray</span>(item) ? <span class="fn">flatten</span>(item) : item)\n  , []);\n}\n<span class="cmt">// flatten([1, [2, [3, 4]]]) → [1, 2, 3, 4]</span>`
+      },
+      { speaker: "raj", text: `"Interview tips: <strong>talk out loud</strong> while you code. Say 'I'm thinking about using a hashmap here because...' Interviewers care about your thought process, not just the answer. Start with a brute force solution, state its complexity, then optimise. If you get stuck, ask a clarifying question — don't sit in silence. And always test your solution with an example before saying you're done."` },
+      {
+        type: "summary",
+        points: ["Big O = how runtime/memory scales. O(n²) nested loops → try O(n) with hashmaps.", "Set/Map trick = trade O(n) space for O(1) lookup time. Solves most array problems.", "Two Sum pattern = store complement in map while iterating — single pass O(n).", "Recursion = base case + recursive case. Useful for trees, nested data, divide-and-conquer.", "In interviews: think aloud, brute force first, then optimise, test with an example."]
+      }
+    ]
+  },
+  {
+    tag: "Soft Skills",
+    title: "The Questions They Don't Warn You About",
+    intro: "Technical round done. Now it's the hiring manager. No code editor — just you and them.",
+    scenes: [
+      { speaker: "raj", text: `"These feel easier but they're not. A bad answer here kills offers that the technical round won. The key is the <em>STAR format</em> — Situation, Task, Action, Result. Every behavioral answer should hit all four. It keeps you focused and makes you sound credible."` },
+      { speaker: "you", text: `"What about the gap on my resume? They're definitely going to ask about it."` },
+      { speaker: "raj", text: `"Own it cleanly. Don't over-explain or apologize. Something like: 'I took time off for personal reasons. During that time I stayed sharp by reviewing core concepts, and I'm now fully focused on getting back into a strong engineering role.' Short, honest, forward-facing. What they're really checking is — are you stable? Are you motivated? Answer those underlying questions."` },
+      {
+        type: "analogy",
+        text: "Explaining a career gap is like explaining you took a pit stop in a race. Acknowledge it happened, show you refuelled, and that you're back in the race. Don't apologise for pit stops — every car needs them."
+      },
+      { speaker: "raj", text: `"'Tell me about a production bug you caused.' This one tests maturity. Don't blame tools, teammates, or bad luck. Walk them through it: what happened, how you discovered it, how you fixed it, and most importantly — <strong>what you changed so it won't happen again</strong>. That last part is what separates juniors from seniors."` },
+      { speaker: "raj", text: `"'How do you approach a new codebase?' They want to see you're systematic and not paralysed. Your answer: start with the README. Then find the entry point — index.js or app.js. Understand the folder structure. Look at the package.json to see what tools they use. Run the app locally. Then pick the smallest bug or task and trace through the code to make your first small change."` },
+      { speaker: "raj", text: `"'How do you estimate tasks?' Don't give a number immediately. Break it into subtasks first. Then estimate each piece. Add buffer for unknowns — things you haven't done before, dependencies on others, testing time, and PR review. A good answer: 'I break it down, estimate parts, then add ~20% buffer for unknowns and review cycles.' Shows you've been burned by underestimating before."` },
+      { speaker: "raj", text: `"'Tell me about a disagreement with a teammate.' They're testing emotional intelligence — not whether you fight or fold. Ideal answer structure: you had different technical approaches, you listened to their reasoning, you explained yours with data or examples, you reached a solution together or escalated to the team. Show you can disagree <em>respectfully and productively</em>."` },
+      { speaker: "you", text: `"What should I ask them at the end?"` },
+      { speaker: "raj", text: `"Always have questions — it signals genuine interest. Good ones: 'What does the onboarding process look like for new engineers?', 'What does a typical sprint cycle look like?', 'What's the biggest technical challenge the team is working through right now?', 'How do you handle code reviews?' Avoid asking about salary in the first round unless they bring it up."` },
+      {
+        type: "summary",
+        points: ["STAR format = Situation, Task, Action, Result. Use for every behavioral answer.", "Career gap = own it briefly, show you stayed sharp, stay forward-focused.", "Production bug story = what happened, how fixed, what changed to prevent recurrence.", "New codebase approach = README → entry point → structure → run it → small first task.", "Task estimation = break down → estimate parts → add buffer for unknowns and reviews.", "Disagreements = show you listened, explained with reasoning, and resolved constructively."]
+      }
+    ]
+  },
+  {
+    tag: "Why JS?",
+    title: "JS Does WHAT? — The Why Behind the Weird",
+    intro: "The interviewer smiles and asks: 'Quick one — what does typeof null return, and why?' You pause. Raj had warned you about these.",
+    scenes: [
+      { speaker: "raj", text: `"These 'why does JS do this' questions feel like gotchas but they test genuine engine-level understanding. First — <em>typeof null === 'object'</em>. This is a bug from 1995 that has never been fixed because fixing it would break the entire web. In the original JS engine, values were stored with binary type tags. The tag for objects was 000. null was represented as a null pointer — also 000. So typeof null read the tag and returned 'object.' It's wrong, it's known, and it will never change."` },
+      { speaker: "raj", text: `"<em>0.1 + 0.2 !== 0.3</em>. JavaScript uses IEEE 754 floating point — the same standard as most languages. In binary, 0.1 and 0.2 cannot be represented exactly, just like 1/3 is 0.333... in decimal. When you add them you get 0.30000000000000004. Fix: never compare floats directly. Use <em>Math.abs(a - b) &lt; Number.EPSILON</em>, or multiply to integers before calculating, or use a library like decimal.js for money values."` },
+      {
+        type: "code",
+        text: `console.log(0.1 + 0.2);         // 0.30000000000000004\nconsole.log(0.1 + 0.2 === 0.3); // false !\n\n// Safe float comparison\nMath.abs(0.1 + 0.2 - 0.3) < Number.EPSILON // true\n\n// typeof weirdness\ntypeof null       // "object" — historic bug\ntypeof undefined  // "undefined" — correct\ntypeof []         // "object" — use Array.isArray()`
+      },
+      { speaker: "raj", text: `"<em>var vs let/const scoping</em>. var is function-scoped — it leaks out of if blocks and for loops. let and const are block-scoped — contained within their curly braces. Also, var declarations are hoisted and initialized as undefined. let/const are hoisted but NOT initialized — accessing them before declaration throws a ReferenceError. That window between hoisting and initialization is called the <em>Temporal Dead Zone</em>."` },
+      {
+        type: "code",
+        text: `if (true) {\n  var x = 1;   // leaks out\n  let y = 2;   // stays inside\n}\nconsole.log(x); // 1\nconsole.log(y); // ReferenceError\n\n// const allows property mutation\nconst user = { name: 'Raj' };\nuser.name = 'New'; // fine — object itself unchanged\nuser = {};         // TypeError — can't reassign binding`
+      },
+      { speaker: "raj", text: `"<em>const with objects</em> — const means you cannot reassign the variable binding, not that the value is immutable. The variable still points to the same object in memory, but the object's properties can change freely. To make a truly immutable object, use <em>Object.freeze()</em> — but note it only freezes one level deep."` },
+      { speaker: "raj", text: `"<em>forEach and async/await</em>. forEach does not await Promises — it fires all callbacks and moves on immediately. So async functions inside forEach all start in parallel and you lose control of order and completion. Use <em>for...of</em> to await each iteration one by one, or <em>Promise.all(array.map(...))</em> to run in parallel and wait for all to finish."` },
+      {
+        type: "code",
+        text: `// BROKEN — forEach ignores await\nids.forEach(async (id) => {\n  await processItem(id); // doesn't actually wait\n});\n\n// Sequential — waits for each one\nfor (const id of ids) {\n  await processItem(id);\n}\n\n// Parallel — all at once, wait for all\nawait Promise.all(ids.map(id => processItem(id)));`
+      },
+      { speaker: "raj", text: `"<em>[] + [] and [] + {}</em> — type coercion at its most bizarre. When you use + with non-numbers, JS converts them to primitives. An empty array converts to an empty string. So [] + [] becomes '' + '' which is ''. An empty object converts to '[object Object]'. So [] + {} becomes '[object Object]'. The reason {} + [] gives 0 in the console is that the {} gets parsed as an empty block statement, not an object — then +[] coerces to 0."` },
+      { speaker: "raj", text: `"<em>Arrow functions have no arguments object</em>. Regular functions get a magic arguments variable containing all passed args. Arrow functions do not — they inherit arguments from their enclosing scope. If you need variadic args in an arrow function, use rest parameters instead: <em>(...args)</em>."` },
+      { speaker: "raj", text: `"<em>Why does useEffect with no deps array run every render?</em> Because the deps array is what controls when it runs. No array means after every render. Empty array means once on mount. Array with values means when those values change. A common infinite loop bug: inside the effect you update state, which triggers a render, which runs the effect, which updates state again — forever."` },
+      {
+        type: "code",
+        text: `useEffect(() => { fetchData() })          // every render\nuseEffect(() => { fetchData() }, [])       // once on mount\nuseEffect(() => { fetchData() }, [userId]) // when userId changes\n\n// Why nested state doesn't re-render\nconst [user, setUser] = useState({ name: 'Raj' });\nuser.name = 'New'; // mutating directly\nsetUser(user);     // same reference — React bails out\nsetUser({...user}); // new reference — React re-renders`
+      },
+      { speaker: "raj", text: `"<em>setState({...state}) re-renders even with same values</em> because React uses shallow reference equality. Spreading creates a new object in memory even if all values are identical. React sees a different reference and re-renders. This is also why you must never mutate state directly — if the reference is the same, React thinks nothing changed and skips the render entirely."` },
+      {
+        type: "summary",
+        points: ["typeof null = 'object' — 1995 binary tag bug, never fixed to avoid breaking the web", "0.1 + 0.2 is not 0.3 — IEEE 754 float precision. Use epsilon for comparisons.", "var = function scoped + hoisted as undefined. let/const = block scoped, Temporal Dead Zone.", "forEach ignores await — use for...of (sequential) or Promise.all+map (parallel).", "useEffect deps: none = every render, [] = once, [val] = on change. Missing array = infinite loops.", "setState needs new reference — spread creates new object. Direct mutation = React skips render."]
+      }
+    ]
+  },
+  {
+    tag: "System Design",
+    title: "Drawing the Big Picture",
+    intro: "The interviewer opens a blank whiteboard. 'Let's design a real-time chat feature.' Raj prepped you for this exact moment.",
+    scenes: [
+      { speaker: "raj", text: `"System design interviews are not about the perfect answer — they test whether you can <em>think at scale</em>. Always start with clarifying questions: How many users? Real-time or near-real-time? One-on-one or group chat? Then state your assumptions out loud before drawing anything. This shows structured thinking before you reach for the marker."` },
+      { speaker: "raj", text: `"<em>WebSockets vs polling vs SSE</em>. HTTP polling means the client asks the server every few seconds — simple but wasteful. Server-Sent Events is a one-way stream from server to client — good for notifications or live feeds. <em>WebSockets</em> is a persistent two-way connection — perfect for chat. After the initial handshake, both sides push messages instantly without new HTTP requests each time."` },
+      {
+        type: "analogy",
+        text: "HTTP polling = texting your friend every 30 seconds asking 'did you reply yet?'. SSE = they can message you but you cannot reply. WebSockets = an actual phone call — both sides talk freely in real time."
+      },
+      { speaker: "raj", text: `"For chat at scale: clients connect via WebSocket to a server node. Messages are saved to the database and pushed to the recipient's socket connection. But what if sender and receiver are on <em>different server instances</em>? That is where <em>Redis Pub/Sub</em> comes in — Server 1 publishes the message to a Redis channel, all servers subscribed to that channel receive it and push to the right client."` },
+      {
+        type: "code",
+        text: `// Chat system at scale\n// Client A ──WebSocket──> Server 1 ──> Redis Pub/Sub ──> Server 2 ──WebSocket──> Client B\n//                              |                                   |\n//                              └──────────── MongoDB ──────────────┘\n//                                        (message history)\n\n// Redis publish\nredisClient.publish('chat:room:42', JSON.stringify(message));\n\n// Redis subscribe on each server\nredisSubscriber.subscribe('chat:room:42');\nredisSubscriber.on('message', (channel, msg) => {\n  // push to connected WebSocket clients on THIS server\n});`
+      },
+      { speaker: "raj", text: `"<em>Notification system design</em>. When an event fires — order placed, comment received — publish it to a <em>message queue</em>. Separate worker services consume the queue and handle each channel: one worker sends emails via SendGrid, another sends push notifications via Firebase FCM, another writes to the in-app notifications table. Decoupling means a slow email provider does not block push notifications."` },
+      { speaker: "raj", text: `"<em>File upload at scale</em> — never upload through your own server. Your server becomes a bottleneck and disk space is finite. Instead: client requests a <em>presigned URL</em> from your API — a temporary signed URL for direct upload to S3. Client uploads straight to S3 without your server touching a single byte. S3 then fires an event to your queue for post-processing: thumbnails, virus scanning, video transcoding."` },
+      {
+        type: "analogy",
+        text: "Presigned URL = a signed permission slip. You ask the teacher (server), they sign it, you take it to the library (S3) yourself. The teacher never carries the book."
+      },
+      { speaker: "raj", text: `"<em>CDN</em>. Your server sits in one data centre. Users far away get slow responses due to physical distance. A CDN has edge nodes all over the world. Static assets — JS bundles, images, CSS — get cached at the nearest edge. A user in Chennai hits the Mumbai edge node instead of your US server. Latency drops dramatically. Cloudflare and AWS CloudFront are the two you will hear most."` },
+      { speaker: "raj", text: `"<em>What happens when you type a URL and press Enter</em> — this is a classic. Browser checks DNS cache. If not cached, the DNS resolver queries root nameserver then TLD then authoritative nameserver to get the IP. Browser opens a TCP connection — three-way handshake. TLS handshake if HTTPS. Browser sends HTTP GET. Server responds with HTML. Browser parses HTML, finds links to CSS, JS, images, fires more requests. DOM and CSSOM are built, combined into a render tree, then painted to screen."` },
+      { speaker: "raj", text: `"<em>Monolith vs Microservices</em>. Monolith is one codebase, one deployment, one database. Simple to develop and debug when starting out. Microservices means each feature is a separate service with its own deployment and often its own database, talking over APIs or queues. Start with a monolith — seriously. Microservices bring massive operational complexity: distributed tracing, service discovery, network failures between services. Split only when team size or scale genuinely demands it."` },
+      { speaker: "raj", text: `"<em>Database sharding</em> — when a single database machine cannot hold all your data, you split horizontally. Each shard holds a subset — users A to M on shard 1, N to Z on shard 2. The application routes queries using a shard key. Cross-shard queries become painful. Most applications never need this — exhaust vertical scaling and read replicas first before sharding."` },
+      { speaker: "raj", text: `"<em>Eventual vs strong consistency</em>. Strong consistency means every read immediately sees the latest write — like a single SQL database. Eventual consistency means after a write, replicas catch up over time and different nodes may briefly return different values. For bank balances, you need strong consistency. For a like count on a post, eventual is perfectly fine and gives you much better performance at scale."` },
+      { speaker: "raj", text: `"<em>Nginx as reverse proxy</em>. Your Node app runs on port 3000 — you do not expose that directly. Nginx sits in front, listens on 80 and 443, and forwards requests to your app. It handles SSL termination so Node gets plain HTTP internally, load balances across multiple Node processes, serves static files directly without involving Node, and can rate limit at the network layer before requests even reach your code."` },
+      {
+        type: "code",
+        text: `# Nginx reverse proxy config\nserver {\n  listen 443 ssl;\n  server_name myapp.com;\n\n  location / {\n    proxy_pass http://localhost:3000; # forward to Node\n  }\n\n  location /static/ {\n    root /var/www; # serve directly, skip Node entirely\n  }\n}`
+      },
+      {
+        type: "summary",
+        points: ["WebSockets = persistent 2-way connection. Best for chat and live features.", "Real-time at scale = WebSocket + Redis Pub/Sub to sync messages across server instances.", "Notifications = message queue + separate workers per delivery channel.", "File uploads = presigned S3 URL — client uploads direct, your server never touches bytes.", "URL to screen = DNS → TCP → TLS → HTTP → parse HTML → sub-requests → render.", "Monolith first. Microservices only when team size or scale genuinely justifies the complexity.", "Sharding = last resort. Vertical scaling and read replicas cover most applications.", "Nginx = SSL termination, load balancing, static files, rate limiting — in front of your Node app."]
+      }
+    ]
+  }
+];
+
+let current = 0;
+
+function render() {
+  const nav = document.getElementById('topNav');
+  const container = document.getElementById('lessons');
+
+  nav.innerHTML = lessons.map((l, i) =>
+    `<button class="nav-btn ${i === current ? 'active' : ''}" onclick="goTo(${i})">${l.tag}</button>`
+  ).join('');
+
+  container.innerHTML = lessons.map((l, i) => `
+    <div class="lesson ${i === current ? 'active' : ''}" id="lesson-${i}">
+      <div class="lesson-header">
+        <div class="lesson-tag">${l.tag}</div>
+        <h2 class="lesson-title">${l.title}</h2>
+        <p class="lesson-intro">${l.intro}</p>
+      </div>
+      ${l.scenes.map(s => renderScene(s)).join('')}
+    </div>
+  `).join('');
+
+  const fill = ((current + 1) / lessons.length) * 100;
+  document.getElementById('progressFill').style.width = fill + '%';
+  document.getElementById('prevBtn').disabled = current === 0;
+  document.getElementById('nextBtn').textContent = current === lessons.length - 1 ? '✓ Done' : 'Next →';
+  document.getElementById('nextBtn').disabled = current === lessons.length - 1;
+}
+
+function renderScene(s) {
+  if (s.type === 'analogy') {
+    return `<div class="analogy"><div class="analogy-label">🎯 The Analogy</div>${s.text}</div>`;
+  }
+  if (s.type === 'code') {
+    return `<div class="code-block">${s.text}</div>`;
+  }
+  if (s.type === 'summary') {
+    return `<div class="summary-box"><h4>📌 Quick Recap</h4><ul>${s.points.map(p => `<li>${p}</li>`).join('')}</ul></div>`;
+  }
+  const cls = s.speaker === 'raj' ? 'raj' : 'you';
+  const label = s.speaker === 'raj' ? '👨‍💻 Raj' : '🧑‍💻 You';
+  return `
+    <div class="scene ${cls === 'you' ? 'you-scene' : ''}">
+      <div class="speaker ${cls}">${label}</div>
+      <div class="dialogue">${s.text}</div>
+    </div>`;
+}
+
+function goTo(i) {
+  current = i;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function changeLesson(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < lessons.length) goTo(next);
+}
+
+render();
+</script>
+</body>
+</html>
