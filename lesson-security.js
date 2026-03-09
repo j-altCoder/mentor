@@ -80,7 +80,7 @@ res.setHeader('Content-Security-Policy',
 // 'self' = only scripts from your own domain are allowed to execute
 // object-src 'none' = blocks Flash and plugins
 // No 'unsafe-inline' = inline <script> tags are blocked even if injected`
-      }
+      
     },
 
     // ── CSRF ──
@@ -145,7 +145,7 @@ const verifyOrigin = (req, res, next) => {
   }
   next();
 };`
-      }
+      
     },
 
     // ── SQL / NoSQL Injection ──
@@ -204,7 +204,7 @@ const result = await pool.query(
   'SELECT * FROM users WHERE email = $1', [req.body.email]
   // $1 is a placeholder — the driver sends email as data, not code
 );`
-      }
+      
     },
 
     // ── Security headers beyond helmet ──
@@ -261,7 +261,7 @@ app.use(helmet({
   },
   hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }
 }));`
-      }
+      
     },
 
     // ── Mass assignment ──
@@ -317,7 +317,7 @@ const userSchema = new Schema({
   isVerified: { type: Boolean, default: false }
 });
 // But don't rely on this alone — filter at the route level too`
-      }
+      
     },
 
     // ── Sensitive data exposure ──
@@ -379,7 +379,7 @@ logger.info('Incoming request', { body: req.body });
 // ✅ Scrub sensitive fields before logging
 const { password, token, ...safeBody } = req.body;
 logger.info('Incoming request', { body: safeBody });`
-      }
+      
     },
 
     // ── Dependency vulnerabilities ──
@@ -435,7 +435,7 @@ updates:
   "automerge": true,           // auto-merge patch updates
   "major": { "automerge": false } // require review for major bumps
 }`
-      }
+      
     },
 
     // ── HTTPS and TLS ──
@@ -480,7 +480,7 @@ server {
 }
 
 # Test your TLS config: ssllabs.com/ssltest — aim for A+ grade`
-      }
+      
     },
 
     // ── Secrets management ──
@@ -525,7 +525,7 @@ app.listen(3000);
 // Environment-based secret access (IAM role on EC2/ECS — no hardcoded AWS keys)
 // EC2 instance has IAM role with GetSecretValue permission on myapp/production/*
 // No AWS_ACCESS_KEY_ID needed — role credentials auto-injected by AWS metadata service`
-      }
+      
     },
 
     // ── Prototype pollution ──
@@ -576,7 +576,7 @@ Object.freeze(Object.prototype);
 
 // Check if you're affected: Object.prototype.polluted after your code runs?
 // Use: npx is-my-node-vulnerable to check Node version for known issues`
-      }
+      
     },
 
     // ── Security checklist ──
