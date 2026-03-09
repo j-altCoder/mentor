@@ -447,6 +447,7 @@ header p {
   line-height: 1.8;
   color: var(--code-text);
   white-space: pre;
+  padding-left: 3rem;
   overflow-x: auto;
 }
 
@@ -946,8 +947,42 @@ header p {
     z-index: 99;
   }
   .overlay.show { display: block; }
-  .content { padding: 2rem 1.2rem 5rem; }
+  .content { padding: 2rem 1.2rem 6rem; }
   .sidebar-topbar { padding: 1.2rem 1rem 0.8rem; }
+  .fav-panel {
+    display: flex !important;
+    position: fixed;
+    bottom: 0; left: 0; right: 0; top: auto;
+    height: 72vh; max-height: 72vh;
+    border-left: none; border-top: 1px solid var(--border);
+    border-radius: 1rem 1rem 0 0;
+    z-index: 110;
+    transform: translateY(105%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+  }
+  .fav-panel.mobile-open { transform: translateY(0); }
+  .fav-mobile-handle {
+    display: block; width: 36px; height: 4px;
+    background: var(--border); border-radius: 2px;
+    margin: 0.75rem auto 0; flex-shrink: 0;
+  }
+  .mobile-fav-toggle {
+    display: flex; align-items: center; gap: 0.45rem;
+    position: fixed; bottom: 1.5rem; left: 1.5rem;
+    z-index: 200; background: var(--surface);
+    border: 1.5px solid var(--border); color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    font-weight: 600; padding: 0.6rem 1rem;
+    border-radius: 2rem; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+  .fav-count-pill {
+    background: var(--cat5); color: #000;
+    font-size: 0.55rem; padding: 0.1rem 0.35rem;
+    border-radius: 1rem; font-weight: 700;
+  }
+
 }
 
 [data-theme="light"] .search-overlay {
@@ -1040,7 +1075,9 @@ header p {
   font-size: 0.92rem;
   color: var(--text);
   resize: none;
-  min-height: 80px;
+  min-height: 60px;
+  max-height: 400px;
+  overflow-y: hidden;
   line-height: 1.7;
   caret-color: var(--raj);
 }
@@ -1141,6 +1178,122 @@ header p {
   font-style: italic;
   font-size: 0.85rem;
 }
+
+.mark-done-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  margin: 1.8rem auto 0; padding: 0.55rem 1.3rem;
+  border-radius: 2rem; border: 1.5px solid var(--border);
+  background: transparent; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  cursor: pointer; transition: all 0.18s; letter-spacing: 0.04em;
+}
+.mark-done-btn:hover { border-color: #61dca3; color: #61dca3; }
+.mark-done-btn.done  { border-color: #61dca3; color: #61dca3; background: #61dca31a; }
+.lesson-btn { display: flex; align-items: center; justify-content: space-between; }
+.lesson-btn.completed::after { content: "\u2713"; color: #61dca3; font-size: 0.65rem; opacity: 0.85; }
+
+
+.kb-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72); z-index: 999;
+  align-items: center; justify-content: center;
+}
+.kb-overlay.open { display: flex; }
+.kb-modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.8rem 2rem;
+  max-width: 360px; width: 90%;
+}
+.kb-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 1.2rem;
+}
+.kb-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.42rem 0; border-bottom: 1px solid var(--border); font-size: 0.82rem;
+}
+.kb-row:last-child { border-bottom: none; }
+.kb-label { color: var(--text); opacity: 0.8; }
+kbd {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.66rem;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.12rem 0.42rem; color: var(--raj);
+}
+
+
+.all-notes-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72); z-index: 997;
+  align-items: flex-start; justify-content: center;
+  padding-top: 5vh; overflow-y: auto;
+}
+.all-notes-overlay.open { display: flex; }
+.all-notes-modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; width: min(660px, 94vw);
+  max-height: 84vh; overflow-y: auto;
+  margin-bottom: 3rem; position: relative;
+}
+.all-notes-header {
+  position: sticky; top: 0; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1.1rem 1.5rem; display: flex;
+  align-items: center; justify-content: space-between; z-index: 1;
+}
+.all-notes-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.66rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+}
+.all-notes-close {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 1rem; padding: 0.2rem 0.4rem;
+}
+.all-notes-close:hover { color: var(--text); }
+.all-notes-empty {
+  padding: 3rem 2rem; text-align: center;
+  color: var(--muted); font-size: 0.85rem; font-style: italic; line-height: 1.7;
+}
+.all-notes-group { border-bottom: 1px solid var(--border); }
+.all-notes-group:last-child { border-bottom: none; }
+.all-notes-group-hdr {
+  padding: 0.8rem 1.5rem 0.3rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: 0.5rem;
+}
+.all-notes-item {
+  padding: 0.5rem 1.5rem 0.85rem 1.5rem;
+  cursor: pointer; transition: background 0.12s;
+}
+.all-notes-item:hover { background: var(--bg); }
+.all-notes-item-meta {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.57rem;
+  color: var(--muted); margin-bottom: 0.3rem; opacity: 0.7;
+}
+.all-notes-item-text {
+  font-size: 0.86rem; line-height: 1.65;
+  color: var(--text); white-space: pre-wrap;
+}
+
+
+.code-card { position: relative; overflow: hidden; }
+.code-lines {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  width: 2.6rem; padding-top: 0; padding-bottom: 0;
+  display: flex; flex-direction: column;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  line-height: 1.65; color: var(--muted); opacity: 0.3;
+  user-select: none; pointer-events: none;
+  border-right: 1px solid var(--border);
+  background: transparent; padding-right: 0;
+  overflow: hidden;
+}
+.code-lines span {
+  display: block; text-align: right;
+  padding-right: 0.5rem; flex-shrink: 0;
+}
+
 </style>
 </head>
 <body>
@@ -1169,9 +1322,11 @@ header p {
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-topbar">
       <span class="sidebar-brand">Lessons</span>
-      <button class="search-icon-btn" onclick="openSearch()" title="Search lessons (/)">
+      <button class="search-icon-btn" onclick="openSearch()" title="Search (/)">
         🔍 Search
       </button>
+      <button class="search-icon-btn" onclick="openAllNotes()" title="All notes">📝</button>
+      <button class="search-icon-btn" onclick="showKeyboardHelp()" title="Keyboard shortcuts" style="opacity:0.55">⌨</button>
     </div>
     <div class="sidebar-nav-scroll" id="sidebarContent"></div>
   </aside>
@@ -1187,7 +1342,8 @@ header p {
 
   <!-- Right: favorites panel (grid column 3, only on wide screens) -->
   <aside class="fav-panel" id="favPanel">
-    <div class="fav-header">
+    <div class="fav-mobile-handle"></div>
+  <div class="fav-header">
       ⭐ Favorites
       <span class="fav-badge" id="favBadge">0</span>
     </div>
@@ -1217,8 +1373,30 @@ header p {
   </div>
 </div>
 
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="all-notes-overlay" id="allNotesOverlay" onclick="closeAllNotes()">
+  <div class="all-notes-modal" onclick="event.stopPropagation()">
+    <div class="all-notes-header">
+      <span class="all-notes-title">All Notes</span>
+      <button class="all-notes-close" onclick="closeAllNotes()">&#x2715;</button>
+    </div>
+    <div id="allNotesBody"></div>
+  </div>
+</div>
+<div class="kb-overlay" id="kbOverlay" onclick="hideKeyboardHelp()">
+  <div class="kb-modal" onclick="event.stopPropagation()">
+    <div class="kb-title">Keyboard Shortcuts</div>
+    <div class="kb-row"><span class="kb-label">Next lesson</span><span><kbd>L</kbd> / <kbd>&rarr;</kbd></span></div>
+    <div class="kb-row"><span class="kb-label">Prev lesson</span><span><kbd>H</kbd> / <kbd>&larr;</kbd></span></div>
+    <div class="kb-row"><span class="kb-label">Mark done</span><kbd>D</kbd></div>
+    <div class="kb-row"><span class="kb-label">Search</span><kbd>/</kbd></div>
+    <div class="kb-row"><span class="kb-label">This help</span><kbd>?</kbd></div>
+    <div class="kb-row"><span class="kb-label">Close / dismiss</span><kbd>Esc</kbd></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeSidebar(); document.getElementById('favPanel').classList.remove('mobile-open');"></div>
 <button class="mobile-nav-toggle" onclick="toggleSidebar()">☰ Lessons</button>
+<button class="mobile-fav-toggle" id="mobileFavToggle" onclick="toggleMobileFav()">★ Saved <span class="fav-count-pill" id="mobileFavCount" style="display:none"></span></button>
 
 <!-- Lesson files: safe-loaded, missing files just log a warning -->
 <script src="lesson-auth.js"          onerror="console.warn('lesson-auth.js not found')"></script>
@@ -1362,7 +1540,8 @@ function buildSidebar() {
     html += `<div class="sidebar-section">
       <div class="cat-header"><span>${meta.icon}</span><span>${cat}</span></div>`;
     grouped[cat].forEach(({ tag, idx }) => {
-      html += `<button class="lesson-btn" id="sidebarBtn-${idx}"
+      const isDone = completedLessons.has(idx);
+      html += `<button class="lesson-btn${isDone ? " completed" : ""}" id="sidebarBtn-${idx}"
         style="--active-color:${meta.color}"
         onclick="selectLesson(${idx})">${tag}</button>`;
     });
@@ -1409,12 +1588,14 @@ function selectLesson(idx, skipScrollTop) {
       <h2 class="lesson-title">${lesson.title}</h2>
       <p class="lesson-intro">${lesson.intro}</p>
       ${scenesHTML}
+      <div style="text-align:center"><button class="mark-done-btn ${completedLessons.has(idx)?"done":""}" id="markDoneBtn" onclick="toggleDone(${idx})">${completedLessons.has(idx)?"\u2713 Completed":"\u25cb Mark as done"}</button></div>
       <div class="lesson-nav">
         <button class="nav-btn-arrow" onclick="selectLesson(${prevIdx})" ${!hasPrev?'disabled':''}>← Prev</button>
         <button class="nav-btn-arrow next-btn" onclick="selectLesson(${nextIdx})" ${!hasNext?'disabled':''}>${hasNext?'Next →':'✓ Done'}</button>
       </div>
     </div>`;
 
+  injectCodeLineNumbers(view);
   updateProgress();
   if (!skipScrollTop) window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
@@ -1463,6 +1644,7 @@ function renderScene(s, catMeta, si) {
           <div class="code-dot" style="background:#febc2e"></div>
           <div class="code-dot" style="background:#28c840"></div>
         </div>
+        <div class="code-lines" aria-hidden="true"></div>
         <div class="code-body">${s.text}</div>
       </div>
     </div>${inlineNote}`;
@@ -1541,17 +1723,66 @@ function updateReadingTime() {
 window.addEventListener('scroll', updateReadingTime, { passive: true });
 
 function updateProgress() {
-  const total  = LESSONS.length;
-  const pos    = currentIdx !== null ? flatLessons.indexOf(currentIdx) + 1 : 0;
-  const pct    = total > 0 ? (pos / total) * 100 : 0;
+  const total = LESSONS.length;
+  const done  = completedLessons.size;
+  const pct   = total > 0 ? (done / total) * 100 : 0;
   document.getElementById('progressFill').style.width  = pct + '%';
-  document.getElementById('progressLabel').textContent = pos + ' / ' + total;
+  document.getElementById('progressLabel').textContent = done + ' / ' + total + ' done';
   updateReadingTime();
 }
 
 // ─────────────────────────────────────────────────────────────
 //  MOBILE SIDEBAR
 // ─────────────────────────────────────────────────────────────
+
+function showKeyboardHelp() { document.getElementById('kbOverlay').classList.add('open'); }
+function hideKeyboardHelp() { document.getElementById('kbOverlay').classList.remove('open'); }
+
+function openAllNotes() {
+  const body = document.getElementById('allNotesBody');
+  const byLesson = {};
+  Object.entries(notesStore).forEach(function(entry) {
+    var key = entry[0], note = entry[1];
+    if (!note || !note.text) return;
+    var li = note.lessonIdx;
+    if (li === undefined || li === null) return;
+    if (!byLesson[li]) byLesson[li] = [];
+    byLesson[li].push(note);
+  });
+  var lessonIdxs = Object.keys(byLesson).map(Number).sort(function(a, b) {
+    var ia = flatLessons.indexOf(a), ib = flatLessons.indexOf(b);
+    return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+  });
+  if (lessonIdxs.length === 0) {
+    body.innerHTML = '<div class="all-notes-empty">No notes yet.<br>Click ✏️ on any scene to add one.</div>';
+  } else {
+    body.innerHTML = lessonIdxs.map(function(li) {
+      var lesson = LESSONS[li];
+      var name   = lesson ? esc(lesson.tag) : 'Lesson ' + li;
+      var catM   = lesson ? CATEGORY_META[lesson.category] : null;
+      var color  = catM ? catM.color : '#888';
+      var icon   = catM ? catM.icon : '';
+      var items  = byLesson[li].slice().sort(function(a,b){ return (a.sceneIdx||0)-(b.sceneIdx||0); });
+      var rows   = items.map(function(note) {
+        var sceneLabel = note.sceneIdx >= 0 ? 'scene ' + (note.sceneIdx + 1) : '';
+        var date = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
+        var meta = [sceneLabel, date].filter(Boolean).join(' · ');
+        return '<div class="all-notes-item" onclick="closeAllNotes();selectLesson(' + li + ',true);setTimeout(function(){scrollToNoteScene(' + (note.sceneIdx||0) + ')},250)">'
+          + '<div class="all-notes-item-meta">' + meta + '</div>'
+          + '<div class="all-notes-item-text">' + esc(note.text) + '</div>'
+          + '</div>';
+      }).join('');
+      return '<div class="all-notes-group">'
+        + '<div class="all-notes-group-hdr"><span style="color:' + color + '">' + icon + '</span><span>' + name + '</span></div>'
+        + rows + '</div>';
+    }).join('');
+  }
+  document.getElementById('allNotesOverlay').classList.add('open');
+}
+function closeAllNotes() {
+  document.getElementById('allNotesOverlay').classList.remove('open');
+}
+
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('overlay').classList.toggle('show');
@@ -1559,6 +1790,17 @@ function toggleSidebar() {
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
+}
+function toggleMobileFav() {
+  const panel = document.getElementById('favPanel');
+  panel.classList.toggle('mobile-open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function updateMobileFavBadge() {
+  const badge = document.getElementById('mobileFavCount');
+  if (!badge) return;
+  if (favs.length > 0) { badge.textContent = favs.length; badge.style.display = 'inline'; }
+  else { badge.style.display = 'none'; }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1972,15 +2214,23 @@ function handleSearchOverlayClick(e) {
 
 // Keyboard shortcut: '/' opens search, Escape closes
 document.addEventListener('keydown', function(e) {
-  const overlay = document.getElementById('searchOverlay');
-  if (e.key === 'Escape') { closeSearch(); return; }
-  if (e.key === '/' && !overlay.classList.contains('open')) {
-    const tag = document.activeElement.tagName;
-    if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
-      e.preventDefault();
-      openSearch();
-    }
+  const tag = document.activeElement.tagName;
+  const inInput = (tag === 'INPUT' || tag === 'TEXTAREA');
+  if (e.key === 'Escape') { closeSearch(); hideKeyboardHelp(); closeAllNotes(); return; }
+  if (inInput) return;
+  if (e.key === '/') { e.preventDefault(); openSearch(); return; }
+  if (e.key === 'l' || e.key === 'L' || e.key === 'ArrowRight') {
+    const pos = currentIdx !== null ? flatLessons.indexOf(currentIdx) : -1;
+    if (pos < flatLessons.length - 1) { e.preventDefault(); selectLesson(flatLessons[pos + 1]); }
+    return;
   }
+  if (e.key === 'h' || e.key === 'H' || e.key === 'ArrowLeft') {
+    const pos = currentIdx !== null ? flatLessons.indexOf(currentIdx) : -1;
+    if (pos > 0) { e.preventDefault(); selectLesson(flatLessons[pos - 1]); }
+    return;
+  }
+  if (e.key === 'd' || e.key === 'D') { if (currentIdx !== null) toggleDone(currentIdx); return; }
+  if (e.key === '?') { showKeyboardHelp(); return; }
 });
 
 // Extract plain searchable text from a scene
@@ -2037,11 +2287,13 @@ function doSearch(query) {
       }
     });
 
-    // Search each scene
+    // Search each scene + its note
     lesson.scenes.forEach((scene, sceneIdx) => {
       const { type, text } = sceneToText(scene);
-      if (text.toLowerCase().includes(ql)) {
-        hits.push({ type, text, sceneIdx });
+      if (text.toLowerCase().includes(ql)) hits.push({ type, text, sceneIdx });
+      const noteData = notesStore['note-' + lessonIdx + '-' + sceneIdx];
+      if (noteData && noteData.text && noteData.text.toLowerCase().includes(ql)) {
+        hits.push({ type: 'note', text: noteData.text, sceneIdx });
       }
     });
 
@@ -2244,7 +2496,29 @@ function markNoteOpen(sceneIdx) {
 }
 
 // ── Auto-save on input with debounce ──
+
+function injectCodeLineNumbers(view) {
+  if (!view) return;
+  view.querySelectorAll('.code-body').forEach(function(body) {
+    var lnDiv = body.previousElementSibling;
+    if (!lnDiv || !lnDiv.classList.contains('code-lines')) return;
+    var lines = body.textContent.split('\n');
+    // Sync top padding with code-body
+    var pt = parseFloat(getComputedStyle(body).paddingTop) || 0;
+    lnDiv.style.paddingTop = pt + 'px';
+    lnDiv.innerHTML = lines.map(function(_, i) {
+      return '<span>' + (i + 1) + '</span>';
+    }).join('');
+  });
+}
+
+function resizeTextarea(ta) {
+  ta.style.height = "auto";
+  ta.style.height = Math.min(ta.scrollHeight, 400) + "px";
+}
+
 function autoSaveNote(sceneIdx, ta) {
+  resizeTextarea(ta);
   const key = `note-${currentIdx}-${sceneIdx}`;
   const statusEl = document.getElementById(`note-status-${currentIdx}-${sceneIdx}`);
 
@@ -2398,6 +2672,30 @@ selectLesson = function(idx, skipScrollTop) {
   _origSelectLesson(idx, skipScrollTop);
   if (idx !== null && idx !== undefined) saveLastLesson(idx);
 };
+
+
+const COMPLETED_KEY = 'coderoom-v2-completed';
+function loadCompleted() {
+  try { return new Set(JSON.parse(localStorage.getItem(COMPLETED_KEY) || '[]')); } catch(e) { return new Set(); }
+}
+function saveCompleted(set) {
+  try { localStorage.setItem(COMPLETED_KEY, JSON.stringify([...set])); } catch(e) {}
+}
+let completedLessons = loadCompleted();
+
+function toggleDone(idx) {
+  if (completedLessons.has(idx)) { completedLessons.delete(idx); }
+  else { completedLessons.add(idx); }
+  saveCompleted(completedLessons);
+  const btn = document.getElementById('markDoneBtn');
+  if (btn) {
+    btn.textContent = completedLessons.has(idx) ? '\u2713 Completed' : '\u25cb Mark as done';
+    btn.classList.toggle('done', completedLessons.has(idx));
+  }
+  const sb = document.getElementById('sidebarBtn-' + idx);
+  if (sb) sb.classList.toggle('completed', completedLessons.has(idx));
+  updateProgress();
+}
 
 buildSidebar();
 renderFavPanel();
