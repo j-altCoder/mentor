@@ -1575,13 +1575,21 @@ function doSearch(query) {
 
   const catMeta = (lesson) => CATEGORY_META[lesson.category] || { color: '#888', icon: '' };
 
+  // Store results in a registry so onclick handlers never embed strings in HTML attributes
+  window._searchRegistry = {};
+  let regKey = 0;
+
   const html = groups.map(({ lessonIdx, lesson, hits }) => {
     const meta  = catMeta(lesson);
-    const hitsHTML = hits.map(h => `
-      <div class="search-hit" onclick="searchGoTo(${lessonIdx}, ${h.sceneIdx}, ${JSON.stringify(esc(q))})">
-        <span class="search-hit-type">${esc(h.type)}</span>
-        <span class="search-hit-snippet">${excerpt(h.text, q)}</span>
-      </div>`).join('');
+    const hitsHTML = hits.map(h => {
+      const key = regKey++;
+      window._searchRegistry[key] = { lessonIdx, sceneIdx: h.sceneIdx, query: q };
+      return `
+        <div class="search-hit" onclick="searchGoTo(_searchRegistry[${key}].lessonIdx, _searchRegistry[${key}].sceneIdx, _searchRegistry[${key}].query)">
+          <span class="search-hit-type">${esc(h.type)}</span>
+          <span class="search-hit-snippet">${excerpt(h.text, q)}</span>
+        </div>`;
+    }).join('');
     return `
       <div class="search-result-group">
         <div class="search-result-lesson-header">
@@ -1606,18 +1614,15 @@ function searchGoTo(lessonIdx, sceneIdx, query) {
     const view = document.getElementById('lessonView');
     if (!view) return;
 
-    // Find first text node containing the query
-    const q = query.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
     const walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT, null);
     let node;
     while ((node = walker.nextNode())) {
-      const idx = node.textContent.toLowerCase().indexOf(q.toLowerCase());
+      const idx = node.textContent.toLowerCase().indexOf(query.toLowerCase());
       if (idx === -1) continue;
 
-      // Wrap the match in a temporary highlight span
       const range = document.createRange();
       range.setStart(node, idx);
-      range.setEnd(node, idx + q.length);
+      range.setEnd(node, idx + query.length);
 
       const mark = document.createElement('span');
       mark.className = 'search-match-flash';
@@ -1629,10 +1634,8 @@ function searchGoTo(lessonIdx, sceneIdx, query) {
         range.insertNode(mark);
       }
 
-      // Scroll into view
       mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      // Fade and remove after animation
       setTimeout(() => mark.classList.add('fade'), 1200);
       setTimeout(() => {
         if (mark.parentNode) {
