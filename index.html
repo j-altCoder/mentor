@@ -9,19 +9,61 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:      #080a0f;
-  --surface: #0e1118;
-  --card:    #141720;
-  --border:  #1e2230;
-  --text:    #dfe2ec;
-  --muted:   #5a607a;
-  --raj:     #f5a623;
-  --you:     #61dca3;
-  --cat1:    #61dca3;
-  --cat2:    #f5a623;
-  --cat3:    #e879f9;
-  --cat4:    #38bdf8;
-  --cat5:    #fb7185;
+  --bg:          #080a0f;
+  --surface:     #0e1118;
+  --card:        #141720;
+  --border:      #1e2230;
+  --text:        #dfe2ec;
+  --muted:       #5a607a;
+  --raj:         #f5a623;
+  --you:         #61dca3;
+  --cat1:        #61dca3;
+  --cat2:        #f5a623;
+  --cat3:        #e879f9;
+  --cat4:        #38bdf8;
+  --cat5:        #fb7185;
+  /* promoted from hardcoded */
+  --code-bg:     #06080d;
+  --code-topbar: #090b10;
+  --code-text:   #9ca3af;
+  --analogy-text:#b8b4ab;
+  --grid-line:   rgba(255,255,255,0.015);
+  --hover-bg:    rgba(255,255,255,0.03);
+  --active-bg:   rgba(255,255,255,0.05);
+  --shadow-dark: rgba(0,0,0,0.6);
+  --shadow-ring: rgba(255,255,255,0.04);
+  --result-row:  rgba(255,255,255,0.02);
+  --result-hover:rgba(255,255,255,0.04);
+  --count-bg:    rgba(255,255,255,0.015);
+}
+
+[data-theme="light"] {
+  --overlay-backdrop: rgba(0,0,0,0.3);
+  --bg:          #f5f4f0;
+  --surface:     #fffffe;
+  --card:        #ede9e2;
+  --border:      #d8d4cc;
+  --text:        #1a1a1e;
+  --muted:       #7a7872;
+  --raj:         #b86e00;
+  --you:         #187a58;
+  --cat1:        #187a58;
+  --cat2:        #b86e00;
+  --cat3:        #9c1dab;
+  --cat4:        #0369a1;
+  --cat5:        #cc2020;
+  --code-bg:     #f8f6f1;
+  --code-topbar: #ede9e0;
+  --code-text:   #485060;
+  --analogy-text:#4a4640;
+  --grid-line:   rgba(0,0,0,0.04);
+  --hover-bg:    rgba(0,0,0,0.03);
+  --active-bg:   rgba(0,0,0,0.06);
+  --shadow-dark: rgba(0,0,0,0.10);
+  --shadow-ring: rgba(0,0,0,0.05);
+  --result-row:  rgba(0,0,0,0.02);
+  --result-hover:rgba(0,0,0,0.04);
+  --count-bg:    rgba(0,0,0,0.02);
 }
 
 body {
@@ -37,11 +79,40 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 48px 48px;
   pointer-events: none;
   z-index: 0;
+}
+
+/* ── THEME TRANSITION ── */
+html { color-scheme: dark; }
+html[data-theme="light"] { color-scheme: light; }
+body, .sidebar, .fav-panel, .search-box, .scene, .analogy-card,
+.code-card, .summary-card, .fav-panel, header, .progress-wrap,
+.search-overlay, .search-result-group, .search-result-lesson-header {
+  transition: background 0.22s ease, border-color 0.22s ease, color 0.22s ease;
+}
+
+/* ── THEME TOGGLE ── */
+.theme-toggle {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.4rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  z-index: 10;
+}
+.theme-toggle:hover {
+  border-color: var(--raj);
+  transform: scale(1.08);
 }
 
 /* ── HEADER ── */
@@ -212,8 +283,8 @@ header p {
   background: var(--border);
   transition: background 0.15s;
 }
-.lesson-btn:hover { color: var(--text); background: rgba(255,255,255,0.03); }
-.lesson-btn.active { color: var(--text); background: rgba(255,255,255,0.05); }
+.lesson-btn:hover { color: var(--text); background: var(--hover-bg); }
+.lesson-btn.active { color: var(--text); background: var(--active-bg); }
 .lesson-btn.active::before {
   background: var(--active-color, var(--cat5));
   box-shadow: 0 0 6px var(--active-color, var(--cat5));
@@ -336,11 +407,11 @@ header p {
   color: var(--raj);
   margin-bottom: 0.5rem;
 }
-.analogy-text { color: #b8b4ab; font-size: 0.97rem; line-height: 1.75; }
+.analogy-text { color: var(--analogy-text); font-size: 0.97rem; line-height: 1.75; }
 
 /* ── CODE ── */
 .code-card {
-  background: #06080d;
+  background: var(--code-bg);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   margin-bottom: 1.2rem;
@@ -352,7 +423,7 @@ header p {
   gap: 0.4rem;
   padding: 0.6rem 1rem;
   border-bottom: 1px solid var(--border);
-  background: #090b10;
+  background: var(--code-topbar);
 }
 .code-dot { width: 10px; height: 10px; border-radius: 50%; }
 .code-body {
@@ -360,7 +431,7 @@ header p {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
   line-height: 1.8;
-  color: #9ca3af;
+  color: var(--code-text);
   white-space: pre;
   overflow-x: auto;
 }
@@ -479,7 +550,7 @@ header p {
   border-left: 2px solid transparent;
   transition: background 0.12s, border-color 0.12s;
 }
-.fav-entry:hover { background: rgba(255,255,255,0.03); border-left-color: var(--cat5); }
+.fav-entry:hover { background: var(--hover-bg); border-left-color: var(--cat5); }
 .fav-entry-text {
   flex: 1;
   font-size: 0.8rem;
@@ -531,14 +602,14 @@ header p {
 #sel-toolbar {
   position: fixed;
   z-index: 9999;
-  background: #1a1f2e;
+  background: var(--surface);
   border: 1px solid rgba(251,113,133,0.4);
   border-radius: 0.45rem;
   padding: 0.25rem;
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  box-shadow: 0 6px 24px var(--shadow-dark), 0 0 0 1px var(--shadow-ring);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.12s;
@@ -629,7 +700,7 @@ header p {
   position: fixed;
   inset: 0;
   z-index: 500;
-  background: rgba(5, 7, 12, 0.85);
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: flex-start;
@@ -649,7 +720,7 @@ header p {
   border: 1px solid var(--border);
   border-radius: 0.85rem;
   overflow: hidden;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+  box-shadow: 0 24px 80px var(--shadow-dark), 0 0 0 1px var(--shadow-ring);
   display: flex;
   flex-direction: column;
   max-height: 70vh;
@@ -723,7 +794,7 @@ header p {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
-  background: rgba(255,255,255,0.02);
+  background: var(--result-row);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -742,7 +813,7 @@ header p {
   gap: 0.25rem;
 }
 .search-hit:hover {
-  background: rgba(255,255,255,0.04);
+  background: var(--result-hover);
   border-left-color: var(--raj);
 }
 .search-hit-type {
@@ -771,7 +842,7 @@ header p {
   padding: 0.6rem 1.1rem;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
-  background: rgba(255,255,255,0.015);
+  background: var(--count-bg);
 }
 /* ── SEARCH HIGHLIGHT IN LESSON ── */
 .search-match-flash {
@@ -829,11 +900,21 @@ header p {
   .content { padding: 2rem 1.2rem 5rem; }
   .sidebar-topbar { padding: 1.2rem 1rem 0.8rem; }
 }
+
+[data-theme="light"] .search-overlay {
+  background: rgba(200, 198, 192, 0.75);
+}
+[data-theme="light"] #sel-toolbar {
+  border-color: rgba(180,140,80,0.4);
+}
 </style>
 </head>
 <body>
 
 <header>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark theme">
+    <span id="themeIcon">☀️</span>
+  </button>
   <div class="vol-tag">The Coderoom · Vol. 2</div>
   <h1>Senior Dev <span>Mentorship</span></h1>
   <p>Raj explains the hard stuff. You ask the real questions.</p>
@@ -1674,6 +1755,34 @@ function searchGoTo(lessonIdx, sceneIdx, query) {
 document.getElementById('searchInput').addEventListener('input', function() {
   doSearch(this.value);
 });
+
+// ─────────────────────────────────────────────────────────────
+//  THEME
+// ─────────────────────────────────────────────────────────────
+const THEME_KEY = 'coderoom-theme';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const icon = document.getElementById('themeIcon');
+  if (icon) icon.textContent = theme === 'light' ? '🌙' : '☀️';
+  try { localStorage.setItem(THEME_KEY, theme); } catch(e) {}
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'light' ? 'dark' : 'light');
+}
+
+// Apply saved or system preference immediately
+(function() {
+  let saved;
+  try { saved = localStorage.getItem(THEME_KEY); } catch(e) {}
+  if (saved) {
+    applyTheme(saved);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    applyTheme('light');
+  }
+})();
 
 // ─────────────────────────────────────────────────────────────
 //  INIT
