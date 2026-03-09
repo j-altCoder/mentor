@@ -6,573 +6,415 @@
 const LESSON_MICROSERVICES = {
   category: "Architecture & System Design",
   tag: "Microservices",
-  title: "You Cut the Monolith. Now What?",
-  intro: "The tech lead has just announced it: the monolith is being broken up. Six services, three teams, Q3 deadline. There's a slide with boxes and arrows. Raj walks past your desk, glances at the slide on your screen, and pulls up a chair. 'They've given you the diagram,' he says. 'Nobody's told you what you're actually signing up for.'",
+  title: "The Boxes on the Whiteboard Cost More Than You Think",
+  intro: "There's a new whiteboard in the meeting room. Someone drew six boxes connected by arrows overnight. Order Service. Payment Service. User Service. Notification Service. Inventory Service. Auth Service. The VP of Engineering called it 'the target architecture.' Raj stares at it for a long moment, then turns to you. 'Tell me what you see.'",
   scenes: [
 
-    // ── Monolith vs microservices — the honest tradeoff ──
+    // ── What is this actually solving ──
+    {
+      speaker: "you",
+      text: `"Six services. Each one handles a different part of the system — we can deploy them independently, scale them separately."`
+    },
     {
       speaker: "raj",
-      text: `"Before the architecture — what problem are microservices actually solving? Not the sales pitch. The real answer."`
+      text: `"That's what they do. I asked what problem they're solving."`
     },
     {
       speaker: "you",
-      text: `"You can deploy services independently? Scale them separately?"`
+      text: `"The monolith got too big? Hard to change?"`
     },
     {
       speaker: "raj",
-      text: `"Those are the benefits. The problem they're solving is organisational, not technical. A monolith gets painful when multiple teams are stepping on each other — merge conflicts every day, one team's bad deploy takes down everyone, you need six approvals to ship a CSS change. Microservices let teams own their domain end to end and ship without coordinating with everyone else. That's the core value. Independent deployability follows from team autonomy, not the other way around. If you have three engineers on one team, a monolith is almost certainly the right answer. The complexity of microservices is real cost — you pay it whether or not you have the team size to justify it."`
+      text: `"Closer. The real answer is organisational. The monolith gets painful when multiple teams are stepping on each other — merge conflicts every day, one team's broken deploy takes down everyone, you need six sign-offs to ship a button change. Microservices let teams own their domain end to end and ship without coordinating with every other team. That's the core value. Independent deployability is a consequence of team autonomy, not the other way around. The question isn't 'is our codebase big?' — it's 'are multiple teams blocked by sharing one thing?' If you have three engineers on one team, a monolith is almost certainly the right answer. These six boxes cost more to run than a monolith. You should be clear about what you're buying."`
     },
     {
       type: "analogy",
-      text: "A monolith is a restaurant kitchen where everyone works together — one team, one space, one deployment. Fast to start, easy to coordinate, but as it grows, the pastry chef and the grill cook start fighting for space. Microservices is splitting into separate speciality kitchens — each owns their domain, deploys their own menu, scales their own capacity. But now you need a maitre d' routing orders, a way for kitchens to communicate, and a full disaster plan for when the dessert kitchen goes dark mid-service. The food is the same. The operational complexity is not."
+      text: "A monolith is one restaurant kitchen — one team, one space, everything coordinated. Fast to start, easy to debug, but as the kitchen grows, the pastry section and the grill section start fighting for space and blocking each other. Microservices splits into separate speciality kitchens. Each kitchen owns their menu, hires their own staff, runs their own service. But now you need someone routing orders between kitchens, a way for them to communicate when they depend on each other, and a plan for when the dessert kitchen goes dark at 8pm on a Saturday. You've solved the coordination problem. The operational complexity is a new problem you've created."
     },
+
+    // ── What you actually lose ──
     {
       speaker: "raj",
-      text: `"What do you actually gain with independent deployability?"`
+      text: `"In the monolith — placing an order decrements inventory and charges the card. One database transaction. All or nothing. What happens to that in your six-box diagram?"`
     },
     {
       speaker: "you",
-      text: `"Each service can be deployed without touching the others — faster releases, smaller blast radius."`
+      text: `"Each of those is now a network call to a different service."`
     },
     {
       speaker: "raj",
-      text: `"Right. And what do you lose that you had for free in the monolith?"`
+      text: `"And network calls can do something function calls can't. What's that?"`
     },
     {
       speaker: "you",
-      text: `"A function call becomes a network call? Transactions get harder?"`
+      text: `"Fail. Time out."`
     },
     {
       speaker: "raj",
-      text: `"List it properly. In a monolith: function calls are in-process — microseconds, never fail due to network, share a transaction. Cross-cutting concerns — auth, logging, validation — live in one place. You deploy everything at once so versions are always consistent. When you split: every service call is a network hop that can time out, fail, or return stale data. You have no distributed transaction — two services updating their own databases is not atomic. You need service discovery, a way to find where each service lives. You need an API gateway or some routing layer. Every service needs its own logging, auth, deployment pipeline. You've traded one hard problem — coordinating one large codebase — for six harder problems distributed across six codebases. Eyes open."`
+      text: `"Fail, time out, return stale data, take three seconds instead of three milliseconds. And your transaction — what happened to it?"`
+    },
+    {
+      speaker: "you",
+      text: `"There isn't one anymore. Each service has its own database."`
+    },
+    {
+      speaker: "raj",
+      text: `"Right. So you charge the card in Payment Service, then Inventory Service returns a 500. The charge went through. The stock didn't decrement. Those two databases are now inconsistent and there's no rollback. In the monolith that was one transaction. Here it's a distributed systems problem that people write PhD theses about. I'm not saying don't do it. I'm saying look at that whiteboard and understand what you're agreeing to before the VP leaves the room."`
     },
     {
       type: "code",
       text: `// ─────────────────────────────────────────────────────
-// MONOLITH vs MICROSERVICES — THE TRADEOFF MAP
+// WHAT YOU TRADE WHEN YOU LEAVE THE MONOLITH
 // ─────────────────────────────────────────────────────
 
-// MONOLITH — you get these for free:
-// ✓ In-process function calls (microseconds, never fail)
-// ✓ ACID transactions across the whole domain
-// ✓ Single deploy — versions always consistent
-// ✓ Easy refactoring across domain boundaries
-// ✓ One auth system, one logging setup, one CI pipeline
-// ✓ Simple local development (one server to run)
-//
-// MICROSERVICES — you get these:
-// ✓ Independent deployability per service
-// ✓ Independent scaling (scale Order service, not Auth)
-// ✓ Team ownership — one team, one service, one repo
-// ✓ Technology choice per service (if genuinely needed)
-// ✓ Fault isolation — one service crashes, others survive
-//
-// MICROSERVICES — you pay these costs:
-// ✗ Every cross-service call: network latency + failure modes
-// ✗ No distributed transactions — eventual consistency instead
-// ✗ Service discovery, API gateway, load balancing per service
-// ✗ Distributed tracing to follow a request across services
+// ── Monolith: one transaction, three operations ──
+const placeOrder = async (userId, items) => {
+  return await db.transaction(async (tx) => {
+    const order = await tx.orders.create({ userId, items });
+    await tx.inventory.decrement(items);           // same transaction
+    await tx.payments.charge(userId, order.total); // same transaction
+    return order;
+    // if anything throws → everything rolls back. clean.
+  });
+};
+
+// ── Microservices: the same operation, now distributed ──
+const placeOrder = async (userId, items) => {
+  const order = await orderService.create({ userId, items });
+  // What if next line fails? Order already created.
+  await inventoryService.decrement(items);
+  // What if THIS fails? Order created, stock decremented, no charge.
+  await paymentService.charge(userId, order.total);
+  return order;
+};
+// There is no rollback. Each service committed its own local transaction.
+// Inconsistency is now your problem to manage.
+
+// ── What you gain ──
+// ✓ Order Service team ships without touching Payment Service code
+// ✓ Payment Service scales independently
+// ✓ Payment Service goes down → rest of the app still works
+// ✓ Each service can be rewritten in isolation
+
+// ── What you pay ──
+// ✗ Every cross-service call: latency + failure modes
+// ✗ No distributed transactions — you manage consistency manually
 // ✗ N deployment pipelines instead of 1
-// ✗ Data duplication — each service owns its own DB
-// ✗ Integration testing is harder — need services running together
-// ✗ Local development: run 6 services or mock 5 of them
-
-// RULE OF THUMB:
-// Start with a monolith. Extract a service when:
-//   1. A specific part needs to scale differently
-//   2. A team boundary has hardened around it
-//   3. It has a genuinely different operational profile
-// Never split speculatively. The future is always different
-// from what you predicted.`
+// ✗ Distributed tracing to follow one request across six services
+// ✗ Local dev: run all six or mock five of them`
     },
 
-    // ── Service boundaries — how to cut ──
+    // ── Distributed monolith ──
     {
       speaker: "raj",
-      text: `"On the slide — they've drawn six boxes. User Service, Auth Service, Order Service, Payment Service, Notification Service, Product Service. How do you know if these are the right cuts?"`
+      text: `"Look at User Service on the board. Every other service has an arrow pointing to it. Order Service calls it for the shipping address. Notification Service calls it for the email. Payment Service calls it for billing info. What's wrong with that?"`
     },
     {
       speaker: "you",
-      text: `"Each one is a different domain?"`
+      text: `"If User Service goes down, everything goes down?"`
     },
     {
       speaker: "raj",
-      text: `"Domain is a starting point, not a rule. The right cut is where the boundary is <em>stable</em> and where coupling across the line is <em>minimal</em>. If Order Service needs to read User data on every request, you've created a service that can't function without its neighbour. That's a distributed monolith — you get all the costs of microservices and none of the independence. The test: could this service operate and be deployed if every other service was offline for an hour? If the answer is no, reconsider the cut. Auth and Payment are typically good candidates — clear ownership, infrequent data relationships, genuinely different scaling and security profiles. 'User Service' is almost always wrong — user data is referenced by everything, so you've just created a bottleneck with a network hop."`
+      text: `"That's one problem. The deeper one: you haven't actually decoupled anything. You just turned a function call into a network hop. Those services can't operate without each other — they're still tightly coupled. This is called a distributed monolith. You get all the costs of microservices and none of the independence. The giveaway is when a team says 'we can't deploy Order Service without deploying User Service first because of the API change.' That's not independent deployability. That's a monolith with worse debugging and slower deploys."`
     },
     {
       speaker: "you",
-      text: `"What's a distributed monolith?"`
+      text: `"So what's the right cut?"`
     },
     {
       speaker: "raj",
-      text: `"When you split a monolith into services but they're still tightly coupled — they share a database, or they call each other synchronously in a chain so deep that a single request touches six services before it returns. You've kept all the coordination costs of a monolith and added all the network costs of microservices. The worst of both worlds. The giveaway is: 'we can't deploy Service A without deploying Service B first.' That's not independent deployability — that's a monolith with extra steps and worse debugging."`
+      text: `"The test I use: could this service do its core job if every other service was unreachable for an hour? If the answer is no, the boundary is wrong. User Service fails immediately — it's a shared dependency, not a standalone service. Payment is a good candidate. Its own data model, clear ownership, different scaling and security requirements, and most of the system works fine if payment is degraded for a moment. The fix for User Service isn't to make it more reliable — it's to stop calling it on every request. Order Service should store what it needs locally: the shipping address at order time, the product name and price. That data doesn't change retroactively. Stop fetching it live."`
     },
     {
       type: "code",
       text: `// ─────────────────────────────────────────────────────
-// SERVICE BOUNDARIES — GOOD CUTS vs BAD CUTS
+// GOOD BOUNDARIES vs DISTRIBUTED MONOLITH
 // ─────────────────────────────────────────────────────
 
-// ✗ BAD: Services share a database
-// Order Service and User Service both read/write the same DB
-// → Schema changes in one break the other
-// → No independent deployability, no data ownership
-// → This is a monolith with a network hop added
+// ✗ Distributed monolith
+// Every order request crosses four service boundaries before returning.
+// User Service slow → orders slow. User Service down → orders down.
+// Client → Order Service → User Service    (get shipping address)
+//                        → Inventory Service (check stock)
+//                        → Payment Service  → Fraud Service
 
-// ✗ BAD: Deep synchronous call chains
-// Client → API Gateway → Order Service → User Service
-//                     → Inventory Service → Product Service
-//                     → Payment Service  → Fraud Service
-// → One service slow = entire request slow
-// → One service down = entire request fails
-// → Latency compounds: 50ms × 6 hops = 300ms minimum
+// ✓ Each service stores what it needs locally
+const order = {
+  orderId:         '123',
+  userId:          'u456',
+  shippingAddress: '12 Main St',     // copied at order time — not fetched live
+  items: [
+    { productId: 'p789', name: 'Headphones', price: 79.99, qty: 1 }
+    //                   ^^^^               ^^^^^
+    // Copied from Product Service at order creation.
+    // Order Service never calls Product Service to display order history.
+  ],
+  total: 79.99,
+};
+// User Service goes down for a deploy.
+// Order history still works. New orders still process.
+// The data is slightly denormalised. That's intentional.
 
-// ✓ GOOD: Each service owns its data
-// Order Service:    orders DB (orders, order_items, order_status)
-// Payment Service:  payments DB (transactions, refunds)
-// Product Service:  products DB (catalogue, inventory)
-// Each service's DB is private — only reachable via that service's API
-
-// ✓ GOOD: Async for non-critical cross-service work
-// Order placed → emit OrderCreated event to message queue
-//   → Notification Service consumes → sends email (async, own pace)
-//   → Analytics Service consumes   → updates dashboard (async)
-//   → Inventory Service consumes   → decrements stock (async)
-// Order Service doesn't wait for any of these — it returned 200 already
-
-// ✓ GOOD: Services can operate in degraded mode
-// Order Service places order even if Recommendation Service is down
-// Notification Service queues emails if SMTP is slow
-// "Can this service do its core job if neighbour X is unreachable?"
-// If yes → good boundary. If no → reconsider the coupling.
-
-// ── Domain-Driven Design vocabulary ──
-// Bounded Context: the boundary within which a domain model is consistent
-// Each microservice should map to one Bounded Context
-// "User" inside Order Service = orderId + shippingAddress (what Order cares about)
-// "User" inside Auth Service  = email + passwordHash + sessions
-// Same word, different models — that's intentional, not a bug`
+// Each service has its own model of the same concept:
+// "User" in Order Service   = { userId, shippingAddress }
+// "User" in Auth Service    = { userId, email, passwordHash }
+// "User" in Billing Service = { userId, billingAddress, paymentMethods }
+// Same word. Different slices. Each service owns what it needs.`
     },
 
-    // ── Communication patterns ──
+    // ── Sync vs async ──
     {
       speaker: "raj",
-      text: `"Service A needs data from Service B. What are your options and when do you use each?"`
+      text: `"Order is placed. Confirmation email needs to go out. How does Order Service trigger Notification Service?"`
     },
     {
       speaker: "you",
-      text: `"REST API call, or a message queue for async?"`
+      text: `"Call its API?"`
     },
     {
       speaker: "raj",
-      text: `"Three patterns. Synchronous request-response — REST or gRPC. Use it when the caller needs the answer before it can continue: a payment must succeed before you confirm an order. Synchronous is simple but it creates coupling — your service's availability is now tied to your dependency's. Asynchronous messaging — put an event on a queue, return immediately, consumer processes in its own time. Use it when the work doesn't need to complete in the same transaction: sending a confirmation email, updating a search index, logging analytics. The caller doesn't wait, failure is isolated. Third: data replication — a service subscribes to events from another service and maintains its own read-only copy of the data it needs. Eliminates the runtime dependency entirely. Order Service stores the product name and price at the time of order — it doesn't call Product Service on every order lookup. The tradeoff is eventual consistency and data duplication, which is often the right tradeoff."`
+      text: `"What happens if Notification Service is slow?"`
+    },
+    {
+      speaker: "you",
+      text: `"The order response takes longer. But... the user doesn't need to wait for the email. The order's already confirmed."`
+    },
+    {
+      speaker: "raj",
+      text: `"Exactly. Calling synchronously couples your order latency to your email system. Notification Service slows down during a mail provider outage and suddenly orders are slow too — for no reason. You publish an event to a queue instead. 'Order placed, here's the data.' Return 200. Notification Service consumes it at its own pace, retries if the provider is flaky, and Order Service never knew there was a problem. The rule: synchronous when the caller needs the answer to continue. Async when you're notifying something else that something happened."`
     },
     {
       type: "code",
       text: `// ─────────────────────────────────────────────────────
-// COMMUNICATION PATTERNS
+// SYNC vs ASYNC COMMUNICATION
 // ─────────────────────────────────────────────────────
 
-// ── Pattern 1: Synchronous REST/gRPC ──
-// Use when: caller needs the answer to proceed
-// Risk: tight coupling, cascading failures
+app.post('/orders', asyncHandler(async (req, res) => {
+  const order = await db.orders.create({ ...req.body, status: 'pending' });
 
-// Order Service calling Payment Service
-const confirmPayment = async (orderId, amount) => {
-  try {
-    const response = await fetch('http://payment-service/charge', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ orderId, amount }),
-      signal:  AbortSignal.timeout(5000), // ALWAYS set a timeout
-    });
-    if (!response.ok) throw new Error(\`Payment failed: \${response.status}\`);
-    return response.json();
-  } catch (err) {
-    // Payment Service down → Order cannot complete
-    // This is the cost of synchronous coupling
-    throw new ServiceUnavailableError('payment-service', err);
+  // Synchronous — must succeed before we can confirm the order
+  const payment = await fetch('http://payment-service/charge', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'x-trace-id': req.traceId },
+    body:    JSON.stringify({ orderId: order.id, amount: order.total }),
+    signal:  AbortSignal.timeout(8000), // always set a timeout
+  });
+  if (!payment.ok) {
+    await db.orders.updateStatus(order.id, 'payment_failed');
+    return res.status(402).json({ error: 'Payment failed' });
   }
-};
+  await db.orders.updateStatus(order.id, 'confirmed');
 
-// ── Pattern 2: Async messaging (event-driven) ──
-// Use when: work can happen out-of-band
-// Benefit: caller returns immediately, consumer retries independently
-
-// Order Service publishes event and returns 200 — does not wait
-const placeOrder = async (orderData) => {
-  const order = await db.orders.create({ ...orderData, status: 'confirmed' });
-
-  // Fire and forget — these consumers operate independently
+  // Async — publish and return. Order Service does not wait for any of these.
   await messageQueue.publish('order.placed', {
-    orderId:   order.id,
-    userId:    order.userId,
-    items:     order.items,
-    total:     order.total,
-    placedAt:  order.createdAt,
+    orderId:  order.id,
+    userId:   order.userId,
+    items:    order.items,
+    total:    order.total,
+    placedAt: new Date(),
   });
 
-  return order; // returns 200 before email is sent, stock is updated, etc.
-};
-
-// Notification Service — independent consumer
-messageQueue.subscribe('order.placed', async (event) => {
-  await emailProvider.send({
-    to:      await getUserEmail(event.userId),
-    subject: 'Order confirmed',
-    body:    renderOrderEmail(event),
-  });
-  // If this fails, queue retries it — Order Service is unaffected
-});
-
-// ── Pattern 3: Data replication (read model per service) ──
-// Use when: service needs data from another domain but not in real time
-// Benefit: zero runtime dependency on the source service
-
-// Product Service publishes product data on change
-messageQueue.publish('product.updated', {
-  productId: '123',
-  name:      'Wireless Headphones',
-  price:     79.99,
-});
-
-// Order Service maintains its own read model of products it cares about
-messageQueue.subscribe('product.updated', async (event) => {
-  await db.productCache.upsert(
-    { productId: event.productId },
-    { name: event.name, price: event.price, updatedAt: new Date() }
-  );
-});
-
-// When placing order — reads from local cache, no network call
-const product = await db.productCache.findOne({ productId });
-// Stale by seconds/minutes — acceptable for most use cases`
-    },
-
-    // ── Failure handling across services ──
-    {
-      speaker: "raj",
-      text: `"Payment Service is slow. Response time has gone from 80ms to 8 seconds. Your Order Service is calling it synchronously. What happens to Order Service?"`
-    },
-    {
-      speaker: "you",
-      text: `"Requests start backing up? Thread pool exhausts?"`
-    },
-    {
-      speaker: "raj",
-      text: `"Exactly. Your Order Service has a connection pool — say, 100 threads handling requests. Each one is now blocked for 8 seconds waiting for Payment Service. New orders keep arriving. At 100 concurrent orders you run out of threads. Order Service starts refusing connections — not because Order Service has a bug, but because its dependency is slow. This is cascading failure. The slowness of one service has taken down a completely separate service. The fix is a circuit breaker."`
-    },
-    {
-      speaker: "you",
-      text: `"How does a circuit breaker work?"`
-    },
-    {
-      speaker: "raj",
-      text: `"Three states: closed, open, half-open. Closed is normal — requests go through. When failures exceed a threshold — say, 50% of calls failing in a 10-second window — the circuit opens. While open, calls to that dependency fail immediately without attempting the network call. Fast fail instead of slow fail — your threads don't pile up waiting. After a timeout, the circuit goes half-open and lets one test request through. If it succeeds, circuit closes. If it fails, circuit reopens. Your Order Service can now handle Payment Service being down: return a 503 immediately, or show a 'payment unavailable, try again' message — either is better than hanging for 8 seconds and taking down everything."`
-    },
-    {
-      type: "code",
-      text: `// ─────────────────────────────────────────────────────
-// RESILIENCE PATTERNS: Circuit Breaker, Retry, Timeout
-// ─────────────────────────────────────────────────────
-
-// ── Circuit Breaker (using opossum library) ──
-const CircuitBreaker = require('opossum');
-
-const paymentBreaker = new CircuitBreaker(callPaymentService, {
-  timeout:             5000,   // fail if call takes > 5s
-  errorThresholdPercentage: 50, // open circuit if 50%+ of calls fail
-  resetTimeout:        10000,  // try again after 10s (half-open)
-  volumeThreshold:     5,      // need at least 5 calls before tripping
-});
-
-// Fallback when circuit is open or call fails
-paymentBreaker.fallback(() => ({
-  success: false,
-  reason:  'payment-service-unavailable',
+  res.json({ orderId: order.id, status: 'confirmed' });
+  // Response is back. Email not sent yet. Inventory not decremented yet.
+  // Both will happen. Order Service doesn't need to watch.
 }));
 
-// Events for observability
-paymentBreaker.on('open',     () => logger.error({ event: 'circuit_open',     service: 'payment' }));
-paymentBreaker.on('halfOpen', () => logger.warn({  event: 'circuit_half_open',service: 'payment' }));
-paymentBreaker.on('close',    () => logger.info({  event: 'circuit_closed',   service: 'payment' }));
+// Notification Service — its own process, its own pace
+messageQueue.subscribe('order.placed', async (event) => {
+  await emailProvider.send({
+    to:      event.userEmail,
+    subject: \`Order \${event.orderId} confirmed\`,
+    body:    renderTemplate('order-confirmed', event),
+  });
+  // Retries automatically on failure. Order Service unaffected.
+});
 
-// Usage — same interface as direct call
-const result = await paymentBreaker.fire({ orderId, amount });
-if (!result.success) {
-  return res.status(503).json({ error: 'Payment temporarily unavailable. Please retry.' });
-}
-
-// ── Timeout — always set one ──
-// Default: no timeout = thread waits forever
-// With timeout: fail fast, return error, free the thread
-const controller = new AbortController();
-const timeout = setTimeout(() => controller.abort(), 5000);
-
-try {
-  const res = await fetch(url, { signal: controller.signal });
-} catch (err) {
-  if (err.name === 'AbortError') throw new TimeoutError('payment-service timed out after 5s');
-} finally {
-  clearTimeout(timeout);
-}
-
-// ── Retry with exponential backoff — only for idempotent operations ──
-// GET requests, reads: safe to retry
-// POST /charge: NOT safe to retry without idempotency key
-// (retrying a charge could double-bill the user)
-
-const retry = async (fn, { attempts = 3, baseDelay = 200 } = {}) => {
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return await fn();
-    } catch (err) {
-      if (i === attempts - 1) throw err;
-      // Don't retry client errors (4xx) — they won't succeed
-      if (err.status >= 400 && err.status < 500) throw err;
-      await new Promise(r => setTimeout(r, baseDelay * 2 ** i)); // 200ms, 400ms, 800ms
-    }
+// Inventory Service — another independent consumer of the same event
+messageQueue.subscribe('order.placed', async (event) => {
+  for (const item of event.items) {
+    await db.inventory.decrement(item.productId, item.qty);
   }
-};
+});`
+    },
 
-// ── Idempotency key for safe retries on mutations ──
-const chargeWithIdempotency = async (orderId, amount) => {
-  const idempotencyKey = \`charge-\${orderId}\`; // deterministic per order
+    // ── Cascading failure ──
+    {
+      speaker: "raj",
+      text: `"Payment Service starts responding in eight seconds instead of 200ms. You haven't touched Order Service. What happens to it?"`
+    },
+    {
+      speaker: "you",
+      text: `"Requests pile up waiting on Payment Service. Eventually Order Service runs out of threads and stops responding too."`
+    },
+    {
+      speaker: "raj",
+      text: `"That's cascading failure. One slow dependency takes down a completely separate service. What stops it?"`
+    },
+    {
+      speaker: "you",
+      text: `"A timeout would help — fail faster. But requests are still piling up for eight seconds each."`
+    },
+    {
+      speaker: "raj",
+      text: `"Right. A circuit breaker goes further. It watches the failure rate — when enough calls are failing, it opens. Open circuit: calls return an error immediately without touching the network. Milliseconds instead of eight seconds. Threads freed instantly. After a reset timeout it lets one call through to test the dependency. If it succeeds, circuit closes and traffic resumes. If not, stays open. Order Service is now degraded — it tells users payment is temporarily unavailable — instead of completely down. That's the difference."`
+    },
+    {
+      type: "code",
+      text: `// ─────────────────────────────────────────────────────
+// CIRCUIT BREAKER — stops cascading failure
+// ─────────────────────────────────────────────────────
+const CircuitBreaker = require('opossum');
 
-  return fetch('http://payment-service/charge', {
+const callPaymentService = async ({ orderId, amount, idempotencyKey }) => {
+  const res = await fetch('http://payment-service/charge', {
     method:  'POST',
     headers: {
-      'Content-Type':  'application/json',
-      'Idempotency-Key': idempotencyKey, // server deduplicates on this
+      'Content-Type':    'application/json',
+      'Idempotency-Key': idempotencyKey, // safe to retry — server deduplicates
+      'x-trace-id':      getTraceId(),
     },
-    body: JSON.stringify({ orderId, amount }),
+    body:   JSON.stringify({ orderId, amount }),
+    signal: AbortSignal.timeout(5000),
   });
-  // Retrying with the same key → server returns cached result, no double charge
-};`
+  if (!res.ok) throw new Error(\`payment \${res.status}\`);
+  return res.json();
+};
+
+const paymentBreaker = new CircuitBreaker(callPaymentService, {
+  timeout:                  5000,  // fail after 5s
+  errorThresholdPercentage: 50,    // open when 50%+ of calls fail
+  resetTimeout:             15000, // try again after 15s
+  volumeThreshold:          5,     // need at least 5 calls before tripping
+});
+
+paymentBreaker.fallback(() => {
+  throw new ServiceUnavailableError('Payment temporarily unavailable. Please retry.');
+});
+
+paymentBreaker.on('open',     () => logger.error({ event: 'circuit_open',     service: 'payment-service' }));
+paymentBreaker.on('halfOpen', () => logger.warn({  event: 'circuit_half_open',service: 'payment-service' }));
+paymentBreaker.on('close',    () => logger.info({  event: 'circuit_closed',   service: 'payment-service' }));
+
+try {
+  const result = await paymentBreaker.fire({ orderId, amount, idempotencyKey: \`charge-\${orderId}\` });
+} catch (err) {
+  return res.status(503).json({ error: err.message });
+}`
     },
 
-    // ── Service discovery and API gateway ──
+    // ── Distributed tracing ──
     {
       speaker: "raj",
-      text: `"Order Service needs to call Payment Service. Where is Payment Service? What's its IP? What if it has three instances?"`
+      text: `"User calls support. Order failed at 14:37, error ID A3F92. You have six services. Where do you start?"`
     },
     {
       speaker: "you",
-      text: `"Service discovery — something like Consul or Kubernetes DNS?"`
+      text: `"Order Service logs, find the request, then follow it to Payment Service, then wherever it went from there."`
     },
     {
       speaker: "raj",
-      text: `"In Kubernetes, every service gets a stable DNS name automatically — payment-service.default.svc.cluster.local. The cluster handles load balancing across instances. Your code just calls http://payment-service — DNS resolves it, kube-proxy routes it to a healthy pod. You never hardcode IPs. Outside Kubernetes you'd use something like Consul or AWS Cloud Map — services register themselves on startup, deregister on shutdown, and clients query the registry for current addresses. The other piece is an API gateway — the single entry point for all external traffic. It handles TLS termination, auth token validation, rate limiting, request routing to the right internal service. External clients talk to one URL; the gateway routes it internally. This means your services don't need to implement auth and rate limiting themselves — the gateway handles it once."`
+      text: `"So you're opening log files one by one, searching by timestamp, trying to match up requests across six different systems. Twenty minutes to trace a ten-second transaction. What you need instead is a trace ID — one identifier generated when the request enters the system, passed in every outgoing request header, logged on every line in every service. Then you run one query: show me everything with trace ID A3F92. The complete timeline falls out. Which service was slow. Exactly where it failed. You can't run microservices in production without this."`
     },
     {
       type: "code",
       text: `// ─────────────────────────────────────────────────────
-// SERVICE DISCOVERY & API GATEWAY
+// DISTRIBUTED TRACING — one ID across every service
 // ─────────────────────────────────────────────────────
-
-// ── In Kubernetes — DNS-based discovery (automatic) ──
-//
-// Service manifest: kubernetes defines a stable DNS name
-// payment-service → resolves to cluster IP → kube-proxy → healthy pod
-//
-// In code: just use the service name
-const PAYMENT_URL = process.env.PAYMENT_SERVICE_URL
-  || 'http://payment-service'; // Kubernetes DNS, no hardcoded IPs
-
-// ── API Gateway — single external entry point ──
-// All external traffic → gateway → routes internally
-//
-// /api/orders/*   → order-service:3001
-// /api/payments/* → payment-service:3002
-// /api/products/* → product-service:3003
-//
-// Gateway responsibilities:
-//   - TLS termination (HTTPS → HTTP internally)
-//   - Auth token validation (JWT verification once, not in every service)
-//   - Rate limiting per client
-//   - Request logging / distributed trace ID injection
-//   - Circuit breaking for downstream services
-//
-// Example: AWS API Gateway, Kong, Nginx, Traefik, or custom Express gateway
-
-// ── Health checks — essential for service discovery ──
-// Kubernetes uses these to know which pods should receive traffic
-
-// Liveness: is the process alive? (restart if failing)
-app.get('/health/live', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
-// Readiness: is the service ready to serve traffic?
-// (remove from load balancer if failing — e.g., DB connection not ready)
-app.get('/health/ready', async (req, res) => {
-  try {
-    await db.ping();                        // can we reach the DB?
-    await messageQueue.ping();              // can we reach the queue?
-    res.json({ status: 'ready' });
-  } catch (err) {
-    res.status(503).json({ status: 'not ready', reason: err.message });
-    // Kubernetes stops sending traffic until this returns 200
-  }
-});
-
-// Kubernetes deployment manifest excerpt:
-// livenessProbe:
-//   httpGet: { path: /health/live, port: 3000 }
-//   initialDelaySeconds: 10
-//   periodSeconds: 10
-// readinessProbe:
-//   httpGet: { path: /health/ready, port: 3000 }
-//   initialDelaySeconds: 5
-//   periodSeconds: 5`
-    },
-
-    // ── Observability across services ──
-    {
-      speaker: "raj",
-      text: `"A user calls support: 'my order failed at 2:14pm.' You have six services. Where do you even start?"`
-    },
-    {
-      speaker: "you",
-      text: `"Check logs across the services for that time?"`
-    },
-    {
-      speaker: "raj",
-      text: `"Six services, six log streams, looking for what? A request in a microservices system is a chain — API gateway to Order Service to Payment Service to Fraud Service. Each service logs its piece, but those logs have no shared context unless you put it there. You need a trace ID: a single identifier generated at the entry point that travels with the request through every service hop. Every log line emits it. Now 'find all logs for request X' is one query across all services. This is distributed tracing. Every production microservices system needs it. Honeycomb, Jaeger, Zipkin, AWS X-Ray — they all visualise the full request timeline as a waterfall: where did the 1.2 seconds go? Which service was slow? Where did it fail? Without distributed tracing, debugging a microservices system is archaeology."`
-    },
-    {
-      type: "code",
-      text: `// ─────────────────────────────────────────────────────
-// DISTRIBUTED TRACING — trace ID across every service
-// ─────────────────────────────────────────────────────
-
-// ── Middleware: generate or propagate trace ID ──
 const { v4: uuidv4 } = require('uuid');
 
+// Every service runs this middleware
 app.use((req, res, next) => {
-  // Accept trace ID from upstream (API gateway / calling service)
-  // or generate a new one at the entry point
-  req.traceId = req.headers['x-trace-id'] || uuidv4();
+  req.traceId = req.headers['x-trace-id'] || uuidv4(); // accept or generate
   res.setHeader('x-trace-id', req.traceId);
-
-  // Make it available on the logger for this request
-  req.log = logger.child({ traceId: req.traceId });
+  req.log = logger.child({ traceId: req.traceId, service: 'order-service' });
   next();
 });
 
-// ── Log with trace ID on every operation ──
 app.post('/orders', asyncHandler(async (req, res) => {
-  req.log.info({ event: 'order.create.start', userId: req.body.userId });
+  req.log.info({ event: 'order.start', userId: req.body.userId });
 
   const order = await db.orders.create(req.body);
-  req.log.info({ event: 'order.create.db_saved', orderId: order.id });
+  req.log.info({ event: 'order.saved', orderId: order.id });
 
-  // CRITICAL: pass trace ID to every downstream call
-  const payment = await fetch('http://payment-service/charge', {
+  await fetch('http://payment-service/charge', {
     method:  'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-trace-id':   req.traceId,   // ← trace ID travels with the request
+      'x-trace-id':   req.traceId, // ← payment-service logs this same ID
     },
     body: JSON.stringify({ orderId: order.id, amount: order.total }),
   });
 
-  req.log.info({ event: 'order.create.payment_done', orderId: order.id, paymentStatus: payment.status });
+  req.log.info({ event: 'order.confirmed', orderId: order.id });
   res.json(order);
 }));
 
-// Every log line now has the same traceId →
-// One query finds the complete picture across all services:
-// { traceId: "abc-123", event: "order.create.start",   service: "order-service",   ms: 0    }
-// { traceId: "abc-123", event: "charge.start",         service: "payment-service", ms: 45   }
-// { traceId: "abc-123", event: "fraud.check.start",    service: "fraud-service",   ms: 48   }
-// { traceId: "abc-123", event: "fraud.check.complete", service: "fraud-service",   ms: 890  } ← slow
-// { traceId: "abc-123", event: "charge.complete",      service: "payment-service", ms: 950  }
-// { traceId: "abc-123", event: "order.create.done",    service: "order-service",   ms: 1010 }
-
-// ── OpenTelemetry — the standard instrumentation layer ──
-const { NodeSDK }         = require('@opentelemetry/sdk-node');
-const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
-const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
-
-const sdk = new NodeSDK({
-  traceExporter:   new OTLPTraceExporter({ url: 'http://jaeger:4318/v1/traces' }),
-  instrumentations: [
-    new HttpInstrumentation(),    // auto-instruments fetch/http
-    new ExpressInstrumentation(), // auto-instruments Express routes
-  ],
-});
-sdk.start();
-// After this: every HTTP call automatically propagates trace context
-// No manual header passing needed`
+// One query across all services for trace ID A3F92:
+// A3F92  order-service    order.start           t=0ms
+// A3F92  order-service    order.saved           t=11ms
+// A3F92  payment-service  charge.start          t=14ms
+// A3F92  fraud-service    check.start           t=17ms
+// A3F92  fraud-service    check.complete        t=849ms  ← 832ms here
+// A3F92  payment-service  charge.complete       t=865ms
+// A3F92  order-service    order.confirmed       t=902ms
+//
+// Fraud Service was the problem. That took twenty seconds in the old approach.`
     },
 
-    // ── Data consistency without transactions ──
+    // ── Saga ──
     {
       speaker: "raj",
-      text: `"Last hard problem. User clicks 'Place Order'. You need to: create the order in Order Service, charge the card in Payment Service, and decrement stock in Inventory Service. In a monolith that's one transaction — all or nothing. In microservices, how do you keep it consistent?"`
+      text: `"Payment goes through. Then Inventory Service fails trying to decrement the stock. What do you do?"`
     },
     {
       speaker: "you",
-      text: `"Two-phase commit? A distributed transaction?"`
+      text: `"Retry the inventory step. If it keeps failing — refund the payment and cancel the order."`
     },
     {
       speaker: "raj",
-      text: `"Two-phase commit works but it's slow, it requires all participants to be available and it creates a tight coupling that defeats the purpose of independent services. The approach that actually works in practice is the Saga pattern. A saga is a sequence of local transactions — each service does its piece and publishes an event. If a step fails, compensating transactions undo the previous steps. Choreography-based: each service listens for events and knows what to do next. Orchestration-based: a central saga orchestrator tells each service what to do in sequence. Choreography is simpler to start but harder to reason about as complexity grows. Orchestration makes the flow explicit and easier to monitor."`
+      text: `"You just described a saga. A sequence of steps, each with a compensating transaction that undoes it if something downstream fails. That's the standard pattern for distributed consistency. Two things make it work in practice. First: idempotency. Every step must be safe to run twice — because when you retry, the first attempt might have half-succeeded. A charge without an idempotency key retried on a network error double-bills the user. Second: the outbox pattern. If your process crashes after saving to the DB but before publishing the event to the queue, the inventory step never runs. Writing the event to the DB in the same transaction as the order means it can't be lost."`
     },
     {
       type: "code",
       text: `// ─────────────────────────────────────────────────────
-// SAGA PATTERN — consistency without distributed transactions
+// SAGA PATTERN — consistency without transactions
 // ─────────────────────────────────────────────────────
 
-// ── Orchestration-based Saga ──
-// A central OrderSaga orchestrates the sequence and handles failures
-
-class OrderSaga {
-  async execute(orderData) {
-    let orderId, paymentId;
+class PlaceOrderSaga {
+  async run(orderData) {
+    let orderId = null, paymentId = null;
 
     try {
-      // Step 1: Create order (pending status)
-      const order = await orderService.createOrder({ ...orderData, status: 'pending' });
+      const order = await orderService.create({ ...orderData, status: 'pending' });
       orderId = order.id;
 
-      // Step 2: Reserve inventory
-      await inventoryService.reserve({ orderId, items: orderData.items });
-
-      // Step 3: Charge payment
       const payment = await paymentService.charge({
         orderId,
         amount:         orderData.total,
-        idempotencyKey: \`order-\${orderId}-charge\`,
+        idempotencyKey: \`charge-\${orderId}\`, // safe to retry — server deduplicates
       });
       paymentId = payment.id;
 
-      // Step 4: Confirm order
-      await orderService.confirm(orderId);
+      await inventoryService.decrement({
+        orderId,
+        items:          orderData.items,
+        idempotencyKey: \`inventory-\${orderId}\`,
+      });
 
+      await orderService.confirm(orderId);
       return { success: true, orderId };
 
     } catch (err) {
-      // Compensating transactions — undo in reverse order
       logger.error({ event: 'saga.failed', orderId, err: err.message });
 
+      // Compensating transactions — undo in reverse order
       if (paymentId) {
-        // Payment was charged — must refund
-        await paymentService.refund({ paymentId, reason: 'order-saga-failure' })
-          .catch(e => logger.error({ event: 'saga.refund_failed', paymentId, err: e.message }));
+        await paymentService.refund({ paymentId, reason: 'order_failed' })
+          .catch(e => logger.error({ event: 'saga.refund_failed', paymentId }));
       }
-
       if (orderId) {
-        // Inventory was reserved — must release
-        await inventoryService.release({ orderId })
-          .catch(e => logger.error({ event: 'saga.release_failed', orderId, err: e.message }));
-
-        // Mark order as failed
-        await orderService.fail(orderId, err.message)
-          .catch(e => logger.error({ event: 'saga.fail_status_failed', orderId }));
+        await orderService.cancel(orderId)
+          .catch(e => logger.error({ event: 'saga.cancel_failed', orderId }));
       }
 
       return { success: false, reason: err.message };
@@ -580,47 +422,49 @@ class OrderSaga {
   }
 }
 
-// ── Idempotency is critical for saga steps ──
-// Steps may be retried after partial failure
-// Each step must be safe to call twice with the same input
+// ── Outbox pattern — events survive a crash ──
 
-// Payment service: idempotency key deduplicates charge attempts
-// Inventory service: reserve is idempotent per orderId
-// Order service: createOrder with same data returns existing order
-
-// ── Outbox pattern — guaranteed event delivery ──
-// Problem: you save to DB and then publish an event
-// If the process crashes between the two, event is lost
-
-// ✗ Can lose the event if crash happens here ↓
+// ✗ Crash between these two lines → inventory never decrements, no error logged
 await db.orders.save(order);
-await messageQueue.publish('order.created', order); // crash here → event lost
+await messageQueue.publish('order.placed', order); // process dies here
 
-// ✓ Outbox: write event to DB in same transaction as the data
-// A separate process (outbox relay) polls and publishes atomically
+// ✓ Event written to DB in the same transaction — can't be lost
 await db.transaction(async (tx) => {
   await tx.orders.save(order);
-  await tx.outbox.insert({            // same transaction
-    topic:   'order.created',
+  await tx.outbox.insert({
+    topic:   'order.placed',
     payload: JSON.stringify(order),
-    status:  'pending',
+    sentAt:  null,
   });
 });
-// Outbox relay: polls outbox table, publishes to queue, marks as sent
-// If relay crashes and retries — idempotency key on event prevents duplicates`
+// Background relay reads outbox rows where sentAt is null → publishes → marks sent
+// On restart: picks up unsent rows again. Idempotency key on consumer prevents duplicates.`
+    },
+
+    {
+      speaker: "raj",
+      text: `"You look at the whiteboard again. Same six boxes. Does it look different?"`
+    },
+    {
+      speaker: "you",
+      text: `"There's a lot more between those arrows than the diagram shows."`
+    },
+    {
+      speaker: "raj",
+      text: `"Every arrow is a network call that can fail, a consistency boundary you now own, a place where a trace ID has to travel, a circuit breaker that needs tuning. None of that is on the whiteboard because diagrams are optimistic. The engineering is in the gaps between the boxes."`
     },
 
     {
       type: "summary",
       points: [
-        "Microservices solve an organisational problem, not a technical one. They make sense when multiple teams need to ship independently without stepping on each other. For a single team, a monolith is almost always cheaper and simpler.",
-        "The right boundary cut is where coupling across the line is minimal and the service could operate if its neighbours were offline. A service that calls another service on every request is a distributed monolith — all the costs, none of the independence.",
-        "Three communication patterns: synchronous REST/gRPC when the caller needs the answer to proceed; async messaging when the work can happen out-of-band; data replication when a service needs read access to another domain's data without a runtime dependency.",
-        "Synchronous dependencies create cascading failures. A slow downstream service exhausts your thread pool. Circuit breakers prevent this: open when failures exceed a threshold, fail fast, try again after a reset timeout. Always set request timeouts — no timeout means a thread waits forever.",
-        "Service discovery in Kubernetes is automatic via DNS. Every service gets a stable name; the cluster handles routing to healthy instances. The API gateway is the single external entry point — it handles TLS, auth, rate limiting, and routing once, so services don't each implement it.",
-        "Distributed tracing is non-negotiable. Generate a trace ID at the entry point and pass it through every service hop in every outgoing request header. Every log line emits it. Without this, debugging a request that touched six services is archaeology.",
-        "Data consistency without transactions: the Saga pattern. Each service does its local transaction and publishes an event. If a step fails, compensating transactions undo previous steps in reverse order. Idempotency keys make steps safe to retry. The outbox pattern guarantees events are published even if the process crashes between DB write and queue publish.",
-        "The operational costs are real and cumulative: N deployment pipelines, distributed tracing, service meshes, saga patterns, health checks, circuit breakers. None of these exist in a monolith. Count the cost before you cut."
+        "Microservices solve an organisational problem, not a technical one. The right question isn't 'is our codebase big?' but 'are multiple teams blocked by sharing one thing?' A single team is almost always better off with a monolith.",
+        "A distributed monolith is the worst outcome: services that can't deploy independently and can't operate without each other. Every service calling User Service on every request is not decoupling — it's a function call with a network hop and worse debugging.",
+        "The boundary test: could this service do its core job if every other service was unreachable for an hour? If no, the boundary is wrong. Fix it by storing what you need locally rather than fetching it live.",
+        "Synchronous calls when the caller needs the answer to continue — payment must succeed before the order confirms. Async messaging when the work can happen out of band — emails, inventory updates, analytics. The user doesn't wait for any of those.",
+        "Cascading failure: one slow dependency exhausts your thread pool and takes down a healthy service. Circuit breakers prevent it — watch failure rates, open when the threshold trips, fail fast, test and close when the dependency recovers.",
+        "Distributed tracing is non-negotiable. One trace ID at entry, passed in every outgoing header, logged on every meaningful line. Without it, debugging a six-service request is archaeology.",
+        "Saga pattern for distributed consistency: sequence of local transactions with compensating transactions that undo previous steps on failure. Idempotency keys on every step so retries are safe. Outbox pattern so events can't be silently lost between a DB write and a queue publish.",
+        "Every arrow on the architecture diagram is a network call, a consistency boundary, and a new operational concern. The engineering lives in the gaps between the boxes."
       ]
     }
   ]
