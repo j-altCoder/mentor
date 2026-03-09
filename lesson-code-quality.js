@@ -93,7 +93,7 @@ describe('POST /api/checkout', () => {
     }));
   });
 });`
-      }
+      
     },
 
     // ── What to test and what not to ──
@@ -154,7 +154,7 @@ it('handles exactly zero stock on checkout', async () => {
   await expect(OrderService.create({ userId, items: [{ productId, qty: 1 }] }))
     .rejects.toThrow('Insufficient stock');
 });`
-      }
+      
     },
 
     // ── Mocking strategies ──
@@ -218,7 +218,7 @@ it('creates order in database', async () => {
   // ...
   // You're testing that you called .save() — not that the order was actually saved correctly
 });`
-      }
+      
     },
 
     // ── SOLID principles ──
@@ -301,7 +301,7 @@ class PaymentService {
   constructor(adapter) { this.adapter = adapter; }
   async charge(order) { return this.adapter.charge(order.total); }
 }`
-      }
+      
     },
 
     // ── Separation of concerns / layered architecture ──
@@ -374,7 +374,7 @@ class OrderRepository {
 // Benefits: test OrderService by injecting mock repositories — no DB needed
 // Benefits: swap Mongoose for a different ORM by only changing repositories
 // Benefits: use OrderService from HTTP handler, cron job, CLI — same logic`
-      }
+      
     },
 
     // ── Error handling patterns ──
@@ -435,7 +435,7 @@ it('throws NotFoundError for unknown order', async () => {
   await expect(orderService.findById('nonexistent-id', userId))
     .rejects.toBeInstanceOf(NotFoundError);
 });`
-      }
+      
     },
 
     // ── Code review culture ──
@@ -491,7 +491,7 @@ it('throws NotFoundError for unknown order', async () => {
 // ## Edge cases considered
 // ## Screenshots (if UI change)
 // ## Checklist: [ ] Tests added  [ ] No console.logs  [ ] No hardcoded values`
-      }
+      
     },
 
     // ── Documentation ──
@@ -539,7 +539,7 @@ async create(userId, items) { ... }
 // Decision: MongoDB for product catalog, Postgres for financial transactions
 // Consequences: two DBs to manage but best tool for each job
 // Alternatives considered: JSONB in Postgres, single Mongo for everything`
-      }
+      
     },
 
     // ── Refactoring safely ──
@@ -597,7 +597,7 @@ it('charges correct amount in cents', async () => {
 // Don't refactor everything in one PR
 // But when you touch a function: improve its name, extract a helper,
 // add a missing test. Small improvements every pass compound over time.`
-      }
+      
     },
 
     {
