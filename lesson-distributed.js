@@ -97,7 +97,7 @@ const idempotencyMiddleware = async (req, res, next) => {
 };
 
 app.post('/api/checkout', idempotencyMiddleware, asyncHandler(checkoutHandler));`
-      }
+      
     },
 
     // ── Retry strategies ──
@@ -179,7 +179,7 @@ const isRetryable = (err) => {
   if (status === 422) return false;   // validation error — fix your data
   return [408, 429, 500, 502, 503, 504].includes(status);
 };`
-      }
+      
     },
 
     // ── Distributed locks ──
@@ -212,13 +212,13 @@ const acquireLock = async (lockKey, ttlSeconds) => {
 const releaseLock = async (lockKey, lockValue) => {
   // Lua script — atomic check-and-delete
   // Only release if WE hold the lock (prevents releasing another holder's lock)
-  const script = `
-    if redis.call("get", KEYS[1]) == ARGV[1] then
-      return redis.call("del", KEYS[1])
-    else
-      return 0
-    end
-  `;
+  const script = '
+  if redis.call("get", KEYS[1]) == ARGV[1] then
+    return redis.call("del", KEYS[1])
+  else
+    return 0
+  end
+  ';
   return redis.eval(script, 1, lockKey, lockValue);
 };
 
@@ -262,7 +262,7 @@ const redlock = new Redlock([redis1, redis2, redis3], {
 });
 const lock = await redlock.acquire(['lock:' + resourceId], 30000); // 30s TTL
 try { /* critical section */ } finally { await lock.release(); }`
-      }
+      
     },
 
     // ── Saga pattern ──
@@ -341,7 +341,7 @@ const runCheckoutSaga = async (order) => {
     return { success: false, error: err.message };
   }
 };`
-      }
+      
     },
 
     // ── Outbox pattern ──
@@ -416,7 +416,7 @@ const relayOutboxEvents = async () => {
 // Run relay every 1 second
 setInterval(relayOutboxEvents, 1000);
 // OR use MongoDB Change Streams to trigger relay instantly on new outbox entries`
-      }
+      
     },
 
     // ── Event-driven and at-least-once delivery ──
@@ -470,7 +470,7 @@ consumer.run({
     }
   }
 });`
-      }
+      
     },
 
     // ── CAP theorem ──
@@ -522,7 +522,7 @@ const item = await dynamodb.getItem({
 // Even without a partition, there's a latency vs consistency tradeoff:
 // Strong consistency = wait for replication acknowledgement → higher latency
 // Eventual consistency = return immediately, replicate async → lower latency`
-      }
+      
     },
 
     // ── Clock skew and ordering ──
@@ -583,7 +583,7 @@ const onEvent = (event) => {
   clock.update(event.lamport); // advance clock based on sender's time
   processEvent(event);
 };`
-      }
+      
     },
 
     // ── Bulkhead pattern ──
@@ -650,7 +650,7 @@ app.get('/home', asyncHandler(async (req, res) => {
     recommendations: recommendations.status === 'fulfilled' ? recommendations.value : []
   });
 }));`
-      }
+      
     },
 
     {
