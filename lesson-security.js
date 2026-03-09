@@ -412,7 +412,7 @@ jobs:
       # More comprehensive — Snyk has a larger vuln database
       - uses: snyk/actions/node@master
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_TOKEN: \${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high
 
