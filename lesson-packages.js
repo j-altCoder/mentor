@@ -73,7 +73,6 @@ package-lock.json  // if you're using yarn
 // pnpm:      ~/.pnpm-store/express@4.19.2/    (stored once globally)
 //            project-A/node_modules/express → hard link to store
 //            project-B/node_modules/express → same hard link`
-      }
     },
 
     // ── package-lock.json deep dive ──
@@ -123,7 +122,7 @@ package-lock.json  // if you're using yarn
 // npm ci       — reads ONLY lock file, fails if package.json and lock file disagree
 //             — faster (skips resolution step), deterministic, never updates lock file
 //             — always use npm ci in CI/CD pipelines`
-      }
+      
     },
 
     // ── npm ci vs npm install ──
@@ -157,7 +156,7 @@ CMD ["node", "src/index.js"]
 // GitHub Actions
 - name: Install dependencies
   run: npm ci   // not npm install`
-      }
+      
     },
 
     // ── Peer dependencies ──
@@ -198,7 +197,7 @@ CMD ["node", "src/index.js"]
 
 // Check what peers are needed
 npm info some-package peerDependencies`
-      }
+      
     },
 
     // ── Dependency resolution conflicts ──
@@ -231,7 +230,7 @@ npm ls --depth=1             // direct dependencies only
 
 // Find why a package is installed (who depends on it)
 npm why lodash               // shows the chain: your-app → package-a → lodash`
-      }
+      
     },
 
     // ── Security — audit ──
@@ -274,7 +273,7 @@ npx snyk monitor               // continuously monitors your project
 // Check a specific package for known issues
 npx is-my-node-vulnerable      // checks your Node version
 npm view express dist-tags      // see all available versions`
-      }
+      
     },
 
     // ── Publishing vs using packages ──
@@ -308,7 +307,7 @@ npm view express dist-tags      // see all available versions`
   ]
   // Everything else — src/, tests/, .eslintrc — stays off npm
 }`
-      }
+      
     },
 
     // ── npx ──
@@ -343,7 +342,7 @@ npx --yes some-package
 // Running a specific version
 npx eslint@8 src/              // temporarily run eslint version 8
 npx node@18 script.js          // run script with a specific node version`
-      }
+      
     },
 
     // ── Monorepos ──
@@ -393,7 +392,7 @@ npm run build --workspaces
 // Reference a local package as a dependency
 // apps/api/package.json
 { "dependencies": { "@myco/utils": "*" } }  // * = use whatever version is in the repo`
-      }
+      
     },
 
     // ── Dependency security supply chain ──
@@ -438,7 +437,7 @@ tar -tzf some-package-1.0.0.tgz  // list what's inside
     "some-vulnerable-transitive-dep": "2.1.0"  // force this version for everyone
   }
 }`
-      }
+      
     },
 
     // ── Cleaning up ──
@@ -473,7 +472,7 @@ npm prune                      // removes packages not listed in package.json
 npm ls                         // full tree (can be huge)
 npm ls --depth=0               // direct dependencies only — much cleaner
 npm ls some-package            // find where a specific package comes from`
-      }
+      
     },
 
     {
