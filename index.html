@@ -1263,23 +1263,23 @@ header p {
 const LESSON_MAP = [
 
   // ── Language & Framework Fundamentals ──
-  // Runtime & language model first, then the stack built on top
+  // Environment first → language model → the HTTP layer → framework → database → gotchas → front-end runtime → build chain
+  { ref: () => typeof LESSON_TOOLING          !== 'undefined' ? LESSON_TOOLING          : null, category: "Language & Framework Fundamentals", tag: "Dev Tooling" },
   { ref: () => typeof LESSON_JS_RUNTIME       !== 'undefined' ? LESSON_JS_RUNTIME       : null, category: "Language & Framework Fundamentals", tag: "JS Runtime & Async" },
-  { ref: () => typeof LESSON_NODEJS_BACKEND   !== 'undefined' ? LESSON_NODEJS_BACKEND   : null, category: "Language & Framework Fundamentals", tag: "Node.js Backend Behaviour" },
   { ref: () => typeof LESSON_NETWORKING       !== 'undefined' ? LESSON_NETWORKING       : null, category: "Language & Framework Fundamentals", tag: "Networking & HTTP" },
-  { ref: () => typeof LESSON_BACKEND_LIBS     !== 'undefined' ? LESSON_BACKEND_LIBS     : null, category: "Language & Framework Fundamentals", tag: "Express & Backend Libraries" },
+  { ref: () => typeof LESSON_BACKEND_LIBS     !== 'undefined' ? LESSON_BACKEND_LIBS     : null, category: "Language & Framework Fundamentals", tag: "Express & Middleware" },
+  { ref: () => typeof LESSON_NODEJS_BACKEND   !== 'undefined' ? LESSON_NODEJS_BACKEND   : null, category: "Language & Framework Fundamentals", tag: "Node.js in Production" },
   { ref: () => typeof LESSON_MONGODB          !== 'undefined' ? LESSON_MONGODB          : null, category: "Language & Framework Fundamentals", tag: "MongoDB" },
   { ref: () => typeof LESSON_DATETIME         !== 'undefined' ? LESSON_DATETIME         : null, category: "Language & Framework Fundamentals", tag: "Date & Time" },
-  { ref: () => typeof LESSON_REACT_TRAPS      !== 'undefined' ? LESSON_REACT_TRAPS      : null, category: "Language & Framework Fundamentals", tag: "React Trap Questions" },
+  { ref: () => typeof LESSON_REACT_TRAPS      !== 'undefined' ? LESSON_REACT_TRAPS      : null, category: "Language & Framework Fundamentals", tag: "React Internals" },
   { ref: () => typeof LESSON_BUILD_TOOLING    !== 'undefined' ? LESSON_BUILD_TOOLING    : null, category: "Language & Framework Fundamentals", tag: "Build Tooling" },
-  { ref: () => typeof LESSON_TOOLING          !== 'undefined' ? LESSON_TOOLING          : null, category: "Language & Framework Fundamentals", tag: "Dev Tooling" },
 
   // ── Architecture & System Design ──
-  // API first (contracts), then individual system concerns, then distributed
+  // Single-process concerns first → then distributed → then how to design and ship
   { ref: () => typeof LESSON_API_DESIGN            !== 'undefined' ? LESSON_API_DESIGN            : null, category: "Architecture & System Design", tag: "API Design" },
-  { ref: () => typeof LESSON_SCALING               !== 'undefined' ? LESSON_SCALING               : null, category: "Architecture & System Design", tag: "Scaling Strategies" },
   { ref: () => typeof LESSON_CONCURRENCY           !== 'undefined' ? LESSON_CONCURRENCY           : null, category: "Architecture & System Design", tag: "Concurrency & Race Conditions" },
   { ref: () => typeof LESSON_REALTIME              !== 'undefined' ? LESSON_REALTIME              : null, category: "Architecture & System Design", tag: "Real-Time (WebSockets & SSE)" },
+  { ref: () => typeof LESSON_SCALING               !== 'undefined' ? LESSON_SCALING               : null, category: "Architecture & System Design", tag: "Scaling Strategies" },
   { ref: () => typeof LESSON_DISTRIBUTED          !== 'undefined' ? LESSON_DISTRIBUTED           : null, category: "Architecture & System Design", tag: "Distributed Systems" },
   { ref: () => typeof LESSON_MICROSERVICES         !== 'undefined' ? LESSON_MICROSERVICES         : null, category: "Architecture & System Design", tag: "Microservices" },
   { ref: () => typeof LESSON_ARCHITECTURE_THINKING !== 'undefined' ? LESSON_ARCHITECTURE_THINKING : null, category: "Architecture & System Design", tag: "Architecture Thinking" },
@@ -1493,16 +1493,52 @@ function renderScene(s, catMeta, si) {
 // ─────────────────────────────────────────────────────────────
 //  PROGRESS
 // ─────────────────────────────────────────────────────────────
-function estimateReadTime(lesson) {
-  // Count words across all scenes
-  let words = (lesson.intro || '').split(/\s+/).length;
+// ─────────────────────────────────────────────────────────────
+//  READING TIME — updates as you scroll
+// ─────────────────────────────────────────────────────────────
+function countWords(lesson) {
+  let w = (lesson.intro || '').split(/\s+/).length;
   (lesson.scenes || []).forEach(s => {
-    if (s.text)   words += s.text.split(/\s+/).length;
-    if (s.points) s.points.forEach(p => words += p.split(/\s+/).length);
+    if (s.text)   w += s.text.split(/\s+/).length;
+    if (s.points) s.points.forEach(p => { w += p.split(/\s+/).length; });
   });
-  const mins = Math.max(1, Math.round(words / 200)); // ~200 wpm reading speed
-  return mins;
+  return w;
 }
+
+function updateReadingTime() {
+  const rtEl  = document.getElementById('readTimeLabel');
+  const rtTxt = document.getElementById('readTimeTxt');
+  if (!rtEl || !rtTxt || currentIdx === null || !LESSONS[currentIdx]) {
+    if (rtEl) rtEl.style.display = 'none';
+    return;
+  }
+
+  const view = document.getElementById('lessonView');
+  if (!view || view.style.display === 'none') { rtEl.style.display = 'none'; return; }
+
+  const totalWords = countWords(LESSONS[currentIdx]);
+
+  // Estimate words already scrolled past
+  const viewRect    = view.getBoundingClientRect();
+  const viewHeight  = view.scrollHeight;
+  const scrolled    = Math.max(0, -viewRect.top + window.innerHeight * 0.5);
+  const scrollRatio = viewHeight > 0 ? Math.min(1, scrolled / viewHeight) : 0;
+  const wordsRead   = Math.round(totalWords * scrollRatio);
+  const wordsLeft   = Math.max(0, totalWords - wordsRead);
+  const minsLeft    = Math.max(1, Math.round(wordsLeft / 200));
+
+  const label = scrollRatio < 0.05
+    ? `${Math.max(1, Math.round(totalWords / 200))} min read`
+    : minsLeft === 1
+      ? '< 1 min left'
+      : `${minsLeft} min left`;
+
+  rtTxt.textContent = label;
+  rtEl.style.display = 'flex';
+}
+
+// Attach scroll listener once
+window.addEventListener('scroll', updateReadingTime, { passive: true });
 
 function updateProgress() {
   const total  = LESSONS.length;
@@ -1510,16 +1546,7 @@ function updateProgress() {
   const pct    = total > 0 ? (pos / total) * 100 : 0;
   document.getElementById('progressFill').style.width  = pct + '%';
   document.getElementById('progressLabel').textContent = pos + ' / ' + total;
-
-  const rtEl  = document.getElementById('readTimeLabel');
-  const rtTxt = document.getElementById('readTimeTxt');
-  if (rtEl && rtTxt && currentIdx !== null && LESSONS[currentIdx]) {
-    const mins = estimateReadTime(LESSONS[currentIdx]);
-    rtTxt.textContent = mins + ' min read';
-    rtEl.style.display = 'flex';
-  } else if (rtEl) {
-    rtEl.style.display = 'none';
-  }
+  updateReadingTime();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2332,9 +2359,33 @@ function scrollToNoteScene(sceneIdx) {
 // ─────────────────────────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────────────────────────
+const LAST_LESSON_KEY = 'coderoom-v2-last-lesson';
+
+function saveLastLesson(idx) {
+  try { localStorage.setItem(LAST_LESSON_KEY, String(idx)); } catch(e) {}
+}
+function loadLastLesson() {
+  try {
+    const v = localStorage.getItem(LAST_LESSON_KEY);
+    if (v === null) return null;
+    const idx = parseInt(v, 10);
+    return (!isNaN(idx) && idx >= 0 && idx < LESSONS.length) ? idx : null;
+  } catch(e) { return null; }
+}
+
+// Patch selectLesson to persist choice
+const _origSelectLesson = selectLesson;
+selectLesson = function(idx, skipScrollTop) {
+  _origSelectLesson(idx, skipScrollTop);
+  if (idx !== null && idx !== undefined) saveLastLesson(idx);
+};
+
 buildSidebar();
 renderFavPanel();
-if (LESSONS.length > 0) selectLesson(0);
+
+// Restore last lesson, fall back to lesson 0
+const _restored = loadLastLesson();
+selectLesson(_restored !== null ? _restored : 0);
 </script>
 </body>
 </html>
