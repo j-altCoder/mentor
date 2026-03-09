@@ -55,7 +55,7 @@ POST   /api/orders/456/cancellation // create a cancellation (action as noun)
 // PUT    — idempotent (same result if called multiple times with same body)
 // PATCH  — not necessarily idempotent (increment operations can accumulate)
 // DELETE — idempotent (deleting already-deleted resource = same state)`
-      }
+      
     },
 
     // ── HTTP status codes ──
@@ -110,7 +110,7 @@ res.status(404).json({ error: 'You are not authorised' });         // wrong code
 // Has token but not owner of this resource → 403
 // Correct owner but resource deleted last week → 410
 // Valid request but stock ran out → 409 Conflict`
-      }
+      
     },
 
     // ── Request/response design ──
@@ -183,7 +183,7 @@ const errorResponse = (res, statusCode, type, message, fields = null) => {
   if (fields) body.error.fields = fields;
   return res.status(statusCode).json(body);
 };`
-      }
+      
     },
 
     // ── Pagination ──
@@ -257,7 +257,7 @@ app.get('/api/feed', asyncHandler(async (req, res) => {
 }));
 // O(log n) with index regardless of depth — page 1000 as fast as page 1
 // Stable: new items prepended to feed don't shift pages you've already seen`
-      }
+      
     },
 
     // ── Filtering and sorting ──
@@ -321,7 +321,7 @@ app.get('/api/orders', asyncHandler(async (req, res) => {
     pagination: { hasMore, cursor: hasMore ? pageItems.at(-1)._id : null }
   });
 }));`
-      }
+      
     },
 
     // ── Versioning ──
@@ -376,7 +376,7 @@ app.use('/api/v1', (req, res, next) => {
   res.setHeader('Link',         '</api/v2>; rel="successor-version"');
   next();
 });`
-      }
+      
     },
 
     // ── REST vs GraphQL ──
@@ -448,7 +448,7 @@ app.use('/graphql', graphqlHTTP({
 // - HTTP caching is important (GraphQL POSTs aren't cached by default)
 // - You want clear per-endpoint monitoring and rate limiting
 // - Your team is small and operational simplicity matters`
-      }
+      
     },
 
     // ── Rate limiting ──
@@ -504,7 +504,7 @@ app.get('/api/search', authMiddleware, searchLimiter, searchHandler);
 // X-RateLimit-Remaining: 7         (remaining this window)
 // X-RateLimit-Reset:     1710532800 (Unix timestamp when window resets)
 // Retry-After:           30        (seconds to wait — only on 429)`
-      }
+      
     },
 
     // ── HATEOAS ──
@@ -557,7 +557,7 @@ app.post('/api/orders', asyncHandler(async (req, res) => {
     "next": { "href": "/api/orders?limit=20&cursor=ord_30" }  // client just follows this
   }
 }`
-      }
+      
     },
 
     // ── The six questions test ──
