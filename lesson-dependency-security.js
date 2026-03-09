@@ -298,9 +298,9 @@ jobs:
       - uses: dependabot/fetch-metadata@v1
         id: meta
       - if: steps.meta.outputs.update-type == 'version-update:semver-patch'
-        run: gh pr merge --auto --squash "${{ github.event.pull_request.number }}"
+        run: gh pr merge --auto --squash "\${{ github.event.pull_request.number }}"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}`
+          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}`
     },
 
     // ── Supply chain attacks ──
