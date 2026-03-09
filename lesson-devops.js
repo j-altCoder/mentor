@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm ci
       - run: npm audit --audit-level=high`
-      }
+      
     },
 
     // ── What Docker actually does ──
@@ -146,7 +146,7 @@ dist
 coverage
 .git
 *.test.js`
-      }
+      
     },
 
     // ── Docker Compose ──
@@ -203,7 +203,7 @@ volumes:
 # docker compose logs -f api    — follow API logs
 # docker compose down           — stop and remove containers
 # docker compose down -v        — also delete volumes (wipe data)`
-      }
+      
     },
 
     // ── PM2 ──
@@ -258,7 +258,7 @@ pm2 start ecosystem.config.js --env production
 # Survive server reboots
 pm2 startup    # generates a systemd/init script to auto-start PM2
 pm2 save       # saves current process list to be restored on reboot`
-      }
+      
     },
 
     // ── Rolling vs Blue-Green deployments ──
@@ -325,7 +325,7 @@ upstream api_servers {
   server api-blue:3000;   # flip back to blue
 }
 nginx -s reload`
-      }
+      
     },
 
     // ── Canary deployments ──
@@ -375,7 +375,7 @@ app.get('/api/feed', asyncHandler(async (req, res) => {
     : await stableFeedAlgorithm(req.user.userId); // 95% get stable
   res.json(feed);
 }));`
-      }
+      
     },
 
     // ── Environment management ──
@@ -423,7 +423,7 @@ for (const key of required) {
     throw new Error(\`Missing required environment variable: \${key}\`);
   }
 }`
-      }
+      
     },
 
     // ── Database migrations ──
@@ -474,7 +474,7 @@ module.exports = {
 npx migrate-mongo up       # apply pending migrations
 npx migrate-mongo status   # which migrations have/haven't run
 npx migrate-mongo down     # rollback last migration (use with caution in production)`
-      }
+      
     },
 
     // ── Health checks and graceful shutdown ──
@@ -550,7 +550,7 @@ const shutdown = async (signal) => {
 
 process.on('SIGTERM', () => shutdown('SIGTERM')); // Kubernetes, PM2, Docker stop
 process.on('SIGINT',  () => shutdown('SIGINT'));  // Ctrl+C in development`
-      }
+      
     },
 
     // ── Full CD pipeline ──
@@ -645,7 +645,7 @@ jobs:
 
       - name: Rolling deploy to production
         run: aws ecs update-service --cluster production --service api --force-new-deployment`
-      }
+      
     },
 
     // ── Kubernetes basics ──
@@ -704,7 +704,7 @@ spec:
 # kubectl describe pod api-pod-xyz    — debug why pod won't start
 # kubectl rollout undo deployment/api — instant rollback to previous version
 # kubectl scale deployment/api --replicas=5  — scale up`
-      }
+      
     },
 
     {
