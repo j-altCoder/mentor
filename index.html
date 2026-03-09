@@ -1661,29 +1661,40 @@ function removeHighlight(id) {
 }
 
 function jumpToFav(id) {
-  // Find which lesson this fav belongs to
   const fav = favs.find(f => f.id === id);
   if (!fav) return;
 
-  const doScroll = () => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    el.classList.add('flash');
-    setTimeout(() => el.classList.remove('flash'), 900);
+  // Ensure the mark is injected and then scroll to it.
+  // Polls briefly in case the DOM hasn't fully painted yet.
+  const scrollToMark = (attemptsLeft) => {
+    let el = document.getElementById(id);
+    if (!el) {
+      // Try to inject it
+      const view = document.getElementById('lessonView');
+      if (view) injectHighlight(view, fav.text, id);
+      el = document.getElementById(id);
+    }
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 900);
+    } else if (attemptsLeft > 0) {
+      // DOM not ready yet — retry
+      setTimeout(() => scrollToMark(attemptsLeft - 1), 80);
+    }
   };
 
   if (fav.lessonIdx !== currentIdx) {
-    // Navigate to the correct lesson first, then scroll after render
-    selectLesson(fav.lessonIdx);
-    // reapplyFavHighlights runs inside selectLesson; wait for DOM + scroll-to-top to settle
-    setTimeout(doScroll, 400);
+    // Use _origSelectLesson with skipScrollTop=true so window.scrollTo(top:0)
+    // doesn't fire and fight the scrollIntoView below
+    _origSelectLesson(fav.lessonIdx, true);
+    saveLastLesson(fav.lessonIdx);
+    // reapplyFavHighlights runs synchronously inside selectLesson,
+    // but the DOM paint happens async — give it two frames + a small buffer
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollToMark(5)));
   } else {
-    // Already on the right lesson — mark might need re-injection if page was refreshed
-    if (!document.getElementById(id)) {
-      injectHighlight(document.getElementById('lessonView'), fav.text, id);
-    }
-    doScroll();
+    // Already on the right lesson — scroll immediately
+    scrollToMark(3);
   }
 }
 
