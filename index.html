@@ -1671,7 +1671,7 @@ function jumpToFav(id) {
     if (!el) {
       // Try to inject it
       const view = document.getElementById('lessonView');
-      if (view) injectHighlight(view, fav.text, id);
+      if (view) injectHighlight(view, fav.text, id, fav.sceneIdx);
       el = document.getElementById(id);
     }
     if (el) {
@@ -1712,11 +1712,17 @@ function reapplyFavHighlights() {
   lessonFavs.forEach(fav => {
     // Don't double-wrap if already present
     if (document.getElementById(fav.id)) return;
-    injectHighlight(view, fav.text, fav.id);
+    injectHighlight(view, fav.text, fav.id, fav.sceneIdx);
   });
 }
 
-function injectHighlight(root, searchText, id) {
+function injectHighlight(root, searchText, id, sceneIdx) {
+  // Narrow the search root to the specific scene if sceneIdx is known
+  if (sceneIdx !== undefined && sceneIdx >= 0) {
+    const sceneWrap = root.querySelector(`[data-scene-idx="${sceneIdx}"]`);
+    if (sceneWrap) root = sceneWrap;
+  }
+
   // Walk all text nodes inside root, find searchText, wrap first match in <mark>
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
@@ -1912,9 +1918,14 @@ saveBtn.addEventListener('click', function(e) {
 
   const id = 'fm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
 
+  // Detect which scene the selection is inside
+  const anchorNode = activeRange.startContainer;
+  const sceneWrap  = anchorNode.nodeType === Node.ELEMENT_NODE
+    ? anchorNode.closest('[data-scene-idx]')
+    : anchorNode.parentElement?.closest('[data-scene-idx]');
+  const sceneIdx = sceneWrap ? parseInt(sceneWrap.getAttribute('data-scene-idx'), 10) : -1;
+
   // Wrap selection in a highlight mark
-  // surroundContents only works when the range doesn't cross element boundaries.
-  // We use extractContents + insertNode as a safer alternative.
   try {
     const mark = document.createElement('mark');
     mark.className = 'fav-mark';
@@ -1922,21 +1933,18 @@ saveBtn.addEventListener('click', function(e) {
     mark.title     = 'Favorited — click to jump here';
     mark.addEventListener('click', () => jumpToFav(id));
 
-    // Try surroundContents first (clean path)
     try {
       activeRange.surroundContents(mark);
     } catch (_) {
-      // Cross-boundary selection — wrap what we can
       const fragment = activeRange.extractContents();
       mark.appendChild(fragment);
       activeRange.insertNode(mark);
     }
   } catch(err) {
-    // If DOM wrapping fails entirely, still save the text without highlight
     console.warn('Could not highlight selection:', err);
   }
 
-  favs.unshift({ id, text, lessonIdx: currentIdx });
+  favs.unshift({ id, text, lessonIdx: currentIdx, sceneIdx });
   saveFavs(favs);
   renderFavPanel();
   hideToolbar();
