@@ -152,7 +152,7 @@ header p {
   z-index: 1;
   display: grid;
   grid-template-columns: 260px 1fr;
-  min-height: calc(100vh - 200px);
+  align-items: start;
 }
 
 /* 3-column when wide enough */
@@ -164,14 +164,15 @@ header p {
 /* ── LEFT SIDEBAR ── */
 .sidebar {
   border-right: 1px solid var(--border);
-  padding: 2rem 0;
   position: sticky;
   top: 0;
-  height: calc(100vh - 200px);
+  height: 100vh;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
   background: var(--surface);
+  display: flex;
+  flex-direction: column;
 }
 .sidebar-section { margin-bottom: 0.4rem; }
 .cat-header {
@@ -430,7 +431,7 @@ header p {
   background: var(--surface);
   position: sticky;
   top: 0;
-  height: calc(100vh - 200px);
+  height: 100vh;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
@@ -582,6 +583,208 @@ header p {
 .fav-mark:hover { background: rgba(251,113,133,0.38); }
 .fav-mark.flash { background: rgba(251,113,133,0.55) !important; }
 
+/* ── SIDEBAR TOP BAR ── */
+.sidebar-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.2rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.search-icon-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+}
+.search-icon-btn:hover { border-color: var(--raj); color: var(--raj); }
+.sidebar-nav-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ── SEARCH OVERLAY ── */
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(5, 7, 12, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: clamp(4rem, 10vh, 8rem);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.search-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.search-box {
+  width: min(640px, 92vw);
+  background: #0e1118;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+}
+.search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.search-icon {
+  color: var(--muted);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+#searchInput {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  caret-color: var(--raj);
+}
+#searchInput::placeholder { color: var(--muted); }
+.search-close-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  padding: 0.2rem 0.45rem;
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+.search-close-btn:hover { color: var(--text); border-color: var(--text); }
+.search-results {
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.search-empty {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+.search-hint {
+  padding: 1.5rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-family: 'JetBrains Mono', monospace;
+  text-align: center;
+  opacity: 0.7;
+}
+.search-result-group {
+  border-bottom: 1px solid var(--border);
+}
+.search-result-group:last-child { border-bottom: none; }
+.search-result-lesson-header {
+  padding: 0.65rem 1.1rem 0.4rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.search-result-lesson-header .lesson-hit-name {
+  color: var(--text);
+  font-size: 0.68rem;
+}
+.search-hit {
+  padding: 0.65rem 1.1rem;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background 0.1s, border-color 0.1s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.search-hit:hover {
+  background: rgba(255,255,255,0.04);
+  border-left-color: var(--raj);
+}
+.search-hit-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.7;
+}
+.search-hit-snippet {
+  font-size: 0.84rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+.search-hit-snippet mark {
+  background: rgba(245, 166, 35, 0.28);
+  color: var(--raj);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+.search-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  padding: 0.6rem 1.1rem;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.015);
+}
+/* ── SEARCH HIGHLIGHT IN LESSON ── */
+.search-match-flash {
+  background: rgba(245, 166, 35, 0.25);
+  border-radius: 3px;
+  outline: 2px solid rgba(245, 166, 35, 0.5);
+  transition: background 0.6s, outline 0.6s;
+}
+.search-match-flash.fade {
+  background: transparent;
+  outline-color: transparent;
+}
+
 /* ── MOBILE ── */
 .mobile-nav-toggle { display: none; }
 
@@ -624,6 +827,7 @@ header p {
   }
   .overlay.show { display: block; }
   .content { padding: 2rem 1.2rem 5rem; }
+  .sidebar-topbar { padding: 1.2rem 1rem 0.8rem; }
 }
 </style>
 </head>
@@ -647,7 +851,13 @@ header p {
 <div class="app">
   <!-- Left: lesson nav -->
   <aside class="sidebar" id="sidebar">
-    <div id="sidebarContent"></div>
+    <div class="sidebar-topbar">
+      <span class="sidebar-brand">Lessons</span>
+      <button class="search-icon-btn" onclick="openSearch()" title="Search lessons (/)">
+        🔍 Search
+      </button>
+    </div>
+    <div class="sidebar-nav-scroll" id="sidebarContent"></div>
   </aside>
 
   <!-- Centre: lesson content -->
@@ -675,6 +885,20 @@ header p {
 <div id="sel-toolbar">
   <button class="sel-btn" id="selSaveBtn">★ Save</button>
   <span class="sel-label">Favorite this</span>
+</div>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="searchOverlay" onclick="handleSearchOverlayClick(event)">
+  <div class="search-box" id="searchBox">
+    <div class="search-input-row">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search lessons, code, dialogue…" autocomplete="off" spellcheck="false"/>
+      <button class="search-close-btn" onclick="closeSearch()">ESC</button>
+    </div>
+    <div class="search-results" id="searchResults">
+      <div class="search-hint">Type to search across all lessons</div>
+    </div>
+  </div>
 </div>
 
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
@@ -1242,6 +1466,195 @@ saveBtn.addEventListener('click', function(e) {
   renderFavPanel();
   hideToolbar();
   window.getSelection()?.removeAllRanges();
+});
+
+// ─────────────────────────────────────────────────────────────
+//  SEARCH
+// ─────────────────────────────────────────────────────────────
+
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('searchInput').focus(), 60);
+}
+
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '<div class="search-hint">Type to search across all lessons</div>';
+}
+
+function handleSearchOverlayClick(e) {
+  if (!document.getElementById('searchBox').contains(e.target)) closeSearch();
+}
+
+// Keyboard shortcut: '/' opens search, Escape closes
+document.addEventListener('keydown', function(e) {
+  const overlay = document.getElementById('searchOverlay');
+  if (e.key === 'Escape') { closeSearch(); return; }
+  if (e.key === '/' && !overlay.classList.contains('open')) {
+    const tag = document.activeElement.tagName;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+      e.preventDefault();
+      openSearch();
+    }
+  }
+});
+
+// Extract plain searchable text from a scene
+function sceneToText(s) {
+  if (s.type === 'code')    return { type: 'code',    text: stripHtml(s.text) };
+  if (s.type === 'analogy') return { type: 'analogy', text: stripHtml(s.text) };
+  if (s.type === 'summary') return { type: 'takeaways', text: s.points.map(stripHtml).join(' ') };
+  const speaker = s.speaker === 'raj' ? 'Raj' : 'You';
+  return { type: speaker, text: stripHtml(s.text) };
+}
+
+function stripHtml(str) {
+  return String(str || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function excerpt(text, query, radius = 80) {
+  const lo  = text.toLowerCase();
+  const idx = lo.indexOf(query.toLowerCase());
+  if (idx === -1) return esc(text.slice(0, radius * 2)) + '…';
+  const start = Math.max(0, idx - radius);
+  const end   = Math.min(text.length, idx + query.length + radius);
+  let   snip  = (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
+  // Highlight the match
+  const re = new RegExp('(' + escapeRe(query) + ')', 'gi');
+  snip = esc(snip).replace(re, '<mark>$1</mark>');
+  return snip;
+}
+
+function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function doSearch(query) {
+  const q = query.trim();
+  const resultsEl = document.getElementById('searchResults');
+
+  if (q.length < 2) {
+    resultsEl.innerHTML = '<div class="search-hint">Type to search across all lessons</div>';
+    return;
+  }
+
+  const ql = q.toLowerCase();
+  const groups = [];
+  let totalHits = 0;
+
+  LESSONS.forEach((lesson, lessonIdx) => {
+    const hits = [];
+
+    // Search lesson title and tag
+    [
+      { type: 'title', text: lesson.title },
+      { type: 'intro', text: stripHtml(lesson.intro) }
+    ].forEach(({ type, text }) => {
+      if (text.toLowerCase().includes(ql)) {
+        hits.push({ type, text, sceneIdx: -1 });
+      }
+    });
+
+    // Search each scene
+    lesson.scenes.forEach((scene, sceneIdx) => {
+      const { type, text } = sceneToText(scene);
+      if (text.toLowerCase().includes(ql)) {
+        hits.push({ type, text, sceneIdx });
+      }
+    });
+
+    if (hits.length) {
+      groups.push({ lessonIdx, lesson, hits: hits.slice(0, 4) }); // max 4 hits per lesson
+      totalHits += hits.length;
+    }
+  });
+
+  if (groups.length === 0) {
+    resultsEl.innerHTML = `<div class="search-empty">No results for "<strong>${esc(q)}</strong>"</div>`;
+    return;
+  }
+
+  const catMeta = (lesson) => CATEGORY_META[lesson.category] || { color: '#888', icon: '' };
+
+  const html = groups.map(({ lessonIdx, lesson, hits }) => {
+    const meta  = catMeta(lesson);
+    const hitsHTML = hits.map(h => `
+      <div class="search-hit" onclick="searchGoTo(${lessonIdx}, ${h.sceneIdx}, ${JSON.stringify(esc(q))})">
+        <span class="search-hit-type">${esc(h.type)}</span>
+        <span class="search-hit-snippet">${excerpt(h.text, q)}</span>
+      </div>`).join('');
+    return `
+      <div class="search-result-group">
+        <div class="search-result-lesson-header">
+          <span style="color:${meta.color}">${meta.icon}</span>
+          <span class="lesson-hit-name">${esc(lesson.tag)}</span>
+          <span style="margin-left:auto;opacity:0.5">${hits.length} hit${hits.length>1?'s':''}</span>
+        </div>
+        ${hitsHTML}
+      </div>`;
+  }).join('');
+
+  const countLine = `<div class="search-count">${totalHits} result${totalHits!==1?'s':''} across ${groups.length} lesson${groups.length!==1?'s':''}</div>`;
+  resultsEl.innerHTML = html + countLine;
+}
+
+// Navigate to a lesson + scene and highlight the search term
+function searchGoTo(lessonIdx, sceneIdx, query) {
+  closeSearch();
+  closeSidebar();
+
+  const doHighlight = () => {
+    const view = document.getElementById('lessonView');
+    if (!view) return;
+
+    // Find first text node containing the query
+    const q = query.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+    const walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT, null);
+    let node;
+    while ((node = walker.nextNode())) {
+      const idx = node.textContent.toLowerCase().indexOf(q.toLowerCase());
+      if (idx === -1) continue;
+
+      // Wrap the match in a temporary highlight span
+      const range = document.createRange();
+      range.setStart(node, idx);
+      range.setEnd(node, idx + q.length);
+
+      const mark = document.createElement('span');
+      mark.className = 'search-match-flash';
+      try {
+        range.surroundContents(mark);
+      } catch(_) {
+        const frag = range.extractContents();
+        mark.appendChild(frag);
+        range.insertNode(mark);
+      }
+
+      // Scroll into view
+      mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Fade and remove after animation
+      setTimeout(() => mark.classList.add('fade'), 1200);
+      setTimeout(() => {
+        if (mark.parentNode) {
+          while (mark.firstChild) mark.parentNode.insertBefore(mark.firstChild, mark);
+          mark.parentNode.removeChild(mark);
+        }
+      }, 2000);
+      break;
+    }
+  };
+
+  if (currentIdx === lessonIdx) {
+    doHighlight();
+  } else {
+    selectLesson(lessonIdx);
+    setTimeout(doHighlight, 380);
+  }
+}
+
+// Live search as user types
+document.getElementById('searchInput').addEventListener('input', function() {
+  doSearch(this.value);
 });
 
 // ─────────────────────────────────────────────────────────────
