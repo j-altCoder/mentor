@@ -88,7 +88,7 @@ const commentSchema = new Schema({
   },
   content: String
 });`
-      }
+      
     },
 
     // ── Indexes deep dive ──
@@ -154,7 +154,7 @@ db.orders.find({ userId: 'abc', status: 'paid' })
          .explain('executionStats');
 // Check: winningPlan.stage === 'IXSCAN' (good) vs 'COLLSCAN' (add an index)
 // Check: totalKeysExamined vs nReturned — close = efficient, far apart = poor selectivity`
-      }
+      
     },
 
     // ── Aggregation pipeline ──
@@ -231,7 +231,7 @@ const searchResults = await Product.aggregate([
     ]
   }}
 ]);`
-      }
+      
     },
 
     // ── Transactions ──
@@ -292,7 +292,7 @@ await User.findByIdAndUpdate(userId, {
   $push: { purchaseHistory: orderId } // atomic array push
 });
 // Both operations happen atomically — no partial state possible`
-      }
+      
     },
 
     // ── Change streams ──
@@ -341,7 +341,7 @@ changeStream.on('change', (change) => {
 
 // On reconnect — resume from saved token
 const resumedStream = Order.watch(pipeline, { resumeAfter: resumeToken });`
-      }
+      
     },
 
     // ── Mongoose vs native driver ──
@@ -392,7 +392,7 @@ await db.collection('users').bulkWrite(bulkOps, { ordered: false });
 
 // When Mongoose overhead matters — lean() closes the gap for reads
 const users = await User.find({}).lean(); // plain JS objects, no Mongoose wrapping`
-      }
+      
     },
 
     // ── Replica sets explained ──
@@ -445,7 +445,7 @@ const posts = await Post.find({ published: true }).read('secondaryPreferred');
 // Check replica set status
 db.adminCommand({ replSetGetStatus: 1 })
 // Shows: primary, secondaries, each node's optime lag, who's healthy`
-      }
+      
     },
 
     // ── Sharding mechanics ──
@@ -493,7 +493,7 @@ const allPending = await Order.find({ status: 'pending' }); // scatter-gather
 db.orders.getShardDistribution();
 // Shows: which shards hold which chunks, document counts per shard
 // Look for even distribution — if one shard has 80% of docs, re-shard or change key`
-      }
+      
     },
 
     // ── Schema design patterns ──
@@ -558,7 +558,7 @@ const getLikes = async (postId) => {
   const overflow = await LikesOverflow.find({ postId }).select('userId');
   return [...post.likes, ...overflow.map(o => o.userId)];
 };`
-      }
+      
     },
 
     // ── Atlas Search ──
@@ -610,7 +610,7 @@ const results = await Product.aggregate([
     ]
   }}
 ]);`
-      }
+      
     },
 
     {
