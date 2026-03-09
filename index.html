@@ -89,7 +89,7 @@ body::before {
 }
 
 /* ── THEME TRANSITION ── */
-body, .sidebar, .fav-panel, .scene, .analogy-card,
+body, .sidebar, .bookmark-panel, .scene, .analogy-card,
 .code-card, .summary-card, header, .progress-wrap,
 .search-box, .search-input-row, .search-results, .search-result-group,
 .search-result-lesson-header, .search-hint, .search-empty, .search-count,
@@ -243,7 +243,7 @@ header p {
 /* 3-column when wide enough */
 @media (min-width: 1140px) {
   .app { grid-template-columns: 260px 1fr 260px; }
-  .fav-panel { display: flex !important; }
+  .bookmark-panel { display: flex !important; }
 }
 
 /* ── LEFT SIDEBAR ── */
@@ -511,7 +511,7 @@ header p {
 .nav-btn-arrow.next-btn:hover:not(:disabled) { opacity: 0.85; color: #000; }
 
 /* ── RIGHT: FAVORITES PANEL ── */
-.fav-panel {
+.bookmark-panel {
   display: none; /* shown via media query above */
   flex-direction: column;
   border-left: 1px solid var(--border);
@@ -523,7 +523,7 @@ header p {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
-.fav-header {
+.bookmark-header {
   padding: 1.2rem 1rem 0.8rem;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.62rem;
@@ -536,7 +536,7 @@ header p {
   gap: 0.5rem;
   flex-shrink: 0;
 }
-.fav-badge {
+.bookmark-badge {
   background: var(--cat5);
   color: #000;
   font-size: 0.55rem;
@@ -547,7 +547,7 @@ header p {
   min-width: 16px;
   text-align: center;
 }
-.fav-hint {
+.bookmark-hint {
   padding: 1.4rem 1rem;
   color: var(--muted);
   font-size: 0.8rem;
@@ -555,11 +555,11 @@ header p {
   text-align: center;
   line-height: 1.6;
 }
-.fav-hint strong { font-style: normal; color: var(--cat5); font-weight: 500; }
-.fav-items { flex: 1; overflow-y: auto; }
-.fav-group { border-bottom: 1px solid var(--border); }
-.fav-group:last-child { border-bottom: none; }
-.fav-group-header {
+.bookmark-hint strong { font-style: normal; color: var(--cat5); font-weight: 500; }
+.bookmark-items { flex: 1; overflow-y: auto; }
+.bookmark-group { border-bottom: 1px solid var(--border); }
+.bookmark-group:last-child { border-bottom: none; }
+.bookmark-group-header {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -569,8 +569,8 @@ header p {
   transition: background 0.12s;
   user-select: none;
 }
-.fav-group-header:hover { background: var(--hover-bg); }
-.fav-group-name {
+.bookmark-group-header:hover { background: var(--hover-bg); }
+.bookmark-group-name {
   flex: 1;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.62rem;
@@ -580,7 +580,7 @@ header p {
   overflow: hidden;
   white-space: nowrap;
 }
-.fav-group-count {
+.bookmark-group-count {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.58rem;
   background: var(--cat5);
@@ -589,16 +589,16 @@ header p {
   border-radius: 1rem;
   flex-shrink: 0;
 }
-.fav-group-chevron {
+.bookmark-group-chevron {
   font-size: 0.6rem;
   color: var(--muted);
   transition: transform 0.2s;
   flex-shrink: 0;
 }
-.fav-group.collapsed .fav-group-chevron { transform: rotate(-90deg); }
-.fav-group-body { display: block; }
-.fav-group.collapsed .fav-group-body { display: none; }
-.fav-entry {
+.bookmark-group.collapsed .bookmark-group-chevron { transform: rotate(-90deg); }
+.bookmark-group-body { display: block; }
+.bookmark-group.collapsed .bookmark-group-body { display: none; }
+.bookmark-entry {
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
@@ -607,15 +607,15 @@ header p {
   border-left: 2px solid transparent;
   transition: background 0.12s, border-color 0.12s;
 }
-.fav-entry:hover { background: var(--hover-bg); border-left-color: var(--cat5); }
-.fav-entry-text {
+.bookmark-entry:hover { background: var(--hover-bg); border-left-color: var(--cat5); }
+.bookmark-entry-text {
   flex: 1;
   font-size: 0.78rem;
   color: var(--text);
   line-height: 1.45;
   word-break: break-word;
 }
-.fav-entry-del {
+.bookmark-entry-del {
   flex-shrink: 0;
   background: none;
   border: none;
@@ -628,9 +628,9 @@ header p {
   transition: color 0.12s, background 0.12s;
   opacity: 0;
 }
-.fav-entry:hover .fav-entry-del { opacity: 1; }
-.fav-entry-del:hover { color: var(--cat5); background: rgba(251,113,133,0.1); }
-.fav-clear {
+.bookmark-entry:hover .bookmark-entry-del { opacity: 1; }
+.bookmark-entry-del:hover { color: var(--cat5); background: rgba(251,113,133,0.1); }
+.bookmark-clear {
   margin: 0.6rem 0.85rem 1rem;
   padding: 0.4rem 0.6rem;
   width: calc(100% - 1.7rem);
@@ -644,7 +644,7 @@ header p {
   transition: all 0.12s;
   text-align: center;
 }
-.fav-clear:hover { border-color: var(--cat5); color: var(--cat5); }
+.bookmark-clear:hover { border-color: var(--cat5); color: var(--cat5); }
 
 /* ── SELECTION TOOLBAR ── */
 #sel-toolbar {
@@ -691,16 +691,16 @@ header p {
   white-space: nowrap;
 }
 
-/* ── FAV HIGHLIGHT ── */
-.fav-mark {
+/* ── BOOKMARK HIGHLIGHT ── */
+.bookmark-mark {
   background: rgba(251,113,133,0.2);
   border-bottom: 1px solid rgba(251,113,133,0.5);
   border-radius: 2px;
   cursor: pointer;
   transition: background 0.15s;
 }
-.fav-mark:hover { background: rgba(251,113,133,0.38); }
-.fav-mark.flash { background: rgba(251,113,133,0.55) !important; }
+.bookmark-mark:hover { background: rgba(251,113,133,0.38); }
+.bookmark-mark.flash { background: rgba(251,113,133,0.55) !important; }
 
 /* ── SIDEBAR TOP BAR ── */
 .sidebar-topbar {
@@ -908,7 +908,7 @@ header p {
 
 /* ── MOBILE ── */
 .mobile-nav-toggle { display: none; }
-.mobile-fav-toggle { display: none; }
+.mobile-bookmark-toggle { display: none; }
 
 @media (max-width: 767px) {
   .app { grid-template-columns: 1fr; }
@@ -950,7 +950,7 @@ header p {
   .overlay.show { display: block; }
   .content { padding: 2rem 1.2rem 6rem; }
   .sidebar-topbar { padding: 1.2rem 1rem 0.8rem; }
-  .fav-panel {
+  .bookmark-panel {
     display: flex !important;
     position: fixed;
     bottom: 0; left: 0; right: 0; top: auto;
@@ -962,13 +962,13 @@ header p {
     transition: transform 0.3s ease;
     overflow-y: auto;
   }
-  .fav-panel.mobile-open { transform: translateY(0); }
-  .fav-mobile-handle {
+  .bookmark-panel.mobile-open { transform: translateY(0); }
+  .bookmark-mobile-handle {
     display: block; width: 36px; height: 4px;
     background: var(--border); border-radius: 2px;
     margin: 0.75rem auto 0; flex-shrink: 0;
   }
-  .mobile-fav-toggle {
+  .mobile-bookmark-toggle {
     display: flex; align-items: center; gap: 0.45rem;
     position: fixed; bottom: 1.5rem; left: 1.5rem;
     z-index: 200; background: var(--surface);
@@ -978,7 +978,7 @@ header p {
     border-radius: 2rem; cursor: pointer;
     box-shadow: 0 4px 16px rgba(0,0,0,0.25);
   }
-  .fav-count-pill {
+  .bookmark-count-pill {
     background: var(--cat5); color: #000;
     font-size: 0.55rem; padding: 0.1rem 0.35rem;
     border-radius: 1rem; font-weight: 700;
@@ -1280,6 +1280,72 @@ kbd {
 
 
 
+
+/* ── LESSON NOTE (below intro, above scenes) ── */
+.lesson-note-wrap {
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+  border-top: 2px solid rgba(245,166,35,0.4);
+  border-radius: 0.75rem;
+  background: var(--card);
+  overflow: hidden;
+}
+.lesson-note-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--raj);
+  opacity: 0.7;
+  padding: 0.6rem 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.lesson-note-del {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.12s;
+}
+.lesson-note-wrap:hover .lesson-note-del,
+.lesson-note-del.visible { opacity: 1; }
+.lesson-note-del:hover { color: var(--cat5); }
+.lesson-note-textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0.5rem 1rem 0.75rem;
+  font-family: 'Newsreader', serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  resize: none;
+  min-height: 58px;
+  max-height: 400px;
+  overflow-y: hidden;
+  line-height: 1.7;
+  caret-color: var(--raj);
+}
+.lesson-note-textarea::placeholder { color: var(--muted); opacity: 0.45; }
+.lesson-note-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  padding: 0 1rem 0.5rem;
+  opacity: 0.5;
+  min-height: 1.2em;
+  display: block;
+}
+
 </style>
 </head>
 <body>
@@ -1327,22 +1393,22 @@ kbd {
   </main>
 
   <!-- Right: favorites panel (grid column 3, only on wide screens) -->
-  <aside class="fav-panel" id="favPanel">
-    <div class="fav-mobile-handle"></div>
-  <div class="fav-header">
-      ⭐ Favorites
-      <span class="fav-badge" id="favBadge">0</span>
+  <aside class="bookmark-panel" id="bookmarkPanel">
+    <div class="bookmark-mobile-handle"></div>
+  <div class="bookmark-header">
+      Bookmarks
+      <span class="bookmarkBadge" id="bookmarkBadge">0</span>
     </div>
-    <div id="favBody">
-      <p class="fav-hint">Select any text in a lesson, then tap <strong>★ Save</strong> to keep it here.</p>
+    <div id="bookmarkBody">
+      <p class="bookmark-hint">Select any text in a lesson, then tap <strong>🔖 Bookmark</strong> to save it here.</p>
     </div>
   </aside>
 </div>
 
 <!-- Selection toolbar (fixed, shown on text selection) -->
 <div id="sel-toolbar">
-  <button class="sel-btn" id="selSaveBtn">★ Save</button>
-  <span class="sel-label">Favorite this</span>
+  <button class="sel-btn" id="selSaveBtn">🔖 Bookmark</button>
+  <span class="sel-label">Bookmark</span>
 </div>
 
 <!-- Search Overlay -->
@@ -1380,9 +1446,9 @@ kbd {
   </div>
 </div>
 
-<div class="overlay" id="overlay" onclick="closeSidebar(); document.getElementById('favPanel').classList.remove('mobile-open');"></div>
+<div class="overlay" id="overlay" onclick="closeSidebar(); document.getElementById('bookmarkPanel').classList.remove('mobile-open');"></div>
 <button class="mobile-nav-toggle" onclick="toggleSidebar()">☰ Lessons</button>
-<button class="mobile-fav-toggle" id="mobileFavToggle" onclick="toggleMobileFav()">★ Saved <span class="fav-count-pill" id="mobileFavCount" style="display:none"></span></button>
+<button class="mobile-bookmark-toggle" id="mobileBookmarkToggle" onclick="toggleMobileBookmark()">🔖 Bookmarkd <span class="bookmark-count-pill" id="mobileBookmarkCount" style="display:none"></span></button>
 
 <!-- Lesson files: safe-loaded, missing files just log a warning -->
 <script src="lesson-auth.js"          onerror="console.warn('lesson-auth.js not found')"></script>
@@ -1573,6 +1639,18 @@ function selectLesson(idx, skipScrollTop) {
       </div>
       <h2 class="lesson-title">${lesson.title}</h2>
       <p class="lesson-intro">${lesson.intro}</p>
+      ${(function(){
+        const lnKey    = 'note-' + idx + '-lesson';
+        const lnNote   = getNoteByKey(lnKey);
+        const lnText   = lnNote ? escAttr(lnNote.text) : '';
+        return '<div class="lesson-note-wrap">'
+          + '<div class="lesson-note-label">Lesson note'
+          + '<button class="lesson-note-del' + (lnNote ? ' visible' : '') + '" id="lesson-note-del-' + idx + '" onclick="deleteLessonNote(' + idx + ')">delete</button>'
+          + '</div>'
+          + '<textarea class="lesson-note-textarea" id="lesson-note-ta-' + idx + '" placeholder="Add a note about this lesson…" maxlength="1200" oninput="autoSaveLessonNote(' + idx + ',this)">' + lnText + '</textarea>'
+          + '<span class="lesson-note-status" id="lesson-note-status-' + idx + '"></span>'
+          + '</div>';
+      })()}
       ${scenesHTML}
       <div style="text-align:center"><button class="mark-done-btn ${completedLessons.has(idx)?"done":""}" id="markDoneBtn" onclick="toggleDone(${idx})">${completedLessons.has(idx)?"✓ Completed":"○ Mark as done"}</button></div>
       <div class="lesson-nav">
@@ -1585,7 +1663,10 @@ function selectLesson(idx, skipScrollTop) {
   if (!skipScrollTop) window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
   hideToolbar();
-  reapplyFavHighlights();
+  reapplyBookmarkHighlights();
+  // Resize lesson note textarea if it has existing content
+  const _lnTa = document.getElementById('lesson-note-ta-' + idx);
+  if (_lnTa && _lnTa.value) resizeTextarea(_lnTa);
   updateNotesViewBtn();
   if (_notesPanelOpen) renderNotesPanel();
 }
@@ -1748,7 +1829,7 @@ function openAllNotes() {
       var icon   = catM ? catM.icon : '';
       var items  = byLesson[li].slice().sort(function(a,b){ return (a.sceneIdx||0)-(b.sceneIdx||0); });
       var rows   = items.map(function(note) {
-        var sceneLabel = note.sceneIdx >= 0 ? 'scene ' + (note.sceneIdx + 1) : '';
+        var sceneLabel = note.sceneIdx === 'lesson' ? 'lesson note' : (note.sceneIdx >= 0 ? 'scene ' + (note.sceneIdx + 1) : '');
         var date = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
         var meta = [sceneLabel, date].filter(Boolean).join(' · ');
         return '<div class="all-notes-item" onclick="closeAllNotes();selectLesson(' + li + ',true);setTimeout(function(){scrollToNoteScene(' + (note.sceneIdx||0) + ')},250)">'
@@ -1775,55 +1856,55 @@ function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
 }
-function toggleMobileFav() {
-  const panel = document.getElementById('favPanel');
+function toggleMobileBookmark() {
+  const panel = document.getElementById('bookmarkPanel');
   panel.classList.toggle('mobile-open');
   document.getElementById('overlay').classList.toggle('show');
 }
-function updateMobileFavBadge() {
-  const badge = document.getElementById('mobileFavCount');
+function updateMobileBookmarkBadge() {
+  const badge = document.getElementById('mobileBookmarkCount');
   if (!badge) return;
-  if (favs.length > 0) { badge.textContent = favs.length; badge.style.display = 'inline'; }
+  if (bookmarks.length > 0) { badge.textContent = bookmarks.length; badge.style.display = 'inline'; }
   else { badge.style.display = 'none'; }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  FAVORITES — storage
+//  BOOKMARKS — storage
 // ─────────────────────────────────────────────────────────────
-const FAV_KEY = 'coderoom-v2-favs';
+const BOOKMARK_KEY = 'coderoom-v2-bookmarks';
 
-function loadFavs() {
-  try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); }
+function loadBookmarks() {
+  try { return JSON.parse(localStorage.getItem(BOOKMARK_KEY) || '[]'); }
   catch(e) { return []; }
 }
-function saveFavs(list) {
-  try { localStorage.setItem(FAV_KEY, JSON.stringify(list)); } catch(e) {}
+function saveBookmarks(list) {
+  try { localStorage.setItem(BOOKMARK_KEY, JSON.stringify(list)); } catch(e) {}
 }
 
-let favs = loadFavs();
+let bookmarks = loadBookmarks();
 
 // ─────────────────────────────────────────────────────────────
-//  FAVORITES — render panel
+//  BOOKMARKS — render panel
 // ─────────────────────────────────────────────────────────────
-function renderFavPanel() {
-  const badge  = document.getElementById('favBadge');
-  const body   = document.getElementById('favBody');
+function renderBookmarkPanel() {
+  const badge  = document.getElementById('bookmarkBadge');
+  const body   = document.getElementById('bookmarkBody');
   if (!badge || !body) return;
 
-  badge.textContent = favs.length;
+  badge.textContent = bookmarks.length;
 
-  if (favs.length === 0) {
-    body.innerHTML = '<p class="fav-hint">Select any text in a lesson, then tap <strong>★ Save</strong> to keep it here.</p>';
+  if (bookmarks.length === 0) {
+    body.innerHTML = '<p class="bookmark-hint">Select any text in a lesson, then tap <strong>🔖 Bookmark</strong> to save it here.</p>';
     return;
   }
 
   // Group favorites by lessonIdx, preserving add order within each group
   const groups = {};
   const groupOrder = [];
-  favs.forEach((f, i) => {
-    const key = f.lessonIdx !== undefined ? f.lessonIdx : '__none__';
+  bookmarks.forEach((b, i) => {
+    const key = b.lessonIdx !== undefined ? b.lessonIdx : '__none__';
     if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
-    groups[key].push({ f, i });
+    groups[key].push({ b, i });
   });
 
   const groupsHTML = groupOrder.map(key => {
@@ -1831,50 +1912,50 @@ function renderFavPanel() {
     const lesson = key !== '__none__' && LESSONS[key] ? LESSONS[key] : null;
     const name   = lesson ? esc(lesson.tag) : 'Unsorted';
     const count  = items.length;
-    const isOpen = !_favGroupCollapsed[key];
+    const isOpen = !_bookmarkGroupCollapsed[key];
 
-    const itemsHTML = items.map(({ f, i }) => `
-      <div class="fav-entry" onclick="jumpToFav('${f.id}')">
-        <span class="fav-entry-text">${esc(f.text)}</span>
-        <button class="fav-entry-del" onclick="deleteFav(event,${i})" title="Remove">✕</button>
+    const itemsHTML = items.map(({ b, i }) => `
+      <div class="bookmark-entry" onclick="jumpToBookmark('${f.id}')">
+        <span class="bookmark-entry-text">${esc(b.text)}</span>
+        <button class="bookmark-entry-del" onclick="deleteBookmark(event,${i})" title="Remove">✕</button>
       </div>`).join('');
 
     return `
-      <div class="fav-group ${isOpen ? '' : 'collapsed'}" id="fav-group-${key}">
-        <div class="fav-group-header" onclick="toggleFavGroup('${key}')">
-          <span class="fav-group-name">${name}</span>
-          <span class="fav-group-count">${count}</span>
-          <span class="fav-group-chevron">▾</span>
+      <div class="bookmark-group ${isOpen ? '' : 'collapsed'}" id="bookmark-group-${key}">
+        <div class="bookmark-group-header" onclick="toggleBookmarkGroup('${key}')">
+          <span class="bookmark-group-name">${name}</span>
+          <span class="bookmark-group-count">${count}</span>
+          <span class="bookmark-group-chevron">▾</span>
         </div>
-        <div class="fav-group-body">${itemsHTML}</div>
+        <div class="bookmark-group-body">${itemsHTML}</div>
       </div>`;
   }).join('');
 
   body.innerHTML = `
-    <div class="fav-items">${groupsHTML}</div>
-    <button class="fav-clear" onclick="clearAllFavs()">Clear all</button>`;
+    <div class="bookmark-items">${groupsHTML}</div>
+    <button class="bookmark-clear" onclick="clearAllBookmarks()">Clear all</button>`;
 }
 
-const _favGroupCollapsed = {};
-function toggleFavGroup(key) {
-  _favGroupCollapsed[key] = !_favGroupCollapsed[key];
-  renderFavPanel();
+const _bookmarkGroupCollapsed = {};
+function toggleBookmarkGroup(key) {
+  _bookmarkGroupCollapsed[key] = !_bookmarkGroupCollapsed[key];
+  renderBookmarkPanel();
 }
 
-function deleteFav(e, idx) {
+function deleteBookmark(e, idx) {
   e.stopPropagation();
-  const fav = favs[idx];
-  if (fav) removeHighlight(fav.id);
-  favs.splice(idx, 1);
-  saveFavs(favs);
-  renderFavPanel();
+  const bookmark = bookmarks[idx];
+  if (bookmark) removeHighlight(bookmark.id);
+  bookmarks.splice(idx, 1);
+  saveBookmarks(bookmarks);
+  renderBookmarkPanel();
 }
 
-function clearAllFavs() {
-  favs.forEach(f => removeHighlight(f.id));
-  favs = [];
-  saveFavs(favs);
-  renderFavPanel();
+function clearAllBookmarks() {
+  bookmarks.forEach(f => removeHighlight(b.id));
+  bookmarks = [];
+  saveBookmarks(favs);
+  renderBookmarkPanel();
 }
 
 function removeHighlight(id) {
@@ -1886,9 +1967,9 @@ function removeHighlight(id) {
   parent.removeChild(el);
 }
 
-function jumpToFav(id) {
-  const fav = favs.find(f => f.id === id);
-  if (!fav) return;
+function jumpToBookmark(id) {
+  const bookmark = bookmarks.find(f => f.id === id);
+  if (!bookmark) return;
 
   // Ensure the mark is injected and then scroll to it.
   // Polls briefly in case the DOM hasn't fully painted yet.
@@ -1897,7 +1978,7 @@ function jumpToFav(id) {
     if (!el) {
       // Try to inject it
       const view = document.getElementById('lessonView');
-      if (view) injectHighlight(view, fav.text, id, fav.sceneIdx);
+      if (view) injectHighlight(view, bookmark.text, id, bookmark.sceneIdx);
       el = document.getElementById(id);
     }
     if (el) {
@@ -1910,12 +1991,12 @@ function jumpToFav(id) {
     }
   };
 
-  if (fav.lessonIdx !== currentIdx) {
+  if (bookmark.lessonIdx !== currentIdx) {
     // Use _origSelectLesson with skipScrollTop=true so window.scrollTo(top:0)
     // doesn't fire and fight the scrollIntoView below
-    _origSelectLesson(fav.lessonIdx, true);
-    saveLastLesson(fav.lessonIdx);
-    // reapplyFavHighlights runs synchronously inside selectLesson,
+    _origSelectLesson(bookmark.lessonIdx, true);
+    saveLastLesson(bookmark.lessonIdx);
+    // reapplyBookmarkHighlights runs synchronously inside selectLesson,
     // but the DOM paint happens async — give it two frames + a small buffer
     requestAnimationFrame(() => requestAnimationFrame(() => scrollToMark(5)));
   } else {
@@ -1926,19 +2007,16 @@ function jumpToFav(id) {
 
 // Re-apply highlights after lesson navigation (highlights live in rendered HTML
 // which gets replaced on lesson change — we store the text & regenerate)
-function reapplyFavHighlights() {
-  // Re-inject <mark> nodes for any favorites that belong to the current lesson.
-  // We find the saved text in the rendered DOM using TreeWalker and wrap it.
+function reapplyBookmarkHighlights() {
   const view = document.getElementById('lessonView');
   if (!view) return;
 
-  const lessonFavs = favs.filter(f => f.lessonIdx === currentIdx);
-  if (!lessonFavs.length) return;
+  const lessonBookmarks = bookmarks.filter(b => b.lessonIdx === currentIdx);
+  if (!lessonBookmarks.length) return;
 
-  lessonFavs.forEach(fav => {
-    // Don't double-wrap if already present
-    if (document.getElementById(fav.id)) return;
-    injectHighlight(view, fav.text, fav.id, fav.sceneIdx);
+  lessonBookmarks.forEach(bookmark => {
+    if (document.getElementById(bookmark.id)) return;
+    injectHighlight(view, bookmark.text, bookmark.id, bookmark.sceneIdx);
   });
 }
 
@@ -1953,7 +2031,7 @@ function injectHighlight(root, searchText, id, sceneIdx) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       // Skip nodes already inside a fav-mark (avoid double-wrap)
-      if (node.parentElement && node.parentElement.closest('.fav-mark')) return NodeFilter.FILTER_REJECT;
+      if (node.parentElement && node.parentElement.closest('.bookmark-mark')) return NodeFilter.FILTER_REJECT;
       // Skip code blocks — text there is raw and selection is unreliable
       if (node.parentElement && node.parentElement.closest('.code-body'))  return NodeFilter.FILTER_SKIP;
       return NodeFilter.FILTER_ACCEPT;
@@ -2001,10 +2079,10 @@ function injectHighlight(root, searchText, id, sceneIdx) {
 
   try {
     const mark = document.createElement('mark');
-    mark.className = 'fav-mark';
+    mark.className = 'bookmark-mark';
     mark.id        = id;
-    mark.title     = 'Favorited — click to jump here';
-    mark.addEventListener('click', () => jumpToFav(id));
+    mark.title     = 'Bookmarked — click to jump here';
+    mark.addEventListener('click', () => jumpToBookmark(id));
     try {
       range.surroundContents(mark);
     } catch (_) {
@@ -2131,7 +2209,7 @@ document.addEventListener('mousedown', function(e) {
 });
 
 // ─────────────────────────────────────────────────────────────
-//  SAVE FAVORITE
+//  SAVE BOOKMARK
 // ─────────────────────────────────────────────────────────────
 saveBtn.addEventListener('click', function(e) {
   e.stopPropagation();
@@ -2140,7 +2218,7 @@ saveBtn.addEventListener('click', function(e) {
   const text = activeText.slice(0, 150);
 
   // Ignore duplicate text
-  if (favs.some(f => f.text === text)) { hideToolbar(); return; }
+  if (bookmarks.some(b => b.text === text)) { hideToolbar(); return; }
 
   const id = 'fm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
 
@@ -2154,10 +2232,10 @@ saveBtn.addEventListener('click', function(e) {
   // Wrap selection in a highlight mark
   try {
     const mark = document.createElement('mark');
-    mark.className = 'fav-mark';
+    mark.className = 'bookmark-mark';
     mark.id        = id;
-    mark.title     = 'Favorited — click to jump here';
-    mark.addEventListener('click', () => jumpToFav(id));
+    mark.title     = 'Bookmarked — click to jump here';
+    mark.addEventListener('click', () => jumpToBookmark(id));
 
     try {
       activeRange.surroundContents(mark);
@@ -2170,9 +2248,9 @@ saveBtn.addEventListener('click', function(e) {
     console.warn('Could not highlight selection:', err);
   }
 
-  favs.unshift({ id, text, lessonIdx: currentIdx, sceneIdx });
-  saveFavs(favs);
-  renderFavPanel();
+  bookmarks.unshift({ id, text, lessonIdx: currentIdx, sceneIdx });
+  saveBookmarks(bookmarks);
+  renderBookmarkPanel();
   hideToolbar();
   window.getSelection()?.removeAllRanges();
 });
@@ -2261,15 +2339,17 @@ function doSearch(query) {
   LESSONS.forEach((lesson, lessonIdx) => {
     const hits = [];
 
-    // Search lesson title and tag
+    // Search lesson title, tag, intro, and lesson-level note
     [
       { type: 'title', text: lesson.title },
       { type: 'intro', text: stripHtml(lesson.intro) }
     ].forEach(({ type, text }) => {
-      if (text.toLowerCase().includes(ql)) {
-        hits.push({ type, text, sceneIdx: -1 });
-      }
+      if (text.toLowerCase().includes(ql)) hits.push({ type, text, sceneIdx: -1 });
     });
+    const lessonNoteData = notesStore['note-' + lessonIdx + '-lesson'];
+    if (lessonNoteData && lessonNoteData.text && lessonNoteData.text.toLowerCase().includes(ql)) {
+      hits.push({ type: 'note', text: lessonNoteData.text, sceneIdx: -1 });
+    }
 
     // Search each scene + its note
     lesson.scenes.forEach((scene, sceneIdx) => {
@@ -2487,6 +2567,49 @@ function resizeTextarea(ta) {
   ta.style.height = Math.min(ta.scrollHeight, 400) + "px";
 }
 
+
+// ─────────────────────────────────────────────────────────────
+//  LESSON-LEVEL NOTE
+// ─────────────────────────────────────────────────────────────
+const _lessonNoteTimers = {};
+
+function autoSaveLessonNote(lessonIdx, ta) {
+  resizeTextarea(ta);
+  const key      = 'note-' + lessonIdx + '-lesson';
+  const statusEl = document.getElementById('lesson-note-status-' + lessonIdx);
+  const delBtn   = document.getElementById('lesson-note-del-' + lessonIdx);
+
+  if (statusEl) { statusEl.textContent = 'typing…'; statusEl.style.opacity = '0.6'; }
+
+  clearTimeout(_lessonNoteTimers[lessonIdx]);
+  _lessonNoteTimers[lessonIdx] = setTimeout(() => {
+    const text = ta.value.trim();
+    if (text) {
+      notesStore[key] = { text, lessonIdx, sceneIdx: 'lesson', updatedAt: new Date().toISOString() };
+      if (delBtn) delBtn.classList.add('visible');
+    } else {
+      delete notesStore[key];
+      if (delBtn) delBtn.classList.remove('visible');
+    }
+    saveNotesStore(notesStore);
+    if (statusEl) { statusEl.textContent = 'saved'; setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 1400); }
+    updateNotesViewBtn();
+    if (_notesPanelOpen) renderNotesPanel();
+  }, 600);
+}
+
+function deleteLessonNote(lessonIdx) {
+  const key  = 'note-' + lessonIdx + '-lesson';
+  const ta   = document.getElementById('lesson-note-ta-' + lessonIdx);
+  const del  = document.getElementById('lesson-note-del-' + lessonIdx);
+  delete notesStore[key];
+  saveNotesStore(notesStore);
+  if (ta) { ta.value = ''; resizeTextarea(ta); }
+  if (del) del.classList.remove('visible');
+  updateNotesViewBtn();
+  if (_notesPanelOpen) renderNotesPanel();
+}
+
 function autoSaveNote(sceneIdx, ta) {
   resizeTextarea(ta);
   const key = `note-${currentIdx}-${sceneIdx}`;
@@ -2544,6 +2667,7 @@ function deleteInlineNote(sceneIdx) {
 }
 
 function getNotesForLesson(lessonIdx) {
+  // Include lesson note (key: note-{idx}-lesson) + scene notes
   return Object.entries(notesStore)
     .filter(([k]) => k.startsWith(`note-${lessonIdx}-`))
     .map(([k, v]) => ({ key: k, sceneIdx: parseInt(k.split('-')[2]), ...v }))
@@ -2668,7 +2792,7 @@ function toggleDone(idx) {
 }
 
 buildSidebar();
-renderFavPanel();
+renderBookmarkPanel();
 
 // Restore last lesson, fall back to lesson 0
 const _restored = loadLastLesson();
