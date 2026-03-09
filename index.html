@@ -188,18 +188,20 @@ header p {
 
 /* ── PROGRESS ── */
 .progress-wrap {
-  position: relative;
-  z-index: 1;
-  padding: 0.8rem 1.2rem;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  padding: 0.55rem 1.4rem;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   display: flex;
   align-items: center;
   gap: 1rem;
+  box-shadow: 0 1px 8px var(--shadow-dark);
 }
 .progress-track {
   flex: 1;
-  height: 2px;
+  height: 3px;
   background: var(--border);
   border-radius: 2px;
   overflow: hidden;
@@ -216,6 +218,16 @@ header p {
   font-size: 0.65rem;
   color: var(--muted);
   white-space: nowrap;
+}
+.progress-read-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  white-space: nowrap;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 /* ── APP LAYOUT ── */
@@ -541,12 +553,54 @@ header p {
   line-height: 1.6;
 }
 .fav-hint strong { font-style: normal; color: var(--cat5); font-weight: 500; }
-.fav-items { flex: 1; padding: 0.4rem 0; }
+.fav-items { flex: 1; overflow-y: auto; }
+.fav-group { border-bottom: 1px solid var(--border); }
+.fav-group:last-child { border-bottom: none; }
+.fav-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  background: var(--card);
+  transition: background 0.12s;
+  user-select: none;
+}
+.fav-group-header:hover { background: var(--hover-bg); }
+.fav-group-name {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.fav-group-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  background: var(--cat5);
+  color: #fff;
+  padding: 0.1rem 0.38rem;
+  border-radius: 1rem;
+  flex-shrink: 0;
+}
+[data-theme="light"] .fav-group-count { color: #fff; }
+.fav-group-chevron {
+  font-size: 0.6rem;
+  color: var(--muted);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.fav-group.collapsed .fav-group-chevron { transform: rotate(-90deg); }
+.fav-group-body { display: block; }
+.fav-group.collapsed .fav-group-body { display: none; }
 .fav-entry {
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
-  padding: 0.6rem 0.8rem;
+  padding: 0.5rem 0.85rem 0.5rem 1.3rem;
   cursor: pointer;
   border-left: 2px solid transparent;
   transition: background 0.12s, border-color 0.12s;
@@ -554,7 +608,7 @@ header p {
 .fav-entry:hover { background: var(--hover-bg); border-left-color: var(--cat5); }
 .fav-entry-text {
   flex: 1;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text);
   line-height: 1.45;
   word-break: break-word;
@@ -565,28 +619,19 @@ header p {
   border: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   padding: 2px 3px;
   line-height: 1;
   border-radius: 3px;
   transition: color 0.12s, background 0.12s;
+  opacity: 0;
 }
+.fav-entry:hover .fav-entry-del { opacity: 1; }
 .fav-entry-del:hover { color: var(--cat5); background: rgba(251,113,133,0.1); }
-.fav-entry-lesson {
-  display: block;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  color: var(--cat5);
-  opacity: 0.7;
-  margin-bottom: 0.2rem;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
 .fav-clear {
-  margin: 0.6rem 0.8rem 1rem;
+  margin: 0.6rem 0.85rem 1rem;
   padding: 0.4rem 0.6rem;
-  width: calc(100% - 1.6rem);
+  width: calc(100% - 1.7rem);
   background: none;
   border: 1px solid var(--border);
   border-radius: 0.4rem;
@@ -910,6 +955,254 @@ header p {
 [data-theme="light"] #sel-toolbar {
   border-color: rgba(180,140,80,0.4);
 }
+
+/* ── SCENE NOTE BUTTON ── */
+.scene-wrap {
+  position: relative;
+}
+.scene-wrap .note-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0.28rem 0.38rem;
+  opacity: 0;
+  transition: opacity 0.15s, border-color 0.15s, color 0.15s, background 0.15s;
+  z-index: 2;
+}
+.scene-wrap:hover .note-btn,
+.scene-wrap .note-btn.has-note {
+  opacity: 1;
+}
+.scene-wrap .note-btn.has-note {
+  color: var(--raj);
+  border-color: rgba(245,166,35,0.35);
+  background: rgba(245,166,35,0.07);
+}
+.scene-wrap .note-btn:hover {
+  color: var(--raj);
+  border-color: rgba(245,166,35,0.4);
+  background: rgba(245,166,35,0.1);
+}
+
+/* ── NOTES HEADER ICON (in lesson eyebrow) ── */
+.notes-view-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  padding: 0.28rem 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.notes-view-btn:hover { border-color: var(--raj); color: var(--raj); }
+.notes-view-btn.has-notes { border-color: rgba(245,166,35,0.4); color: var(--raj); background: rgba(245,166,35,0.07); }
+
+/* ── NOTE MODAL (inline, below eyebrow / floats) ── */
+.note-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.note-overlay.open { opacity: 1; pointer-events: all; }
+.note-dialog {
+  width: min(480px, 92vw);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  box-shadow: 0 20px 60px var(--shadow-dark);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.note-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+.note-dialog-title {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.note-dialog-close {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  padding: 0.2rem 0.45rem;
+  transition: all 0.12s;
+}
+.note-dialog-close:hover { color: var(--text); border-color: var(--text); }
+.note-scene-preview {
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  line-height: 1.5;
+  max-height: 4.5rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+#noteTextarea {
+  flex: 1;
+  background: var(--surface);
+  border: none;
+  outline: none;
+  padding: 1rem;
+  font-family: 'Newsreader', serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  resize: none;
+  min-height: 140px;
+  line-height: 1.7;
+  caret-color: var(--raj);
+}
+#noteTextarea::placeholder { color: var(--muted); opacity: 0.6; }
+.note-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  gap: 0.6rem;
+}
+.note-save-btn {
+  background: var(--raj);
+  color: #000;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.42rem 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+.note-save-btn:hover { opacity: 0.85; }
+.note-delete-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0.38rem 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.note-delete-btn:hover { border-color: var(--cat5); color: var(--cat5); }
+.note-char-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  margin-right: auto;
+}
+
+/* ── ALL NOTES PANEL (inline dropdown in lesson) ── */
+.notes-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  margin-bottom: 1.2rem;
+  overflow: hidden;
+  animation: fadeUp 0.2s ease;
+}
+.notes-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.notes-panel-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  flex: 1;
+}
+.notes-panel-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  transition: color 0.12s;
+}
+.notes-panel-close:hover { color: var(--text); }
+.notes-panel-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.notes-panel-item:last-child { border-bottom: none; }
+.notes-panel-item:hover { background: var(--hover-bg); }
+.notes-panel-scene-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-top: 0.15rem;
+  opacity: 0.7;
+  min-width: 2.5rem;
+}
+.notes-panel-note-text {
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.55;
+  word-break: break-word;
+}
+.notes-panel-empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.85rem;
+}
 </style>
 </head>
 <body>
@@ -930,6 +1223,7 @@ header p {
 <div class="progress-wrap">
   <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
   <span class="progress-label" id="progressLabel">0 / 0</span>
+  <span class="progress-read-time" id="readTimeLabel" style="display:none">⏱ <span id="readTimeTxt"></span></span>
 </div>
 
 <div class="app">
@@ -969,6 +1263,23 @@ header p {
 <div id="sel-toolbar">
   <button class="sel-btn" id="selSaveBtn">★ Save</button>
   <span class="sel-label">Favorite this</span>
+</div>
+
+<!-- Note Dialog -->
+<div class="note-overlay" id="noteOverlay" onclick="handleNoteOverlayClick(event)">
+  <div class="note-dialog" id="noteDialog">
+    <div class="note-dialog-header">
+      <span class="note-dialog-title" id="noteDiagTitle">📝 Add Note</span>
+      <button class="note-dialog-close" onclick="closeNoteDialog()">ESC</button>
+    </div>
+    <div class="note-scene-preview" id="noteScenePreview"></div>
+    <textarea id="noteTextarea" placeholder="Write your note here…" maxlength="600"></textarea>
+    <div class="note-dialog-footer">
+      <span class="note-char-count" id="noteCharCount">0 / 600</span>
+      <button class="note-delete-btn" id="noteDeleteBtn" onclick="deleteCurrentNote()" style="display:none">Delete note</button>
+      <button class="note-save-btn" onclick="saveNote()">Save</button>
+    </div>
+  </div>
 </div>
 
 <!-- Search Overlay -->
@@ -1153,6 +1464,7 @@ function selectLesson(idx, skipScrollTop) {
           ${catMeta.icon} ${lesson.category}
         </span>
         <span class="lesson-sub-tag">/ ${lesson.tag}</span>
+        <button class="notes-view-btn" id="notesViewBtn" onclick="toggleNotesPanel()">📝 Notes</button>
       </div>
       <h2 class="lesson-title">${lesson.title}</h2>
       <p class="lesson-intro">${lesson.intro}</p>
@@ -1168,53 +1480,94 @@ function selectLesson(idx, skipScrollTop) {
   closeSidebar();
   hideToolbar();
   reapplyFavHighlights();
+  updateNotesViewBtn();
+  if (_notesPanelOpen) renderNotesPanel();
 }
 
 function renderScene(s, catMeta, si) {
-  const idx = (si !== undefined) ? ` data-scene-idx="${si}"` : '';
+  const sceneIdx = (si !== undefined) ? si : -1;
+  const idxAttr  = sceneIdx >= 0 ? ` data-scene-idx="${sceneIdx}"` : '';
+  const noteKey  = `note-${currentIdx}-${sceneIdx}`;
+  const hasNote  = !!getNoteByKey(noteKey);
+  const noteBtn  = sceneIdx >= 0
+    ? `<button class="note-btn ${hasNote ? 'has-note' : ''}" title="Add note" onclick="openNoteDialog(${sceneIdx})">✏️</button>`
+    : '';
 
   if (s.type === 'analogy') return `
-    <div class="analogy-card"${idx}>
-      <div class="analogy-label">🎯 The Analogy</div>
-      <div class="analogy-text">${s.text}</div>
+    <div class="scene-wrap"${idxAttr}>
+      ${noteBtn}
+      <div class="analogy-card">
+        <div class="analogy-label">🎯 The Analogy</div>
+        <div class="analogy-text">${s.text}</div>
+      </div>
     </div>`;
 
   if (s.type === 'code') return `
-    <div class="code-card"${idx}>
-      <div class="code-topbar">
-        <div class="code-dot" style="background:#ff5f57"></div>
-        <div class="code-dot" style="background:#febc2e"></div>
-        <div class="code-dot" style="background:#28c840"></div>
+    <div class="scene-wrap"${idxAttr}>
+      ${noteBtn}
+      <div class="code-card">
+        <div class="code-topbar">
+          <div class="code-dot" style="background:#ff5f57"></div>
+          <div class="code-dot" style="background:#febc2e"></div>
+          <div class="code-dot" style="background:#28c840"></div>
+        </div>
+        <div class="code-body">${s.text}</div>
       </div>
-      <div class="code-body">${s.text}</div>
     </div>`;
 
   if (s.type === 'summary') return `
-    <div class="summary-card"${idx}>
-      <div class="summary-title">📌 Quick Recap</div>
-      <ul class="summary-list">${s.points.map(p => `<li>${p}</li>`).join('')}</ul>
+    <div class="scene-wrap"${idxAttr}>
+      ${noteBtn}
+      <div class="summary-card">
+        <div class="summary-title">📌 Quick Recap</div>
+        <ul class="summary-list">${s.points.map(p => `<li>${p}</li>`).join('')}</ul>
+      </div>
     </div>`;
 
   const isRaj  = s.speaker === 'raj';
   const color  = isRaj ? 'var(--raj)' : 'var(--you)';
   const label  = isRaj ? '👨‍💻 Raj' : '🧑‍💻 You';
   return `
-    <div class="scene"${idx}>
-      <div class="scene-accent" style="background:${color}"></div>
-      <div class="speaker-label" style="color:${color}">${label}</div>
-      <div class="dialogue">${s.text}</div>
+    <div class="scene-wrap"${idxAttr}>
+      ${noteBtn}
+      <div class="scene">
+        <div class="scene-accent" style="background:${color}"></div>
+        <div class="speaker-label" style="color:${color}">${label}</div>
+        <div class="dialogue">${s.text}</div>
+      </div>
     </div>`;
 }
 
 // ─────────────────────────────────────────────────────────────
 //  PROGRESS
 // ─────────────────────────────────────────────────────────────
+function estimateReadTime(lesson) {
+  // Count words across all scenes
+  let words = (lesson.intro || '').split(/\s+/).length;
+  (lesson.scenes || []).forEach(s => {
+    if (s.text)   words += s.text.split(/\s+/).length;
+    if (s.points) s.points.forEach(p => words += p.split(/\s+/).length);
+  });
+  const mins = Math.max(1, Math.round(words / 200)); // ~200 wpm reading speed
+  return mins;
+}
+
 function updateProgress() {
   const total  = LESSONS.length;
   const pos    = currentIdx !== null ? flatLessons.indexOf(currentIdx) + 1 : 0;
   const pct    = total > 0 ? (pos / total) * 100 : 0;
   document.getElementById('progressFill').style.width  = pct + '%';
   document.getElementById('progressLabel').textContent = pos + ' / ' + total;
+
+  const rtEl  = document.getElementById('readTimeLabel');
+  const rtTxt = document.getElementById('readTimeTxt');
+  if (rtEl && rtTxt && currentIdx !== null && LESSONS[currentIdx]) {
+    const mins = estimateReadTime(LESSONS[currentIdx]);
+    rtTxt.textContent = mins + ' min read';
+    rtEl.style.display = 'flex';
+  } else if (rtEl) {
+    rtEl.style.display = 'none';
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1259,16 +1612,48 @@ function renderFavPanel() {
     return;
   }
 
-  const items = favs.map((f, i) => `
-    <div class="fav-entry" onclick="jumpToFav('${f.id}')">
-      ${f.lessonIdx !== undefined && LESSONS[f.lessonIdx] ? `<span class="fav-entry-lesson">${esc(LESSONS[f.lessonIdx].tag)}</span>` : ''}
-      <span class="fav-entry-text">${esc(f.text)}</span>
-      <button class="fav-entry-del" onclick="deleteFav(event,${i})" title="Remove">✕</button>
-    </div>`).join('');
+  // Group favorites by lessonIdx, preserving add order within each group
+  const groups = {};
+  const groupOrder = [];
+  favs.forEach((f, i) => {
+    const key = f.lessonIdx !== undefined ? f.lessonIdx : '__none__';
+    if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
+    groups[key].push({ f, i });
+  });
+
+  const groupsHTML = groupOrder.map(key => {
+    const items  = groups[key];
+    const lesson = key !== '__none__' && LESSONS[key] ? LESSONS[key] : null;
+    const name   = lesson ? esc(lesson.tag) : 'Unsorted';
+    const count  = items.length;
+    const isOpen = !_favGroupCollapsed[key];
+
+    const itemsHTML = items.map(({ f, i }) => `
+      <div class="fav-entry" onclick="jumpToFav('${f.id}')">
+        <span class="fav-entry-text">${esc(f.text)}</span>
+        <button class="fav-entry-del" onclick="deleteFav(event,${i})" title="Remove">✕</button>
+      </div>`).join('');
+
+    return `
+      <div class="fav-group ${isOpen ? '' : 'collapsed'}" id="fav-group-${key}">
+        <div class="fav-group-header" onclick="toggleFavGroup('${key}')">
+          <span class="fav-group-name">${name}</span>
+          <span class="fav-group-count">${count}</span>
+          <span class="fav-group-chevron">▾</span>
+        </div>
+        <div class="fav-group-body">${itemsHTML}</div>
+      </div>`;
+  }).join('');
 
   body.innerHTML = `
-    <div class="fav-items">${items}</div>
+    <div class="fav-items">${groupsHTML}</div>
     <button class="fav-clear" onclick="clearAllFavs()">Clear all</button>`;
+}
+
+const _favGroupCollapsed = {};
+function toggleFavGroup(key) {
+  _favGroupCollapsed[key] = !_favGroupCollapsed[key];
+  renderFavPanel();
 }
 
 function deleteFav(e, idx) {
@@ -1800,6 +2185,167 @@ function toggleTheme() {
     applyTheme('light');
   }
 })();
+
+// ─────────────────────────────────────────────────────────────
+//  NOTES SYSTEM
+// ─────────────────────────────────────────────────────────────
+const NOTES_KEY = 'coderoom-v2-notes';
+
+function loadNotes() {
+  try { return JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function saveNotesStore(store) {
+  try { localStorage.setItem(NOTES_KEY, JSON.stringify(store)); } catch(e) {}
+}
+
+let notesStore = loadNotes(); // { "note-{lessonIdx}-{sceneIdx}": { text, updatedAt } }
+
+function getNoteByKey(key) { return notesStore[key] || null; }
+
+// ── Note dialog state ──
+let _noteSceneIdx = -1;
+let _notesPanelOpen = false;
+
+function openNoteDialog(sceneIdx) {
+  _noteSceneIdx = sceneIdx;
+  const key     = `note-${currentIdx}-${sceneIdx}`;
+  const note    = getNoteByKey(key);
+  const lesson  = LESSONS[currentIdx];
+  const scene   = lesson && lesson.scenes[sceneIdx];
+
+  // Populate preview — strip HTML, truncate
+  const preview = scene
+    ? stripHtml(scene.text || (scene.points || []).join(' ') || '').slice(0, 160)
+    : '';
+  document.getElementById('noteScenePreview').textContent = preview + (preview.length === 160 ? '…' : '');
+
+  const ta = document.getElementById('noteTextarea');
+  ta.value = note ? note.text : '';
+  updateNoteCharCount();
+
+  const title = document.getElementById('noteDiagTitle');
+  title.textContent = note ? '✏️ Edit Note' : '✏️ Add Note';
+
+  const delBtn = document.getElementById('noteDeleteBtn');
+  delBtn.style.display = note ? 'inline-block' : 'none';
+
+  document.getElementById('noteOverlay').classList.add('open');
+  setTimeout(() => ta.focus(), 60);
+}
+
+function closeNoteDialog() {
+  document.getElementById('noteOverlay').classList.remove('open');
+}
+
+function handleNoteOverlayClick(e) {
+  if (!document.getElementById('noteDialog').contains(e.target)) closeNoteDialog();
+}
+
+function updateNoteCharCount() {
+  const ta  = document.getElementById('noteTextarea');
+  const cnt = document.getElementById('noteCharCount');
+  if (cnt) cnt.textContent = `${ta.value.length} / 600`;
+}
+document.getElementById('noteTextarea').addEventListener('input', updateNoteCharCount);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('noteOverlay').classList.contains('open')) {
+    closeNoteDialog();
+  }
+});
+
+function saveNote() {
+  const text = document.getElementById('noteTextarea').value.trim();
+  const key  = `note-${currentIdx}-${_noteSceneIdx}`;
+  if (text) {
+    notesStore[key] = { text, lessonIdx: currentIdx, sceneIdx: _noteSceneIdx, updatedAt: new Date().toISOString() };
+  } else {
+    delete notesStore[key];
+  }
+  saveNotesStore(notesStore);
+  closeNoteDialog();
+  // Refresh the lesson view so note button state updates
+  selectLesson(currentIdx, true);
+  if (_notesPanelOpen) renderNotesPanel();
+  updateNotesViewBtn();
+}
+
+function deleteCurrentNote() {
+  const key = `note-${currentIdx}-${_noteSceneIdx}`;
+  delete notesStore[key];
+  saveNotesStore(notesStore);
+  closeNoteDialog();
+  selectLesson(currentIdx, true);
+  if (_notesPanelOpen) renderNotesPanel();
+  updateNotesViewBtn();
+}
+
+function getNotesForLesson(lessonIdx) {
+  return Object.entries(notesStore)
+    .filter(([k]) => k.startsWith(`note-${lessonIdx}-`))
+    .map(([k, v]) => ({ key: k, sceneIdx: parseInt(k.split('-')[2]), ...v }))
+    .sort((a, b) => a.sceneIdx - b.sceneIdx);
+}
+
+function updateNotesViewBtn() {
+  const btn = document.getElementById('notesViewBtn');
+  if (!btn) return;
+  const hasNotes = getNotesForLesson(currentIdx).length > 0;
+  btn.classList.toggle('has-notes', hasNotes);
+  btn.textContent = hasNotes ? `📝 Notes (${getNotesForLesson(currentIdx).length})` : '📝 Notes';
+}
+
+// Notes panel — inline dropdown inserted before scenes
+function toggleNotesPanel() {
+  _notesPanelOpen = !_notesPanelOpen;
+  if (_notesPanelOpen) renderNotesPanel();
+  else removeNotesPanel();
+}
+
+function removeNotesPanel() {
+  const existing = document.getElementById('notesInlinePanel');
+  if (existing) existing.remove();
+}
+
+function renderNotesPanel() {
+  removeNotesPanel();
+  const notes  = getNotesForLesson(currentIdx);
+  const lesson = LESSONS[currentIdx];
+  const view   = document.getElementById('lessonView');
+  if (!view) return;
+
+  const itemsHTML = notes.length === 0
+    ? '<div class="notes-panel-empty">No notes for this lesson yet.</div>'
+    : notes.map(n => {
+        const scene = lesson && lesson.scenes[n.sceneIdx];
+        const sceneLabel = scene
+          ? (scene.speaker ? (scene.speaker === 'raj' ? 'Raj' : 'You') : (scene.type || 'scene'))
+          : `#${n.sceneIdx}`;
+        return `
+          <div class="notes-panel-item" onclick="openNoteDialog(${n.sceneIdx})">
+            <span class="notes-panel-scene-label">${esc(sceneLabel)}</span>
+            <span class="notes-panel-note-text">${esc(n.text)}</span>
+          </div>`;
+      }).join('');
+
+  const panel = document.createElement('div');
+  panel.id        = 'notesInlinePanel';
+  panel.className = 'notes-panel';
+  panel.innerHTML = `
+    <div class="notes-panel-header">
+      <span class="notes-panel-title">📝 Your notes — ${esc(lesson ? lesson.tag : '')}</span>
+      <button class="notes-panel-close" onclick="toggleNotesPanel()">✕</button>
+    </div>
+    ${itemsHTML}`;
+
+  // Insert after .lesson-intro
+  const intro = view.querySelector('.lesson-intro');
+  if (intro && intro.nextSibling) {
+    view.querySelector('.lesson').insertBefore(panel, intro.nextSibling);
+  } else {
+    view.querySelector('.lesson').appendChild(panel);
+  }
+}
 
 // ─────────────────────────────────────────────────────────────
 //  INIT
