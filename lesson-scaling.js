@@ -59,7 +59,7 @@ if (cluster.isPrimary) {
 
 // In production — PM2 handles this automatically
 // pm2 start app.js -i max   (max = number of CPU cores)`
-      }
+      
     },
 
     // ── Load balancing ──
@@ -116,7 +116,7 @@ app.get('/health', asyncHandler(async (req, res) => {
 }));
 // If DB or Redis throws → unhandled error → asyncHandler → next(err) → 500
 // Load balancer sees 500 → removes server from pool`
-      }
+      
     },
 
     // ── Caching strategy ──
@@ -189,7 +189,7 @@ const getWithLock = async (key, fetchFn) => {
     return getWithLock(key, fetchFn); // retry
   }
 };`
-      }
+      
     },
 
     // ── Redis data structures ──
@@ -236,7 +236,7 @@ const job = await client.blpop('email_queue', 0);            // blocking pop fro
 // HyperLogLog — count unique visitors (approximate, ~0.81% error, fixed 12KB)
 await client.pfadd('unique_visitors:2024-03-10', userId);
 const uniqueCount = await client.pfcount('unique_visitors:2024-03-10');`
-      }
+      
     },
 
     // ── CDN ──
@@ -290,7 +290,7 @@ await cf.send(new CreateInvalidationCommand({
     CallerReference: Date.now().toString()
   }
 }));`
-      }
+      
     },
 
     // ── Database scaling ──
@@ -352,7 +352,7 @@ const getShardForUser = (userId) => {
   return parseInt(hash.slice(0, 8), 16) % NUM_SHARDS;
 };
 const db = shardConnections[getShardForUser(userId)];`
-      }
+      
     },
 
     // ── Message queues ──
@@ -418,7 +418,7 @@ emailWorker.on('failed', (job, err) => {
 // Scheduled/delayed jobs
 await emailQueue.add('reminder', data, { delay: 24 * 60 * 60 * 1000 }); // 24 hours later
 await emailQueue.add('digest',   data, { repeat: { cron: '0 9 * * *' } }); // every day 9am`
-      }
+      
     },
 
     // ── Reverse proxy and Nginx ──
@@ -476,7 +476,7 @@ server {
   listen 80;
   return 301 https://$host$request_uri;
 }`
-      }
+      
     },
 
     // ── WebSockets at scale ──
@@ -521,7 +521,7 @@ io.on('connection', (socket) => {
     io.to('user:' + toUserId).emit('new_message', message);
   });
 });`
-      }
+      
     },
 
     // ── Eventual consistency ──
@@ -565,7 +565,7 @@ await Post.findByIdAndUpdate(postId, { $inc: { likes: 1 } });
 // In a distributed system, during a network partition, you choose:
 // Consistency  → return error if can't guarantee latest data (banks)
 // Availability → return possibly stale data rather than an error (social feeds)`
-      }
+      
     },
 
     // ── Graceful degradation ──
@@ -614,7 +614,7 @@ app.get('/home', asyncHandler(async (req, res) => {
     // page still loads even if recommendations service is completely down
   });
 }));`
-      }
+      
     },
 
     {
