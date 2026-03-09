@@ -1026,7 +1026,7 @@ function buildSidebar() {
 // ─────────────────────────────────────────────────────────────
 //  LESSON RENDERER
 // ─────────────────────────────────────────────────────────────
-function selectLesson(idx) {
+function selectLesson(idx, skipScrollTop) {
   if (idx === null || idx === undefined || !LESSONS[idx]) return;
   currentIdx = idx;
   const lesson = LESSONS[idx];
@@ -1040,7 +1040,7 @@ function selectLesson(idx) {
   view.style.display = 'block';
 
   const catMeta = CATEGORY_META[lesson.category];
-  const scenesHTML = lesson.scenes.map(s => renderScene(s, catMeta)).join('');
+  const scenesHTML = lesson.scenes.map((s, si) => renderScene(s, catMeta, si)).join('');
 
   const pos     = flatLessons.indexOf(idx);
   const hasPrev = pos > 0;
@@ -1066,21 +1066,23 @@ function selectLesson(idx) {
     </div>`;
 
   updateProgress();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!skipScrollTop) window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
   hideToolbar();
   reapplyFavHighlights();
 }
 
-function renderScene(s, catMeta) {
+function renderScene(s, catMeta, si) {
+  const idx = (si !== undefined) ? ` data-scene-idx="${si}"` : '';
+
   if (s.type === 'analogy') return `
-    <div class="analogy-card">
+    <div class="analogy-card"${idx}>
       <div class="analogy-label">🎯 The Analogy</div>
       <div class="analogy-text">${s.text}</div>
     </div>`;
 
   if (s.type === 'code') return `
-    <div class="code-card">
+    <div class="code-card"${idx}>
       <div class="code-topbar">
         <div class="code-dot" style="background:#ff5f57"></div>
         <div class="code-dot" style="background:#febc2e"></div>
@@ -1090,7 +1092,7 @@ function renderScene(s, catMeta) {
     </div>`;
 
   if (s.type === 'summary') return `
-    <div class="summary-card">
+    <div class="summary-card"${idx}>
       <div class="summary-title">📌 Quick Recap</div>
       <ul class="summary-list">${s.points.map(p => `<li>${p}</li>`).join('')}</ul>
     </div>`;
@@ -1099,7 +1101,7 @@ function renderScene(s, catMeta) {
   const color  = isRaj ? 'var(--raj)' : 'var(--you)';
   const label  = isRaj ? '👨‍💻 Raj' : '🧑‍💻 You';
   return `
-    <div class="scene">
+    <div class="scene"${idx}>
       <div class="scene-accent" style="background:${color}"></div>
       <div class="speaker-label" style="color:${color}">${label}</div>
       <div class="dialogue">${s.text}</div>
@@ -1608,13 +1610,21 @@ function doSearch(query) {
 // Navigate to a lesson + scene and highlight the search term
 function searchGoTo(lessonIdx, sceneIdx, query) {
   closeSearch();
-  closeSidebar();
 
   const doHighlight = () => {
     const view = document.getElementById('lessonView');
     if (!view) return;
 
-    const walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT, null);
+    // Target the exact scene element if we have a valid sceneIdx,
+    // otherwise search the whole lesson view
+    let root = view;
+    if (sceneIdx >= 0) {
+      const sceneEl = view.querySelector(`[data-scene-idx="${sceneIdx}"]`);
+      if (sceneEl) root = sceneEl;
+    }
+
+    // Walk text nodes inside the target root
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
     let node;
     while ((node = walker.nextNode())) {
       const idx = node.textContent.toLowerCase().indexOf(query.toLowerCase());
@@ -1626,32 +1636,37 @@ function searchGoTo(lessonIdx, sceneIdx, query) {
 
       const mark = document.createElement('span');
       mark.className = 'search-match-flash';
+
       try {
         range.surroundContents(mark);
-      } catch(_) {
+      } catch (_) {
         const frag = range.extractContents();
         mark.appendChild(frag);
         range.insertNode(mark);
       }
 
-      mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Instant scroll — no smooth scroll fighting us
+      mark.scrollIntoView({ block: 'center' });
 
-      setTimeout(() => mark.classList.add('fade'), 1200);
+      // Then fade gently
+      setTimeout(() => mark.classList.add('fade'), 1400);
       setTimeout(() => {
         if (mark.parentNode) {
           while (mark.firstChild) mark.parentNode.insertBefore(mark.firstChild, mark);
           mark.parentNode.removeChild(mark);
         }
-      }, 2000);
+      }, 2200);
       break;
     }
   };
 
   if (currentIdx === lessonIdx) {
+    // Already on the right lesson — highlight immediately
     doHighlight();
   } else {
-    selectLesson(lessonIdx);
-    setTimeout(doHighlight, 380);
+    // Load lesson without scroll-to-top, then highlight once DOM is painted
+    selectLesson(lessonIdx, true /* skipScrollTop */);
+    requestAnimationFrame(() => requestAnimationFrame(doHighlight));
   }
 }
 
