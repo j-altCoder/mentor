@@ -9,6 +9,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  color-scheme: dark;
   --bg:          #080a0f;
   --surface:     #0e1118;
   --card:        #141720;
@@ -37,8 +38,8 @@
   --count-bg:    rgba(255,255,255,0.015);
 }
 
-[data-theme="light"] {
-  --overlay-backdrop: rgba(0,0,0,0.3);
+html[data-theme="light"] {
+  color-scheme: light;
   --bg:          #f5f4f0;
   --surface:     #fffffe;
   --card:        #ede9e2;
@@ -87,11 +88,11 @@ body::before {
 }
 
 /* ── THEME TRANSITION ── */
-html { color-scheme: dark; }
-html[data-theme="light"] { color-scheme: light; }
-body, .sidebar, .fav-panel, .search-box, .scene, .analogy-card,
-.code-card, .summary-card, .fav-panel, header, .progress-wrap,
-.search-overlay, .search-result-group, .search-result-lesson-header {
+body, .sidebar, .fav-panel, .scene, .analogy-card,
+.code-card, .summary-card, header, .progress-wrap,
+.search-box, .search-input-row, .search-results, .search-result-group,
+.search-result-lesson-header, .search-hint, .search-empty, .search-count,
+.search-hit, #searchInput, .search-close-btn {
   transition: background 0.22s ease, border-color 0.22s ease, color 0.22s ease;
 }
 
@@ -716,7 +717,7 @@ header p {
 }
 .search-box {
   width: min(640px, 92vw);
-  background: #0e1118;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0.85rem;
   overflow: hidden;
@@ -731,6 +732,7 @@ header p {
   gap: 0.6rem;
   padding: 0.9rem 1.1rem;
   border-bottom: 1px solid var(--border);
+  background: var(--surface);
   flex-shrink: 0;
 }
 .search-icon {
@@ -765,6 +767,7 @@ header p {
 .search-results {
   overflow-y: auto;
   flex: 1;
+  background: var(--surface);
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
@@ -842,7 +845,7 @@ header p {
   padding: 0.6rem 1.1rem;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
-  background: var(--count-bg);
+  background: var(--surface);
 }
 /* ── SEARCH HIGHLIGHT IN LESSON ── */
 .search-match-flash {
@@ -902,7 +905,7 @@ header p {
 }
 
 [data-theme="light"] .search-overlay {
-  background: rgba(200, 198, 192, 0.75);
+  background: rgba(180, 176, 168, 0.8);
 }
 [data-theme="light"] #sel-toolbar {
   border-color: rgba(180,140,80,0.4);
@@ -1024,34 +1027,46 @@ header p {
 //  LESSONS ARRAY — filter out any files that failed to load
 // ─────────────────────────────────────────────────────────────
 const LESSONS = [
-  typeof LESSON_AUTH          !== 'undefined' ? LESSON_AUTH          : null,
-  typeof LESSON_TOOLING       !== 'undefined' ? LESSON_TOOLING       : null,
-  typeof LESSON_PACKAGES      !== 'undefined' ? LESSON_PACKAGES      : null,
-  typeof LESSON_BACKEND_LIBS  !== 'undefined' ? LESSON_BACKEND_LIBS  : null,
-  typeof LESSON_SCALING       !== 'undefined' ? LESSON_SCALING       : null,
-  typeof LESSON_PERFORMANCE   !== 'undefined' ? LESSON_PERFORMANCE   : null,
-  typeof LESSON_MONGODB       !== 'undefined' ? LESSON_MONGODB       : null,
-  typeof LESSON_SECURITY      !== 'undefined' ? LESSON_SECURITY      : null,
-  typeof LESSON_DEVOPS        !== 'undefined' ? LESSON_DEVOPS        : null,
-  typeof LESSON_OBSERVABILITY !== 'undefined' ? LESSON_OBSERVABILITY : null,
-  typeof LESSON_DISTRIBUTED   !== 'undefined' ? LESSON_DISTRIBUTED   : null,
-  typeof LESSON_CODE_QUALITY  !== 'undefined' ? LESSON_CODE_QUALITY  : null,
-  typeof LESSON_DEBUGGING     !== 'undefined' ? LESSON_DEBUGGING     : null,
-  typeof LESSON_DATETIME      !== 'undefined' ? LESSON_DATETIME      : null,
-  typeof LESSON_CODE_REVIEW   !== 'undefined' ? LESSON_CODE_REVIEW   : null,
-  typeof LESSON_API_DESIGN    !== 'undefined' ? LESSON_API_DESIGN    : null,
-  typeof LESSON_CONCURRENCY   !== 'undefined' ? LESSON_CONCURRENCY   : null,
-  typeof LESSON_REALTIME          !== 'undefined' ? LESSON_REALTIME          : null,
-  typeof LESSON_PRODUCT_THINKING  !== 'undefined' ? LESSON_PRODUCT_THINKING  : null,
-  typeof LESSON_INCIDENTS         !== 'undefined' ? LESSON_INCIDENTS         : null,
-  typeof LESSON_NETWORKING        !== 'undefined' ? LESSON_NETWORKING        : null,
-  typeof LESSON_BROWSER_SECURITY  !== 'undefined' ? LESSON_BROWSER_SECURITY  : null,
-  typeof LESSON_BUILD_TOOLING     !== 'undefined' ? LESSON_BUILD_TOOLING     : null,
-  typeof LESSON_JS_RUNTIME        !== 'undefined' ? LESSON_JS_RUNTIME        : null,
-  typeof LESSON_REACT_TRAPS       !== 'undefined' ? LESSON_REACT_TRAPS       : null,
-  typeof LESSON_NODEJS_BACKEND    !== 'undefined' ? LESSON_NODEJS_BACKEND    : null,
-  typeof LESSON_ARCHITECTURE_THINKING !== 'undefined' ? LESSON_ARCHITECTURE_THINKING : null,
-  typeof LESSON_DEPENDENCY_SECURITY !== 'undefined' ? LESSON_DEPENDENCY_SECURITY : null,
+  // ── Language & Framework Fundamentals ──
+  // Core language & runtime first, then frameworks, then tooling
+  typeof LESSON_JS_RUNTIME            !== 'undefined' ? LESSON_JS_RUNTIME            : null, // JS engine & async model
+  typeof LESSON_NETWORKING            !== 'undefined' ? LESSON_NETWORKING            : null, // HTTP, DNS, TLS
+  typeof LESSON_BACKEND_LIBS          !== 'undefined' ? LESSON_BACKEND_LIBS          : null, // Express, middleware
+  typeof LESSON_MONGODB               !== 'undefined' ? LESSON_MONGODB               : null, // Database layer
+  typeof LESSON_DATETIME              !== 'undefined' ? LESSON_DATETIME              : null, // Date/Time gotchas
+  typeof LESSON_REACT_TRAPS           !== 'undefined' ? LESSON_REACT_TRAPS           : null, // React internals
+  typeof LESSON_NODEJS_BACKEND        !== 'undefined' ? LESSON_NODEJS_BACKEND        : null, // Node runtime behaviour
+  typeof LESSON_BUILD_TOOLING         !== 'undefined' ? LESSON_BUILD_TOOLING         : null, // Webpack/Vite
+  typeof LESSON_TOOLING               !== 'undefined' ? LESSON_TOOLING               : null, // Dev environment
+
+  // ── Architecture & System Design ──
+  // Fundamentals first, then patterns, then real-world systems
+  typeof LESSON_API_DESIGN            !== 'undefined' ? LESSON_API_DESIGN            : null, // API contracts
+  typeof LESSON_SCALING               !== 'undefined' ? LESSON_SCALING               : null, // Scaling strategies
+  typeof LESSON_CONCURRENCY           !== 'undefined' ? LESSON_CONCURRENCY           : null, // Race conditions
+  typeof LESSON_DISTRIBUTED           !== 'undefined' ? LESSON_DISTRIBUTED           : null, // Distributed reliability
+  typeof LESSON_REALTIME              !== 'undefined' ? LESSON_REALTIME              : null, // WebSockets/SSE
+  typeof LESSON_ARCHITECTURE_THINKING !== 'undefined' ? LESSON_ARCHITECTURE_THINKING : null, // System design interviews
+  typeof LESSON_DEVOPS                !== 'undefined' ? LESSON_DEVOPS                : null, // CI/CD & deployment
+  typeof LESSON_PRODUCT_THINKING      !== 'undefined' ? LESSON_PRODUCT_THINKING      : null, // Product decisions
+
+  // ── Scalability & Performance ──
+  typeof LESSON_PERFORMANCE           !== 'undefined' ? LESSON_PERFORMANCE           : null,
+
+  // ── Code Quality & Debugging ──
+  typeof LESSON_CODE_QUALITY          !== 'undefined' ? LESSON_CODE_QUALITY          : null,
+  typeof LESSON_PACKAGES              !== 'undefined' ? LESSON_PACKAGES              : null, // Dependency management
+  typeof LESSON_CODE_REVIEW           !== 'undefined' ? LESSON_CODE_REVIEW           : null,
+  typeof LESSON_DEBUGGING             !== 'undefined' ? LESSON_DEBUGGING             : null,
+
+  // ── Security & Production Operations ──
+  // Learn security concepts, then apply them in production
+  typeof LESSON_AUTH                  !== 'undefined' ? LESSON_AUTH                  : null, // Auth patterns
+  typeof LESSON_SECURITY              !== 'undefined' ? LESSON_SECURITY              : null, // App security
+  typeof LESSON_BROWSER_SECURITY      !== 'undefined' ? LESSON_BROWSER_SECURITY      : null, // XSS/CSRF
+  typeof LESSON_DEPENDENCY_SECURITY   !== 'undefined' ? LESSON_DEPENDENCY_SECURITY   : null, // Supply chain
+  typeof LESSON_OBSERVABILITY         !== 'undefined' ? LESSON_OBSERVABILITY         : null, // Monitoring
+  typeof LESSON_INCIDENTS             !== 'undefined' ? LESSON_INCIDENTS             : null, // Incident response
 ].filter(Boolean);
 
 const CATEGORIES = [
