@@ -447,7 +447,6 @@ header p {
   line-height: 1.8;
   color: var(--code-text);
   white-space: pre;
-  padding-left: 3rem;
   overflow-x: auto;
 }
 
@@ -908,6 +907,7 @@ header p {
 
 /* ── MOBILE ── */
 .mobile-nav-toggle { display: none; }
+.mobile-fav-toggle { display: none; }
 
 @media (max-width: 767px) {
   .app { grid-template-columns: 1fr; }
@@ -1190,7 +1190,7 @@ header p {
 .mark-done-btn:hover { border-color: #61dca3; color: #61dca3; }
 .mark-done-btn.done  { border-color: #61dca3; color: #61dca3; background: #61dca31a; }
 .lesson-btn { display: flex; align-items: center; justify-content: space-between; }
-.lesson-btn.completed::after { content: "\u2713"; color: #61dca3; font-size: 0.65rem; opacity: 0.85; }
+.lesson-btn.completed::after { content: "✓"; color: #61dca3; font-size: 0.65rem; opacity: 0.85; }
 
 
 .kb-overlay {
@@ -1277,22 +1277,7 @@ kbd {
 }
 
 
-.code-card { position: relative; overflow: hidden; }
-.code-lines {
-  position: absolute; top: 0; left: 0; bottom: 0;
-  width: 2.6rem; padding-top: 0; padding-bottom: 0;
-  display: flex; flex-direction: column;
-  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
-  line-height: 1.65; color: var(--muted); opacity: 0.3;
-  user-select: none; pointer-events: none;
-  border-right: 1px solid var(--border);
-  background: transparent; padding-right: 0;
-  overflow: hidden;
-}
-.code-lines span {
-  display: block; text-align: right;
-  padding-right: 0.5rem; flex-shrink: 0;
-}
+
 
 </style>
 </head>
@@ -1588,14 +1573,13 @@ function selectLesson(idx, skipScrollTop) {
       <h2 class="lesson-title">${lesson.title}</h2>
       <p class="lesson-intro">${lesson.intro}</p>
       ${scenesHTML}
-      <div style="text-align:center"><button class="mark-done-btn ${completedLessons.has(idx)?"done":""}" id="markDoneBtn" onclick="toggleDone(${idx})">${completedLessons.has(idx)?"\u2713 Completed":"\u25cb Mark as done"}</button></div>
+      <div style="text-align:center"><button class="mark-done-btn ${completedLessons.has(idx)?"done":""}" id="markDoneBtn" onclick="toggleDone(${idx})">${completedLessons.has(idx)?"✓ Completed":"○ Mark as done"}</button></div>
       <div class="lesson-nav">
         <button class="nav-btn-arrow" onclick="selectLesson(${prevIdx})" ${!hasPrev?'disabled':''}>← Prev</button>
         <button class="nav-btn-arrow next-btn" onclick="selectLesson(${nextIdx})" ${!hasNext?'disabled':''}>${hasNext?'Next →':'✓ Done'}</button>
       </div>
     </div>`;
 
-  injectCodeLineNumbers(view);
   updateProgress();
   if (!skipScrollTop) window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
@@ -1644,7 +1628,6 @@ function renderScene(s, catMeta, si) {
           <div class="code-dot" style="background:#febc2e"></div>
           <div class="code-dot" style="background:#28c840"></div>
         </div>
-        <div class="code-lines" aria-hidden="true"></div>
         <div class="code-body">${s.text}</div>
       </div>
     </div>${inlineNote}`;
@@ -2497,20 +2480,6 @@ function markNoteOpen(sceneIdx) {
 
 // ── Auto-save on input with debounce ──
 
-function injectCodeLineNumbers(view) {
-  if (!view) return;
-  view.querySelectorAll('.code-body').forEach(function(body) {
-    var lnDiv = body.previousElementSibling;
-    if (!lnDiv || !lnDiv.classList.contains('code-lines')) return;
-    var lines = body.textContent.split('\n');
-    // Sync top padding with code-body
-    var pt = parseFloat(getComputedStyle(body).paddingTop) || 0;
-    lnDiv.style.paddingTop = pt + 'px';
-    lnDiv.innerHTML = lines.map(function(_, i) {
-      return '<span>' + (i + 1) + '</span>';
-    }).join('');
-  });
-}
 
 function resizeTextarea(ta) {
   ta.style.height = "auto";
@@ -2689,7 +2658,7 @@ function toggleDone(idx) {
   saveCompleted(completedLessons);
   const btn = document.getElementById('markDoneBtn');
   if (btn) {
-    btn.textContent = completedLessons.has(idx) ? '\u2713 Completed' : '\u25cb Mark as done';
+    btn.textContent = completedLessons.has(idx) ? '✓ Completed' : '○ Mark as done';
     btn.classList.toggle('done', completedLessons.has(idx));
   }
   const sb = document.getElementById('sidebarBtn-' + idx);
