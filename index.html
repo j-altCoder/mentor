@@ -1915,7 +1915,7 @@ function renderBookmarkPanel() {
     const isOpen = !_bookmarkGroupCollapsed[key];
 
     const itemsHTML = items.map(({ b, i }) => `
-      <div class="bookmark-entry" onclick="jumpToBookmark('${f.id}')">
+      <div class="bookmark-entry" onclick="jumpToBookmark('${b.id}')">
         <span class="bookmark-entry-text">${esc(b.text)}</span>
         <button class="bookmark-entry-del" onclick="deleteBookmark(event,${i})" title="Remove">✕</button>
       </div>`).join('');
@@ -1952,7 +1952,7 @@ function deleteBookmark(e, idx) {
 }
 
 function clearAllBookmarks() {
-  bookmarks.forEach(f => removeHighlight(b.id));
+  bookmarks.forEach(b => removeHighlight(b.id));
   bookmarks = [];
   saveBookmarks(favs);
   renderBookmarkPanel();
