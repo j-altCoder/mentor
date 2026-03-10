@@ -1392,12 +1392,12 @@ kbd {
     <div id="lessonView" style="display:none"></div>
   </main>
 
-  <!-- Right: favorites panel (grid column 3, only on wide screens) -->
+  <!-- Right: bookmarks panel (grid column 3, only on wide screens) -->
   <aside class="bookmark-panel" id="bookmarkPanel">
     <div class="bookmark-mobile-handle"></div>
   <div class="bookmark-header">
       Bookmarks
-      <span class="bookmarkBadge" id="bookmarkBadge">0</span>
+      <span class="bookmark-badge" id="bookmarkBadge">0</span>
     </div>
     <div id="bookmarkBody">
       <p class="bookmark-hint">Select any text in a lesson, then tap <strong>🔖 Bookmark</strong> to save it here.</p>
@@ -1889,7 +1889,7 @@ let bookmarks = loadBookmarks();
 function renderBookmarkPanel() {
   const badge  = document.getElementById('bookmarkBadge');
   const body   = document.getElementById('bookmarkBody');
-  if (!badge || !body) return;
+  if (!body) return;  // badge optional
 
   badge.textContent = bookmarks.length;
 
@@ -2749,14 +2749,17 @@ function scrollToNoteScene(sceneIdx) {
 const LAST_LESSON_KEY = 'coderoom-v2-last-lesson';
 
 function saveLastLesson(idx) {
-  try { localStorage.setItem(LAST_LESSON_KEY, String(idx)); } catch(e) {}
+  try {
+    const tag = LESSONS[idx] ? LESSONS[idx].tag : null;
+    if (tag) localStorage.setItem(LAST_LESSON_KEY, tag);
+  } catch(e) {}
 }
 function loadLastLesson() {
   try {
-    const v = localStorage.getItem(LAST_LESSON_KEY);
-    if (v === null) return null;
-    const idx = parseInt(v, 10);
-    return (!isNaN(idx) && idx >= 0 && idx < LESSONS.length) ? idx : null;
+    const tag = localStorage.getItem(LAST_LESSON_KEY);
+    if (!tag) return null;
+    const idx = LESSONS.findIndex(function(l) { return l.tag === tag; });
+    return idx >= 0 ? idx : null;
   } catch(e) { return null; }
 }
 
@@ -2795,8 +2798,11 @@ buildSidebar();
 renderBookmarkPanel();
 
 // Restore last lesson, fall back to lesson 0
-const _restored = loadLastLesson();
-selectLesson(_restored !== null ? _restored : 0);
+(function() {
+  const _restored = loadLastLesson();
+  const _startIdx = (_restored !== null && LESSONS[_restored]) ? _restored : (flatLessons[0] ?? 0);
+  selectLesson(_startIdx);
+})();
 </script>
 </body>
 </html>
