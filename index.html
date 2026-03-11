@@ -1480,9 +1480,11 @@ kbd {
 <script src="lesson-architecture-thinking.js" onerror="console.warn('lesson-architecture-thinking.js not found')"></script>
 <script src="lesson-microservices.js"          onerror="console.warn('lesson-microservices.js not found')"></script>
 <script src="lesson-dependency-security.js" onerror="console.warn('lesson-dependency-security.js not found')"></script>
-
-
-
+<script src="lesson-aws-deployment.js" onerror="console.warn('lesson-aws-deployment.js failed to load')"></script>
+<script src="lesson-microservices-scenarios.js" onerror="console.warn('lesson-microservices-scenarios.js failed to load')"></script>
+<script src="lesson-design-patterns.js" onerror="console.warn('lesson-design-patterns.js failed to load')"></script>
+<script src="lesson-date-manipulation.js" onerror="console.warn('lesson-date-manipulation.js failed to load')"></script>
+<script src="lesson-hr-interviews.js" onerror="console.warn('lesson-hr-interviews.js failed to load')"></script>
 
 
 <script>
@@ -1501,6 +1503,7 @@ const LESSON_MAP = [
   { ref: () => typeof LESSON_NODEJS_BACKEND   !== 'undefined' ? LESSON_NODEJS_BACKEND   : null, category: "Language & Framework Fundamentals", tag: "Node.js in Production" },
   { ref: () => typeof LESSON_MONGODB          !== 'undefined' ? LESSON_MONGODB          : null, category: "Language & Framework Fundamentals", tag: "MongoDB" },
   { ref: () => typeof LESSON_DATETIME         !== 'undefined' ? LESSON_DATETIME         : null, category: "Language & Framework Fundamentals", tag: "Date & Time" },
+  { ref: () => typeof LESSON_DATE_MANIPULATION !== 'undefined' ? LESSON_DATE_MANIPULATION : null, category: "Language & Framework Fundamentals", tag: "Date Manipulation" },
   { ref: () => typeof LESSON_REACT_TRAPS      !== 'undefined' ? LESSON_REACT_TRAPS      : null, category: "Language & Framework Fundamentals", tag: "React Internals" },
   { ref: () => typeof LESSON_BUILD_TOOLING    !== 'undefined' ? LESSON_BUILD_TOOLING    : null, category: "Language & Framework Fundamentals", tag: "Build Tooling" },
 
@@ -1512,8 +1515,12 @@ const LESSON_MAP = [
   { ref: () => typeof LESSON_SCALING               !== 'undefined' ? LESSON_SCALING               : null, category: "Architecture & System Design", tag: "Scaling Strategies" },
   { ref: () => typeof LESSON_DISTRIBUTED          !== 'undefined' ? LESSON_DISTRIBUTED           : null, category: "Architecture & System Design", tag: "Distributed Systems" },
   { ref: () => typeof LESSON_MICROSERVICES         !== 'undefined' ? LESSON_MICROSERVICES         : null, category: "Architecture & System Design", tag: "Microservices" },
+  { ref: () => typeof LESSON_MICROSERVICES_SCENARIOS !== 'undefined' ? LESSON_MICROSERVICES_SCENARIOS : null, category: "Architecture & System Design", tag: "Microservices Scenarios" },
   { ref: () => typeof LESSON_ARCHITECTURE_THINKING !== 'undefined' ? LESSON_ARCHITECTURE_THINKING : null, category: "Architecture & System Design", tag: "Architecture Thinking" },
+  { ref: () => typeof LESSON_DESIGN_PATTERNS !== 'undefined' ? LESSON_DESIGN_PATTERNS : null, category: "Architecture & System Design", tag: "Design Patterns" },
   { ref: () => typeof LESSON_DEVOPS               !== 'undefined' ? LESSON_DEVOPS                : null, category: "Architecture & System Design", tag: "DevOps & CI/CD" },
+  { ref: () => typeof LESSON_AWS_DEPLOYMENT !== 'undefined' ? LESSON_AWS_DEPLOYMENT : null, category: "Architecture & System Design", tag: "MERN Deployment on AWS" },
+
   { ref: () => typeof LESSON_PRODUCT_THINKING     !== 'undefined' ? LESSON_PRODUCT_THINKING      : null, category: "Architecture & System Design", tag: "Product Thinking" },
 
   // ── Scalability & Performance ──
@@ -1535,6 +1542,10 @@ const LESSON_MAP = [
   { ref: () => typeof LESSON_OBSERVABILITY       !== 'undefined' ? LESSON_OBSERVABILITY       : null, category: "Security & Production Operations", tag: "Observability & Monitoring" },
   { ref: () => typeof LESSON_INCIDENTS           !== 'undefined' ? LESSON_INCIDENTS           : null, category: "Security & Production Operations", tag: "Production Incident Response" },
 
+  // ── Career & Interviews
+  { ref: () => typeof LESSON_HR_INTERVIEWS !== 'undefined' ? LESSON_HR_INTERVIEWS : null, category: "Career & Interviews", tag: "HR & Salary Negotiation" },
+
+
 ];
 
 // Build LESSONS — merge map entry onto lesson object, map tag/category win
@@ -1554,14 +1565,16 @@ const CATEGORIES = [
   "Architecture & System Design",
   "Scalability & Performance",
   "Code Quality & Debugging",
-  "Security & Production Operations"
+  "Security & Production Operations",
+  "Career & Interviews
 ];
 const CATEGORY_META = {
   "Language & Framework Fundamentals": { icon: "⚙️",  color: "#61dca3" },
   "Architecture & System Design":      { icon: "🏗️", color: "#f5a623" },
   "Scalability & Performance":         { icon: "⚡",  color: "#e879f9" },
   "Code Quality & Debugging":          { icon: "🔍",  color: "#38bdf8" },
-  "Security & Production Operations":  { icon: "🔒",  color: "#fb7185" }
+  "Security & Production Operations":  { icon: "🔒",  color: "#fb7185" },
+  "Career & Interviews":  { icon: "🔒",  color: "#fb7185" }
 };
 
 // ─────────────────────────────────────────────────────────────
