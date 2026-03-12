@@ -9,7 +9,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --progress-h: 42px; /* height of sticky progress bar */
+  --progress-h: 42px;
   color-scheme: dark;
   --bg:          #080a0f;
   --surface:     #0e1118;
@@ -24,7 +24,6 @@
   --cat3:        #e879f9;
   --cat4:        #38bdf8;
   --cat5:        #fb7185;
-  /* promoted from hardcoded */
   --code-bg:     #06080d;
   --code-topbar: #090b10;
   --code-text:   #9ca3af;
@@ -124,14 +123,16 @@ header {
   padding: 4rem 2rem 3rem;
   text-align: center;
   border-bottom: 1px solid var(--border);
-  overflow: hidden;
+  overflow: hidden; /* FIX: already had this, ensures ::after glow is clipped */
 }
 header::after {
   content: '';
   position: absolute;
   bottom: -60px; left: 50%;
   transform: translateX(-50%);
-  width: 600px; height: 120px;
+  /* FIX: was 600px wide — now uses a percentage so it never exceeds container */
+  width: min(600px, 100%);
+  height: 120px;
   background: radial-gradient(ellipse, rgba(251,113,133,0.15) 0%, transparent 70%);
   pointer-events: none;
 }
@@ -310,7 +311,7 @@ header p {
   padding: 3rem 3rem 6rem;
   max-width: 820px;
   margin-inline: auto;
-  min-width: 0; /* prevent grid blowout */
+  min-width: 0;
 }
 .empty-state {
   display: flex;
@@ -336,6 +337,7 @@ header p {
   align-items: center;
   gap: 0.6rem;
   margin-bottom: 0.7rem;
+  flex-wrap: wrap;
 }
 .lesson-cat-tag {
   font-family: 'JetBrains Mono', monospace;
@@ -450,6 +452,8 @@ header p {
   color: var(--code-text);
   white-space: pre;
   overflow-x: auto;
+  /* FIX: add scroll affordance on mobile */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ── SUMMARY ── */
@@ -504,6 +508,7 @@ header p {
   color: var(--text);
   cursor: pointer;
   transition: all 0.2s;
+  min-width: 90px;
 }
 .nav-btn-arrow:hover:not(:disabled) { border-color: var(--raj); color: var(--raj); }
 .nav-btn-arrow:disabled { opacity: 0.25; cursor: not-allowed; }
@@ -512,7 +517,7 @@ header p {
 
 /* ── RIGHT: FAVORITES PANEL ── */
 .bookmark-panel {
-  display: none; /* shown via media query above */
+  display: none;
   flex-direction: column;
   border-left: 1px solid var(--border);
   background: var(--surface);
@@ -661,7 +666,6 @@ header p {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.12s;
-  /* positioned via JS; translateX centers it horizontally */
 }
 #sel-toolbar.show {
   opacity: 1;
@@ -710,6 +714,7 @@ header p {
   padding: 1rem 1.2rem 0.6rem;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  gap: 0.4rem;
 }
 .sidebar-brand {
   font-family: 'JetBrains Mono', monospace;
@@ -906,84 +911,136 @@ header p {
   outline-color: transparent;
 }
 
+/* ── MOBILE BOTTOM NAV BAR ── */
+/* FIX: Replace two floating FABs with a single bottom nav bar */
+.mobile-bottom-nav {
+  display: none;
+}
+
 /* ── MOBILE ── */
 .mobile-nav-toggle { display: none; }
 .mobile-bookmark-toggle { display: none; }
 
 @media (max-width: 767px) {
   .app { grid-template-columns: 1fr; }
+
+  /* FIX: sidebar now starts below progress bar, not at top:0 */
   .sidebar {
     position: fixed;
-    top: 0; left: 0;
-    width: 80vw; max-width: 300px;
-    height: 100vh;
-    z-index: 100;
+    top: var(--progress-h);
+    left: 0;
+    width: 82vw;
+    max-width: 300px;
+    height: calc(100vh - var(--progress-h));
+    z-index: 150;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
   }
   .sidebar.open { transform: translateX(0); }
-  .mobile-nav-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    position: fixed;
-    bottom: 1.5rem; right: 1.5rem;
-    z-index: 200;
-    background: var(--raj);
-    color: #000;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.65rem 1.1rem;
-    border-radius: 2rem;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(245,166,35,0.35);
-  }
+
   .overlay {
     display: none;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.6);
-    z-index: 99;
+    z-index: 140;
   }
   .overlay.show { display: block; }
-  .content { padding: 2rem 1.2rem 6rem; }
+
+  /* FIX: bottom padding accounts for the nav bar height (56px) */
+  .content { padding: 2rem 1.2rem 5rem; }
   .sidebar-topbar { padding: 1.2rem 1rem 0.8rem; }
+
+  /* FIX: bookmark panel capped at 55vh, z-index above overlay */
   .bookmark-panel {
     display: flex !important;
     position: fixed;
     bottom: 0; left: 0; right: 0; top: auto;
-    height: 72vh; max-height: 72vh;
-    border-left: none; border-top: 1px solid var(--border);
+    height: 55vh;
+    max-height: 55vh;
+    border-left: none;
+    border-top: 1px solid var(--border);
     border-radius: 1rem 1rem 0 0;
-    z-index: 110;
+    z-index: 160;
     transform: translateY(105%);
     transition: transform 0.3s ease;
     overflow-y: auto;
   }
   .bookmark-panel.mobile-open { transform: translateY(0); }
+
   .bookmark-mobile-handle {
-    display: block; width: 36px; height: 4px;
-    background: var(--border); border-radius: 2px;
-    margin: 0.75rem auto 0; flex-shrink: 0;
-  }
-  .mobile-bookmark-toggle {
-    display: flex; align-items: center; gap: 0.45rem;
-    position: fixed; bottom: 1.5rem; left: 1.5rem;
-    z-index: 200; background: var(--surface);
-    border: 1.5px solid var(--border); color: var(--text);
-    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
-    font-weight: 600; padding: 0.6rem 1rem;
-    border-radius: 2rem; cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-  }
-  .bookmark-count-pill {
-    background: var(--cat5); color: #000;
-    font-size: 0.55rem; padding: 0.1rem 0.35rem;
-    border-radius: 1rem; font-weight: 700;
+    display: block;
+    width: 36px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0.75rem auto 0;
+    flex-shrink: 0;
   }
 
+  /* FIX: hide old floating FABs on mobile */
+  .mobile-nav-toggle { display: none !important; }
+  .mobile-bookmark-toggle { display: none !important; }
+
+  /* FIX: show bottom nav bar */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    align-items: stretch;
+  }
+  .mobile-nav-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    position: relative;
+    padding: 0;
+  }
+  .mobile-nav-tab:active { background: var(--hover-bg); }
+  .mobile-nav-tab.active { color: var(--raj); }
+  .mobile-nav-tab .tab-icon { font-size: 1.1rem; line-height: 1; }
+  .mobile-nav-tab .tab-badge {
+    position: absolute;
+    top: 6px; right: calc(50% - 18px);
+    background: var(--cat5);
+    color: #000;
+    font-size: 0.5rem;
+    font-weight: 700;
+    padding: 0.08rem 0.32rem;
+    border-radius: 1rem;
+    min-width: 14px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* FIX: hide read-time on very small screens to prevent overflow */
+  .progress-read-time { display: none !important; }
+
+  /* FIX: search box adapts to keyboard push on mobile */
+  .search-overlay {
+    padding-top: 1rem;
+    align-items: flex-start;
+  }
+  .search-box {
+    max-height: calc(100vh - 2rem);
+    border-radius: 0.75rem;
+    margin-top: env(safe-area-inset-top, 0px);
+  }
 }
 
 [data-theme="light"] .search-overlay {
@@ -1028,7 +1085,7 @@ header p {
   background: rgba(245,166,35,0.1);
 }
 
-/* ── NOTES HEADER ICON (in lesson eyebrow) ── */
+/* ── NOTES HEADER ICON ── */
 .notes-view-btn {
   margin-left: auto;
   background: none;
@@ -1048,7 +1105,7 @@ header p {
 .notes-view-btn:hover { border-color: var(--raj); color: var(--raj); }
 .notes-view-btn.has-notes { border-color: rgba(245,166,35,0.4); color: var(--raj); background: rgba(245,166,35,0.07); }
 
-/* ── INLINE NOTE AREA (expands below each scene) ── */
+/* ── INLINE NOTE AREA ── */
 .inline-note {
   display: none;
   margin: -0.2rem 0 0.7rem 0;
@@ -1110,7 +1167,7 @@ header p {
 }
 .inline-note-del:hover { color: var(--cat5); opacity: 1; }
 
-/* ── ALL NOTES PANEL (inline dropdown in lesson) ── */
+/* ── ALL NOTES PANEL ── */
 .notes-panel {
   background: var(--card);
   border: 1px solid var(--border);
@@ -1193,7 +1250,6 @@ header p {
 
 .lesson-btn.completed::after { content: "✓"; color: #61dca3; font-size: 0.65rem; opacity: 0.85; }
 
-
 .kb-overlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.72); z-index: 999;
@@ -1221,7 +1277,6 @@ kbd {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 4px; padding: 0.12rem 0.42rem; color: var(--raj);
 }
-
 
 .all-notes-overlay {
   display: none; position: fixed; inset: 0;
@@ -1277,11 +1332,7 @@ kbd {
   color: var(--text); white-space: pre-wrap;
 }
 
-
-
-
-
-/* ── LESSON NOTE (below intro, above scenes) ── */
+/* ── LESSON NOTE ── */
 .lesson-note-wrap {
   margin-bottom: 2rem;
   border: 1px solid var(--border);
@@ -1345,7 +1396,6 @@ kbd {
   min-height: 1.2em;
   display: block;
 }
-
 </style>
 </head>
 <body>
@@ -1374,9 +1424,7 @@ kbd {
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-topbar">
       <span class="sidebar-brand">Lessons</span>
-      <button class="search-icon-btn" onclick="openSearch()" title="Search (/)">
-        🔍 Search
-      </button>
+      <button class="search-icon-btn" onclick="openSearch()" title="Search (/)">🔍 Search</button>
       <button class="search-icon-btn" onclick="openAllNotes()" title="All notes">📝</button>
       <button class="search-icon-btn" onclick="showKeyboardHelp()" title="Keyboard shortcuts" style="opacity:0.55">⌨</button>
     </div>
@@ -1392,10 +1440,10 @@ kbd {
     <div id="lessonView" style="display:none"></div>
   </main>
 
-  <!-- Right: bookmarks panel (grid column 3, only on wide screens) -->
+  <!-- Right: bookmarks panel -->
   <aside class="bookmark-panel" id="bookmarkPanel">
     <div class="bookmark-mobile-handle"></div>
-  <div class="bookmark-header">
+    <div class="bookmark-header">
       Bookmarks
       <span class="bookmark-badge" id="bookmarkBadge">0</span>
     </div>
@@ -1405,7 +1453,28 @@ kbd {
   </aside>
 </div>
 
-<!-- Selection toolbar (fixed, shown on text selection) -->
+<!-- FIX: Single bottom nav bar replacing two floating FABs -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <button class="mobile-nav-tab" id="tabLessons" onclick="toggleMobileSidebar()">
+    <span class="tab-icon">☰</span>
+    <span>Lessons</span>
+  </button>
+  <button class="mobile-nav-tab" id="tabBookmarks" onclick="toggleMobileBookmark()">
+    <span class="tab-icon">🔖</span>
+    <span>Bookmarks</span>
+    <span class="tab-badge" id="mobileBookmarkCount" style="display:none"></span>
+  </button>
+  <button class="mobile-nav-tab" onclick="openSearch()">
+    <span class="tab-icon">🔍</span>
+    <span>Search</span>
+  </button>
+  <button class="mobile-nav-tab" onclick="openAllNotes()">
+    <span class="tab-icon">📝</span>
+    <span>Notes</span>
+  </button>
+</nav>
+
+<!-- Selection toolbar -->
 <div id="sel-toolbar">
   <button class="sel-btn" id="selSaveBtn">🔖 Bookmark</button>
   <span class="sel-label">Bookmark</span>
@@ -1434,6 +1503,7 @@ kbd {
     <div id="allNotesBody"></div>
   </div>
 </div>
+
 <div class="kb-overlay" id="kbOverlay" onclick="hideKeyboardHelp()">
   <div class="kb-modal" onclick="event.stopPropagation()">
     <div class="kb-title">Keyboard Shortcuts</div>
@@ -1446,11 +1516,9 @@ kbd {
   </div>
 </div>
 
-<div class="overlay" id="overlay" onclick="closeSidebar(); document.getElementById('bookmarkPanel').classList.remove('mobile-open');"></div>
-<button class="mobile-nav-toggle" onclick="toggleSidebar()">☰ Lessons</button>
-<button class="mobile-bookmark-toggle" id="mobileBookmarkToggle" onclick="toggleMobileBookmark()">🔖 Bookmarkd <span class="bookmark-count-pill" id="mobileBookmarkCount" style="display:none"></span></button>
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
 
-<!-- Lesson files: safe-loaded, missing files just log a warning -->
+<!-- Lesson files -->
 <script src="lesson-auth.js"          onerror="console.warn('lesson-auth.js not found')"></script>
 <script src="lesson-tooling.js"       onerror="console.warn('lesson-tooling.js not found')"></script>
 <script src="lesson-packages.js"      onerror="console.warn('lesson-packages.js not found')"></script>
@@ -1486,16 +1554,11 @@ kbd {
 <script src="lesson-date-manipulation.js" onerror="console.warn('lesson-date-manipulation.js failed to load')"></script>
 <script src="lesson-hr-interviews.js" onerror="console.warn('lesson-hr-interviews.js failed to load')"></script>
 
-
 <script>
 // ─────────────────────────────────────────────────────────────
-//  CANONICAL LESSON MAP — source of truth for category, tag, order
-//  lesson files are the fallback only if a key is missing here
+//  LESSON MAP
 // ─────────────────────────────────────────────────────────────
 const LESSON_MAP = [
-
-  // ── Language & Framework Fundamentals ──
-  // Environment first → language model → the HTTP layer → framework → database → gotchas → front-end runtime → build chain
   { ref: () => typeof LESSON_TOOLING          !== 'undefined' ? LESSON_TOOLING          : null, category: "Language & Framework Fundamentals", tag: "Dev Tooling" },
   { ref: () => typeof LESSON_JS_RUNTIME       !== 'undefined' ? LESSON_JS_RUNTIME       : null, category: "Language & Framework Fundamentals", tag: "JS Runtime & Async" },
   { ref: () => typeof LESSON_NETWORKING       !== 'undefined' ? LESSON_NETWORKING       : null, category: "Language & Framework Fundamentals", tag: "Networking & HTTP" },
@@ -1506,9 +1569,6 @@ const LESSON_MAP = [
   { ref: () => typeof LESSON_DATE_MANIPULATION !== 'undefined' ? LESSON_DATE_MANIPULATION : null, category: "Language & Framework Fundamentals", tag: "Date Manipulation" },
   { ref: () => typeof LESSON_REACT_TRAPS      !== 'undefined' ? LESSON_REACT_TRAPS      : null, category: "Language & Framework Fundamentals", tag: "React Internals" },
   { ref: () => typeof LESSON_BUILD_TOOLING    !== 'undefined' ? LESSON_BUILD_TOOLING    : null, category: "Language & Framework Fundamentals", tag: "Build Tooling" },
-
-  // ── Architecture & System Design ──
-  // Single-process concerns first → then distributed → then how to design and ship
   { ref: () => typeof LESSON_API_DESIGN            !== 'undefined' ? LESSON_API_DESIGN            : null, category: "Architecture & System Design", tag: "API Design" },
   { ref: () => typeof LESSON_CONCURRENCY           !== 'undefined' ? LESSON_CONCURRENCY           : null, category: "Architecture & System Design", tag: "Concurrency & Race Conditions" },
   { ref: () => typeof LESSON_REALTIME              !== 'undefined' ? LESSON_REALTIME              : null, category: "Architecture & System Design", tag: "Real-Time (WebSockets & SSE)" },
@@ -1520,35 +1580,21 @@ const LESSON_MAP = [
   { ref: () => typeof LESSON_DESIGN_PATTERNS !== 'undefined' ? LESSON_DESIGN_PATTERNS : null, category: "Architecture & System Design", tag: "Design Patterns" },
   { ref: () => typeof LESSON_DEVOPS               !== 'undefined' ? LESSON_DEVOPS                : null, category: "Architecture & System Design", tag: "DevOps & CI/CD" },
   { ref: () => typeof LESSON_AWS_DEPLOYMENT !== 'undefined' ? LESSON_AWS_DEPLOYMENT : null, category: "Architecture & System Design", tag: "MERN Deployment on AWS" },
-
   { ref: () => typeof LESSON_PRODUCT_THINKING     !== 'undefined' ? LESSON_PRODUCT_THINKING      : null, category: "Architecture & System Design", tag: "Product Thinking" },
-
-  // ── Scalability & Performance ──
   { ref: () => typeof LESSON_PERFORMANCE !== 'undefined' ? LESSON_PERFORMANCE : null, category: "Scalability & Performance", tag: "Performance Optimisation" },
-
-  // ── Code Quality & Debugging ──
-  // Write it well → manage deps → review it → debug when it breaks
   { ref: () => typeof LESSON_CODE_QUALITY !== 'undefined' ? LESSON_CODE_QUALITY : null, category: "Code Quality & Debugging", tag: "Code Quality" },
   { ref: () => typeof LESSON_PACKAGES     !== 'undefined' ? LESSON_PACKAGES     : null, category: "Code Quality & Debugging", tag: "Packages & Dependencies" },
   { ref: () => typeof LESSON_CODE_REVIEW  !== 'undefined' ? LESSON_CODE_REVIEW  : null, category: "Code Quality & Debugging", tag: "Code Review" },
   { ref: () => typeof LESSON_DEBUGGING    !== 'undefined' ? LESSON_DEBUGGING    : null, category: "Code Quality & Debugging", tag: "Debugging" },
-
-  // ── Security & Production Operations ──
-  // Auth & app security → browser-layer → supply chain → observe → respond
   { ref: () => typeof LESSON_AUTH                !== 'undefined' ? LESSON_AUTH                : null, category: "Security & Production Operations", tag: "Authentication" },
   { ref: () => typeof LESSON_SECURITY            !== 'undefined' ? LESSON_SECURITY            : null, category: "Security & Production Operations", tag: "Application Security" },
   { ref: () => typeof LESSON_BROWSER_SECURITY    !== 'undefined' ? LESSON_BROWSER_SECURITY    : null, category: "Security & Production Operations", tag: "Browser Security (XSS/CSRF)" },
   { ref: () => typeof LESSON_DEPENDENCY_SECURITY !== 'undefined' ? LESSON_DEPENDENCY_SECURITY : null, category: "Security & Production Operations", tag: "Dependency Security" },
   { ref: () => typeof LESSON_OBSERVABILITY       !== 'undefined' ? LESSON_OBSERVABILITY       : null, category: "Security & Production Operations", tag: "Observability & Monitoring" },
   { ref: () => typeof LESSON_INCIDENTS           !== 'undefined' ? LESSON_INCIDENTS           : null, category: "Security & Production Operations", tag: "Production Incident Response" },
-
-  // ── Career & Interviews
   { ref: () => typeof LESSON_HR_INTERVIEWS !== 'undefined' ? LESSON_HR_INTERVIEWS : null, category: "Career & Interviews", tag: "HR & Salary Negotiation" },
-
-
 ];
 
-// Build LESSONS — merge map entry onto lesson object, map tag/category win
 const LESSONS = LESSON_MAP
   .map(entry => {
     const lesson = entry.ref();
@@ -1574,7 +1620,7 @@ const CATEGORY_META = {
   "Scalability & Performance":         { icon: "⚡",  color: "#e879f9" },
   "Code Quality & Debugging":          { icon: "🔍",  color: "#38bdf8" },
   "Security & Production Operations":  { icon: "🔒",  color: "#fb7185" },
-  "Career & Interviews":  { icon: "🔒",  color: "#fb7185" }
+  "Career & Interviews":               { icon: "💼",  color: "#fb7185" }
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -1584,13 +1630,20 @@ let currentIdx  = null;
 let flatLessons = [];
 
 // ─────────────────────────────────────────────────────────────
-//  SIDEBAR — driven entirely by LESSON_MAP order & categories
+//  SIDEBAR
 // ─────────────────────────────────────────────────────────────
 function buildSidebar() {
   const container = document.getElementById('sidebarContent');
 
-  // Respect LESSON_MAP order: group by category, preserve insertion order
-  const grouped = {}; // category → [{ tag, idx }]
+  // Guard: no lessons loaded
+  if (LESSONS.length === 0) {
+    container.innerHTML = '<p style="padding:1.5rem;color:var(--muted);font-size:0.85rem;font-style:italic;">No lessons found. Make sure lesson JS files are present.</p>';
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('lessonView').style.display = 'none';
+    return;
+  }
+
+  const grouped = {};
   LESSONS.forEach((lesson, idx) => {
     const cat = lesson.category;
     if (!grouped[cat]) grouped[cat] = [];
@@ -1653,9 +1706,9 @@ function selectLesson(idx, skipScrollTop) {
       <h2 class="lesson-title">${lesson.title}</h2>
       <p class="lesson-intro">${lesson.intro}</p>
       ${(function(){
-        const lnKey    = 'note-' + idx + '-lesson';
-        const lnNote   = getNoteByKey(lnKey);
-        const lnText   = lnNote ? escAttr(lnNote.text) : '';
+        const lnKey  = 'note-' + idx + '-lesson';
+        const lnNote = getNoteByKey(lnKey);
+        const lnText = lnNote ? escAttr(lnNote.text) : '';
         return '<div class="lesson-note-wrap">'
           + '<div class="lesson-note-label">Lesson note'
           + '<button class="lesson-note-del' + (lnNote ? ' visible' : '') + '" id="lesson-note-del-' + idx + '" onclick="deleteLessonNote(' + idx + ')">delete</button>'
@@ -1677,7 +1730,6 @@ function selectLesson(idx, skipScrollTop) {
   closeSidebar();
   hideToolbar();
   reapplyBookmarkHighlights();
-  // Resize lesson note textarea if it has existing content
   const _lnTa = document.getElementById('lesson-note-ta-' + idx);
   if (_lnTa && _lnTa.value) resizeTextarea(_lnTa);
   updateNotesViewBtn();
@@ -1751,10 +1803,7 @@ function renderScene(s, catMeta, si) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  PROGRESS
-// ─────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────
-//  READING TIME — updates as you scroll
+//  PROGRESS & READING TIME
 // ─────────────────────────────────────────────────────────────
 function countWords(lesson) {
   let w = (lesson.intro || '').split(/\s+/).length;
@@ -1772,13 +1821,10 @@ function updateReadingTime() {
     if (rtEl) rtEl.style.display = 'none';
     return;
   }
-
   const view = document.getElementById('lessonView');
   if (!view || view.style.display === 'none') { rtEl.style.display = 'none'; return; }
 
-  const totalWords = countWords(LESSONS[currentIdx]);
-
-  // Estimate words already scrolled past
+  const totalWords  = countWords(LESSONS[currentIdx]);
   const viewRect    = view.getBoundingClientRect();
   const viewHeight  = view.scrollHeight;
   const scrolled    = Math.max(0, -viewRect.top + window.innerHeight * 0.5);
@@ -1789,15 +1835,12 @@ function updateReadingTime() {
 
   const label = scrollRatio < 0.05
     ? `${Math.max(1, Math.round(totalWords / 200))} min read`
-    : minsLeft === 1
-      ? '< 1 min left'
-      : `${minsLeft} min left`;
+    : minsLeft === 1 ? '< 1 min left' : `${minsLeft} min left`;
 
   rtTxt.textContent = label;
   rtEl.style.display = 'flex';
 }
 
-// Attach scroll listener once
 window.addEventListener('scroll', updateReadingTime, { passive: true });
 
 function updateProgress() {
@@ -1810,8 +1853,61 @@ function updateProgress() {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  MOBILE SIDEBAR
+//  MOBILE NAV — unified bottom bar
 // ─────────────────────────────────────────────────────────────
+function toggleMobileSidebar() {
+  const sidebar  = document.getElementById('sidebar');
+  const overlay  = document.getElementById('overlay');
+  const tab      = document.getElementById('tabLessons');
+  const isOpen   = sidebar.classList.contains('open');
+  // Close bookmark panel if open
+  document.getElementById('bookmarkPanel').classList.remove('mobile-open');
+  document.getElementById('tabBookmarks').classList.remove('active');
+  if (isOpen) {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+    tab.classList.remove('active');
+  } else {
+    sidebar.classList.add('open');
+    overlay.classList.add('show');
+    tab.classList.add('active');
+  }
+}
+
+function toggleMobileBookmark() {
+  const panel   = document.getElementById('bookmarkPanel');
+  const overlay = document.getElementById('overlay');
+  const tab     = document.getElementById('tabBookmarks');
+  const isOpen  = panel.classList.contains('mobile-open');
+  // Close sidebar if open
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('tabLessons').classList.remove('active');
+  if (isOpen) {
+    panel.classList.remove('mobile-open');
+    overlay.classList.remove('show');
+    tab.classList.remove('active');
+  } else {
+    panel.classList.add('mobile-open');
+    overlay.classList.add('show');
+    tab.classList.add('active');
+  }
+}
+
+// Unified close all mobile panels
+function closeAll() {
+  closeSidebar();
+  document.getElementById('bookmarkPanel').classList.remove('mobile-open');
+  document.getElementById('tabLessons').classList.remove('active');
+  document.getElementById('tabBookmarks').classList.remove('active');
+}
+
+function toggleSidebar()  { toggleMobileSidebar(); }
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  const tab = document.getElementById('tabLessons');
+  if (tab) tab.classList.remove('active');
+}
 
 function showKeyboardHelp() { document.getElementById('kbOverlay').classList.add('open'); }
 function hideKeyboardHelp() { document.getElementById('kbOverlay').classList.remove('open'); }
@@ -1861,19 +1957,6 @@ function closeAllNotes() {
   document.getElementById('allNotesOverlay').classList.remove('open');
 }
 
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('overlay').classList.toggle('show');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
-}
-function toggleMobileBookmark() {
-  const panel = document.getElementById('bookmarkPanel');
-  panel.classList.toggle('mobile-open');
-  document.getElementById('overlay').classList.toggle('show');
-}
 function updateMobileBookmarkBadge() {
   const badge = document.getElementById('mobileBookmarkCount');
   if (!badge) return;
@@ -1882,7 +1965,7 @@ function updateMobileBookmarkBadge() {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  BOOKMARKS — storage
+//  BOOKMARKS
 // ─────────────────────────────────────────────────────────────
 const BOOKMARK_KEY = 'coderoom-v2-bookmarks';
 
@@ -1896,22 +1979,19 @@ function saveBookmarks(list) {
 
 let bookmarks = loadBookmarks();
 
-// ─────────────────────────────────────────────────────────────
-//  BOOKMARKS — render panel
-// ─────────────────────────────────────────────────────────────
 function renderBookmarkPanel() {
   const badge  = document.getElementById('bookmarkBadge');
   const body   = document.getElementById('bookmarkBody');
-  if (!body) return;  // badge optional
+  if (!body) return;
 
   badge.textContent = bookmarks.length;
+  updateMobileBookmarkBadge();
 
   if (bookmarks.length === 0) {
     body.innerHTML = '<p class="bookmark-hint">Select any text in a lesson, then tap <strong>🔖 Bookmark</strong> to save it here.</p>';
     return;
   }
 
-  // Group favorites by lessonIdx, preserving add order within each group
   const groups = {};
   const groupOrder = [];
   bookmarks.forEach((b, i) => {
@@ -1964,10 +2044,11 @@ function deleteBookmark(e, idx) {
   renderBookmarkPanel();
 }
 
+// FIX: was `saveBookmarks(favs)` — `favs` was undefined
 function clearAllBookmarks() {
   bookmarks.forEach(b => removeHighlight(b.id));
   bookmarks = [];
-  saveBookmarks(favs);
+  saveBookmarks(bookmarks);
   renderBookmarkPanel();
 }
 
@@ -1984,12 +2065,9 @@ function jumpToBookmark(id) {
   const bookmark = bookmarks.find(f => f.id === id);
   if (!bookmark) return;
 
-  // Ensure the mark is injected and then scroll to it.
-  // Polls briefly in case the DOM hasn't fully painted yet.
   const scrollToMark = (attemptsLeft) => {
     let el = document.getElementById(id);
     if (!el) {
-      // Try to inject it
       const view = document.getElementById('lessonView');
       if (view) injectHighlight(view, bookmark.text, id, bookmark.sceneIdx);
       el = document.getElementById(id);
@@ -1999,34 +2077,24 @@ function jumpToBookmark(id) {
       el.classList.add('flash');
       setTimeout(() => el.classList.remove('flash'), 900);
     } else if (attemptsLeft > 0) {
-      // DOM not ready yet — retry
       setTimeout(() => scrollToMark(attemptsLeft - 1), 80);
     }
   };
 
   if (bookmark.lessonIdx !== currentIdx) {
-    // Use _origSelectLesson with skipScrollTop=true so window.scrollTo(top:0)
-    // doesn't fire and fight the scrollIntoView below
     _origSelectLesson(bookmark.lessonIdx, true);
     saveLastLesson(bookmark.lessonIdx);
-    // reapplyBookmarkHighlights runs synchronously inside selectLesson,
-    // but the DOM paint happens async — give it two frames + a small buffer
     requestAnimationFrame(() => requestAnimationFrame(() => scrollToMark(5)));
   } else {
-    // Already on the right lesson — scroll immediately
     scrollToMark(3);
   }
 }
 
-// Re-apply highlights after lesson navigation (highlights live in rendered HTML
-// which gets replaced on lesson change — we store the text & regenerate)
 function reapplyBookmarkHighlights() {
   const view = document.getElementById('lessonView');
   if (!view) return;
-
   const lessonBookmarks = bookmarks.filter(b => b.lessonIdx === currentIdx);
   if (!lessonBookmarks.length) return;
-
   lessonBookmarks.forEach(bookmark => {
     if (document.getElementById(bookmark.id)) return;
     injectHighlight(view, bookmark.text, bookmark.id, bookmark.sceneIdx);
@@ -2034,50 +2102,35 @@ function reapplyBookmarkHighlights() {
 }
 
 function injectHighlight(root, searchText, id, sceneIdx) {
-  // Narrow the search root to the specific scene if sceneIdx is known
   if (sceneIdx !== undefined && sceneIdx >= 0) {
     const sceneWrap = root.querySelector(`[data-scene-idx="${sceneIdx}"]`);
     if (sceneWrap) root = sceneWrap;
   }
-
-  // Walk all text nodes inside root, find searchText, wrap first match in <mark>
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
-      // Skip nodes already inside a fav-mark (avoid double-wrap)
       if (node.parentElement && node.parentElement.closest('.bookmark-mark')) return NodeFilter.FILTER_REJECT;
-      // Skip code blocks — text there is raw and selection is unreliable
       if (node.parentElement && node.parentElement.closest('.code-body'))  return NodeFilter.FILTER_SKIP;
       return NodeFilter.FILTER_ACCEPT;
     }
   });
-
-  // Collect all text nodes and their cumulative positions
   const nodes = [];
-  let   full  = '';
-  let   node;
+  let full = '';
+  let node;
   while ((node = walker.nextNode())) {
     nodes.push({ node, start: full.length });
     full += node.textContent;
   }
-
-  // Normalise whitespace for matching (selections collapse whitespace)
   const normFull   = full.replace(/\s+/g, ' ');
   const normSearch = searchText.replace(/\s+/g, ' ').trim();
   const matchIdx   = normFull.indexOf(normSearch);
-  if (matchIdx === -1) return; // text not found in this render
-
-  // Map match position back to original text offset
+  if (matchIdx === -1) return;
   let origStart = mapNormToOrig(full, matchIdx);
   let origEnd   = mapNormToOrig(full, matchIdx + normSearch.length);
-
-  // Find which text nodes span origStart..origEnd
-  const range = document.createRange();
-  let placed  = false;
-
+  const range   = document.createRange();
+  let placed    = false;
   for (let i = 0; i < nodes.length; i++) {
     const { node: n, start } = nodes[i];
     const end = start + n.textContent.length;
-
     if (!placed && origStart >= start && origStart < end) {
       range.setStart(n, origStart - start);
       placed = true;
@@ -2087,9 +2140,7 @@ function injectHighlight(root, searchText, id, sceneIdx) {
       break;
     }
   }
-
   if (!placed) return;
-
   try {
     const mark = document.createElement('mark');
     mark.className = 'bookmark-mark';
@@ -2103,37 +2154,25 @@ function injectHighlight(root, searchText, id, sceneIdx) {
       mark.appendChild(fragment);
       range.insertNode(mark);
     }
-  } catch(err) {
-    // Silently fail — panel entry still works for cross-lesson navigation
-  }
+  } catch(err) {}
 }
 
 function mapNormToOrig(orig, normPos) {
-  // Given a position in the whitespace-collapsed string, return the
-  // corresponding position in the original string.
-  let o = 0; // orig cursor
-  let n = 0; // norm cursor
+  let o = 0, n = 0;
   while (o < orig.length && n < normPos) {
     if (/\s/.test(orig[o])) {
-      // Skip all consecutive whitespace in orig, count as one in norm
       while (o < orig.length && /\s/.test(orig[o])) o++;
       n++;
-    } else {
-      o++;
-      n++;
-    }
+    } else { o++; n++; }
   }
-  // Skip leading whitespace in orig if we're at the start of a ws run
   while (o < orig.length && /\s/.test(orig[o])) o++;
   return o;
 }
 
 function esc(str) {
   return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2144,19 +2183,12 @@ const saveBtn     = document.getElementById('selSaveBtn');
 let   activeRange = null;
 let   activeText  = '';
 
-// Show toolbar above the selection
 function positionToolbar(rect) {
-  // rect is from getBoundingClientRect — viewport coords
-  // toolbar is position:fixed so we use viewport coords directly
-  const tbW = toolbar.offsetWidth || 120;
+  const tbW  = toolbar.offsetWidth || 120;
   let   left = rect.left + rect.width / 2 - tbW / 2;
   let   top  = rect.top - toolbar.offsetHeight - 10;
-
-  // Keep within viewport horizontally
   left = Math.max(8, Math.min(left, window.innerWidth - tbW - 8));
-  // If above viewport, show below instead
   if (top < 8) top = rect.bottom + 10;
-
   toolbar.style.left = left + 'px';
   toolbar.style.top  = top  + 'px';
 }
@@ -2169,35 +2201,24 @@ function hideToolbar() {
 }
 
 document.addEventListener('mouseup', function(e) {
-  // Ignore clicks inside the toolbar
   if (toolbar.contains(e.target)) return;
-
-  // Small delay so the selection is finalised
   setTimeout(() => {
     const sel  = window.getSelection();
     const text = sel ? sel.toString().trim() : '';
-
     if (!text || text.length < 2) { hideToolbar(); return; }
-
-    // Only trigger inside the lesson content area
     const view = document.getElementById('lessonView');
     if (!view || !sel.rangeCount) { hideToolbar(); return; }
-
     const range = sel.getRangeAt(0);
     if (!view.contains(range.commonAncestorContainer)) { hideToolbar(); return; }
-
     activeText  = text;
     activeRange = range.cloneRange();
-
-    const rect = range.getBoundingClientRect();
+    const rect  = range.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) { hideToolbar(); return; }
-
     positionToolbar(rect);
     showToolbar();
   }, 10);
 });
 
-// Touch support
 document.addEventListener('touchend', function(e) {
   if (toolbar.contains(e.target)) return;
   setTimeout(() => {
@@ -2216,7 +2237,6 @@ document.addEventListener('touchend', function(e) {
   }, 50);
 });
 
-// Hide on click outside
 document.addEventListener('mousedown', function(e) {
   if (!toolbar.contains(e.target)) hideToolbar();
 });
@@ -2227,29 +2247,20 @@ document.addEventListener('mousedown', function(e) {
 saveBtn.addEventListener('click', function(e) {
   e.stopPropagation();
   if (!activeRange || !activeText) return;
-
   const text = activeText.slice(0, 150);
-
-  // Ignore duplicate text
   if (bookmarks.some(b => b.text === text)) { hideToolbar(); return; }
-
   const id = 'fm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
-
-  // Detect which scene the selection is inside
   const anchorNode = activeRange.startContainer;
   const sceneWrap  = anchorNode.nodeType === Node.ELEMENT_NODE
     ? anchorNode.closest('[data-scene-idx]')
     : anchorNode.parentElement?.closest('[data-scene-idx]');
   const sceneIdx = sceneWrap ? parseInt(sceneWrap.getAttribute('data-scene-idx'), 10) : -1;
-
-  // Wrap selection in a highlight mark
   try {
     const mark = document.createElement('mark');
     mark.className = 'bookmark-mark';
     mark.id        = id;
     mark.title     = 'Bookmarked — click to jump here';
     mark.addEventListener('click', () => jumpToBookmark(id));
-
     try {
       activeRange.surroundContents(mark);
     } catch (_) {
@@ -2260,7 +2271,6 @@ saveBtn.addEventListener('click', function(e) {
   } catch(err) {
     console.warn('Could not highlight selection:', err);
   }
-
   bookmarks.unshift({ id, text, lessonIdx: currentIdx, sceneIdx });
   saveBookmarks(bookmarks);
   renderBookmarkPanel();
@@ -2271,25 +2281,21 @@ saveBtn.addEventListener('click', function(e) {
 // ─────────────────────────────────────────────────────────────
 //  SEARCH
 // ─────────────────────────────────────────────────────────────
-
 function openSearch() {
   document.getElementById('searchOverlay').classList.add('open');
   setTimeout(() => document.getElementById('searchInput').focus(), 60);
 }
-
 function closeSearch() {
   document.getElementById('searchOverlay').classList.remove('open');
   document.getElementById('searchInput').value = '';
   document.getElementById('searchResults').innerHTML = '<div class="search-hint">Type to search across all lessons</div>';
 }
-
 function handleSearchOverlayClick(e) {
   if (!document.getElementById('searchBox').contains(e.target)) closeSearch();
 }
 
-// Keyboard shortcut: '/' opens search, Escape closes
 document.addEventListener('keydown', function(e) {
-  const tag = document.activeElement.tagName;
+  const tag     = document.activeElement.tagName;
   const inInput = (tag === 'INPUT' || tag === 'TEXTAREA');
   if (e.key === 'Escape') { closeSearch(); hideKeyboardHelp(); closeAllNotes(); return; }
   if (inInput) return;
@@ -2308,7 +2314,6 @@ document.addEventListener('keydown', function(e) {
   if (e.key === '?') { showKeyboardHelp(); return; }
 });
 
-// Extract plain searchable text from a scene
 function sceneToText(s) {
   if (s.type === 'code')    return { type: 'code',    text: stripHtml(s.text) };
   if (s.type === 'analogy') return { type: 'analogy', text: stripHtml(s.text) };
@@ -2328,8 +2333,7 @@ function excerpt(text, query, radius = 80) {
   const start = Math.max(0, idx - radius);
   const end   = Math.min(text.length, idx + query.length + radius);
   let   snip  = (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
-  // Highlight the match
-  const re = new RegExp('(' + escapeRe(query) + ')', 'gi');
+  const re    = new RegExp('(' + escapeRe(query) + ')', 'gi');
   snip = esc(snip).replace(re, '<mark>$1</mark>');
   return snip;
 }
@@ -2339,32 +2343,27 @@ function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function doSearch(query) {
   const q = query.trim();
   const resultsEl = document.getElementById('searchResults');
-
   if (q.length < 2) {
     resultsEl.innerHTML = '<div class="search-hint">Type to search across all lessons</div>';
     return;
   }
-
   const ql = q.toLowerCase();
   const groups = [];
   let totalHits = 0;
 
   LESSONS.forEach((lesson, lessonIdx) => {
     const hits = [];
-
-    // Search lesson title, tag, intro, and lesson-level note
     [
       { type: 'title', text: lesson.title },
       { type: 'intro', text: stripHtml(lesson.intro) }
     ].forEach(({ type, text }) => {
       if (text.toLowerCase().includes(ql)) hits.push({ type, text, sceneIdx: -1 });
     });
+    // FIX: include lesson-level note in search
     const lessonNoteData = notesStore['note-' + lessonIdx + '-lesson'];
     if (lessonNoteData && lessonNoteData.text && lessonNoteData.text.toLowerCase().includes(ql)) {
       hits.push({ type: 'note', text: lessonNoteData.text, sceneIdx: -1 });
     }
-
-    // Search each scene + its note
     lesson.scenes.forEach((scene, sceneIdx) => {
       const { type, text } = sceneToText(scene);
       if (text.toLowerCase().includes(ql)) hits.push({ type, text, sceneIdx });
@@ -2373,9 +2372,8 @@ function doSearch(query) {
         hits.push({ type: 'note', text: noteData.text, sceneIdx });
       }
     });
-
     if (hits.length) {
-      groups.push({ lessonIdx, lesson, hits: hits.slice(0, 4) }); // max 4 hits per lesson
+      groups.push({ lessonIdx, lesson, hits: hits.slice(0, 4) });
       totalHits += hits.length;
     }
   });
@@ -2386,13 +2384,11 @@ function doSearch(query) {
   }
 
   const catMeta = (lesson) => CATEGORY_META[lesson.category] || { color: '#888', icon: '' };
-
-  // Store results in a registry so onclick handlers never embed strings in HTML attributes
   window._searchRegistry = {};
   let regKey = 0;
 
   const html = groups.map(({ lessonIdx, lesson, hits }) => {
-    const meta  = catMeta(lesson);
+    const meta     = catMeta(lesson);
     const hitsHTML = hits.map(h => {
       const key = regKey++;
       window._searchRegistry[key] = { lessonIdx, sceneIdx: h.sceneIdx, query: q };
@@ -2417,36 +2413,26 @@ function doSearch(query) {
   resultsEl.innerHTML = html + countLine;
 }
 
-// Navigate to a lesson + scene and highlight the search term
 function searchGoTo(lessonIdx, sceneIdx, query) {
   closeSearch();
-
   const doHighlight = () => {
     const view = document.getElementById('lessonView');
     if (!view) return;
-
-    // Target the exact scene element if we have a valid sceneIdx,
-    // otherwise search the whole lesson view
     let root = view;
     if (sceneIdx >= 0) {
       const sceneEl = view.querySelector(`[data-scene-idx="${sceneIdx}"]`);
       if (sceneEl) root = sceneEl;
     }
-
-    // Walk text nodes inside the target root
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
     let node;
     while ((node = walker.nextNode())) {
       const idx = node.textContent.toLowerCase().indexOf(query.toLowerCase());
       if (idx === -1) continue;
-
       const range = document.createRange();
       range.setStart(node, idx);
       range.setEnd(node, idx + query.length);
-
       const mark = document.createElement('span');
       mark.className = 'search-match-flash';
-
       try {
         range.surroundContents(mark);
       } catch (_) {
@@ -2454,11 +2440,7 @@ function searchGoTo(lessonIdx, sceneIdx, query) {
         mark.appendChild(frag);
         range.insertNode(mark);
       }
-
-      // Instant scroll — no smooth scroll fighting us
       mark.scrollIntoView({ block: 'center' });
-
-      // Then fade gently
       setTimeout(() => mark.classList.add('fade'), 1400);
       setTimeout(() => {
         if (mark.parentNode) {
@@ -2469,18 +2451,14 @@ function searchGoTo(lessonIdx, sceneIdx, query) {
       break;
     }
   };
-
   if (currentIdx === lessonIdx) {
-    // Already on the right lesson — highlight immediately
     doHighlight();
   } else {
-    // Load lesson without scroll-to-top, then highlight once DOM is painted
-    selectLesson(lessonIdx, true /* skipScrollTop */);
+    selectLesson(lessonIdx, true);
     requestAnimationFrame(() => requestAnimationFrame(doHighlight));
   }
 }
 
-// Live search as user types
 document.getElementById('searchInput').addEventListener('input', function() {
   doSearch(this.value);
 });
@@ -2489,20 +2467,16 @@ document.getElementById('searchInput').addEventListener('input', function() {
 //  THEME
 // ─────────────────────────────────────────────────────────────
 const THEME_KEY = 'coderoom-theme';
-
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   const icon = document.getElementById('themeIcon');
   if (icon) icon.textContent = theme === 'light' ? '🌙' : '☀️';
   try { localStorage.setItem(THEME_KEY, theme); } catch(e) {}
 }
-
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme');
   applyTheme(current === 'light' ? 'dark' : 'light');
 }
-
-// Apply saved or system preference immediately
 (function() {
   let saved;
   try { saved = localStorage.getItem(THEME_KEY); } catch(e) {}
@@ -2514,10 +2488,9 @@ function toggleTheme() {
 })();
 
 // ─────────────────────────────────────────────────────────────
-//  NOTES SYSTEM — inline, auto-save
+//  NOTES SYSTEM
 // ─────────────────────────────────────────────────────────────
 const NOTES_KEY = 'coderoom-v2-notes';
-
 function loadNotes() {
   try { return JSON.parse(localStorage.getItem(NOTES_KEY) || '{}'); }
   catch(e) { return {}; }
@@ -2532,23 +2505,19 @@ let _autoSaveTimers = {};
 
 function getNoteByKey(key) { return notesStore[key] || null; }
 
-// escAttr — for injecting text into HTML attribute values
 function escAttr(str) {
   return String(str || '')
     .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── Toggle inline note open/closed from note button ──
 function openNoteDialog(sceneIdx) {
-  const noteId  = `inline-note-${currentIdx}-${sceneIdx}`;
-  const noteEl  = document.getElementById(noteId);
+  const noteId = `inline-note-${currentIdx}-${sceneIdx}`;
+  const noteEl = document.getElementById(noteId);
   if (!noteEl) return;
-
   const isOpen = noteEl.classList.contains('open');
   if (isOpen) {
     noteEl.classList.remove('open');
-    // update note-btn visual if empty
     const key = `note-${currentIdx}-${sceneIdx}`;
     const ta  = noteEl.querySelector('.inline-note-textarea');
     if (ta && !ta.value.trim()) {
@@ -2567,23 +2536,13 @@ function openNoteDialog(sceneIdx) {
   updateNotesViewBtn();
 }
 
-function markNoteOpen(sceneIdx) {
-  // just focuses — called by onfocus on textarea to ensure btn is active
-  _refreshNoteBtn(sceneIdx, true);
-}
-
-// ── Auto-save on input with debounce ──
-
+function markNoteOpen(sceneIdx) { _refreshNoteBtn(sceneIdx, true); }
 
 function resizeTextarea(ta) {
   ta.style.height = "auto";
   ta.style.height = Math.min(ta.scrollHeight, 400) + "px";
 }
 
-
-// ─────────────────────────────────────────────────────────────
-//  LESSON-LEVEL NOTE
-// ─────────────────────────────────────────────────────────────
 const _lessonNoteTimers = {};
 
 function autoSaveLessonNote(lessonIdx, ta) {
@@ -2591,9 +2550,7 @@ function autoSaveLessonNote(lessonIdx, ta) {
   const key      = 'note-' + lessonIdx + '-lesson';
   const statusEl = document.getElementById('lesson-note-status-' + lessonIdx);
   const delBtn   = document.getElementById('lesson-note-del-' + lessonIdx);
-
   if (statusEl) { statusEl.textContent = 'typing…'; statusEl.style.opacity = '0.6'; }
-
   clearTimeout(_lessonNoteTimers[lessonIdx]);
   _lessonNoteTimers[lessonIdx] = setTimeout(() => {
     const text = ta.value.trim();
@@ -2612,9 +2569,9 @@ function autoSaveLessonNote(lessonIdx, ta) {
 }
 
 function deleteLessonNote(lessonIdx) {
-  const key  = 'note-' + lessonIdx + '-lesson';
-  const ta   = document.getElementById('lesson-note-ta-' + lessonIdx);
-  const del  = document.getElementById('lesson-note-del-' + lessonIdx);
+  const key = 'note-' + lessonIdx + '-lesson';
+  const ta  = document.getElementById('lesson-note-ta-' + lessonIdx);
+  const del = document.getElementById('lesson-note-del-' + lessonIdx);
   delete notesStore[key];
   saveNotesStore(notesStore);
   if (ta) { ta.value = ''; resizeTextarea(ta); }
@@ -2625,19 +2582,15 @@ function deleteLessonNote(lessonIdx) {
 
 function autoSaveNote(sceneIdx, ta) {
   resizeTextarea(ta);
-  const key = `note-${currentIdx}-${sceneIdx}`;
+  const key      = `note-${currentIdx}-${sceneIdx}`;
   const statusEl = document.getElementById(`note-status-${currentIdx}-${sceneIdx}`);
-
-  // Show "typing…" immediately
   if (statusEl) { statusEl.textContent = 'typing…'; statusEl.style.opacity = '0.6'; }
-
   clearTimeout(_autoSaveTimers[key]);
   _autoSaveTimers[key] = setTimeout(() => {
     const text = ta.value.trim();
     if (text) {
       notesStore[key] = { text, lessonIdx: currentIdx, sceneIdx, updatedAt: new Date().toISOString() };
       _refreshNoteBtn(sceneIdx, true);
-      // Refresh delete button in footer
       const footer = ta.closest('.inline-note').querySelector('.inline-note-footer');
       if (footer && !footer.querySelector('.inline-note-del')) {
         footer.innerHTML = `<span class="inline-note-status" id="note-status-${currentIdx}-${sceneIdx}"></span>
@@ -2651,11 +2604,10 @@ function autoSaveNote(sceneIdx, ta) {
     if (statusEl) { statusEl.textContent = 'saved'; setTimeout(() => { statusEl.textContent = ''; }, 1400); }
     if (_notesPanelOpen) renderNotesPanel();
     updateNotesViewBtn();
-  }, 600); // 600ms debounce — feels instant but batches
+  }, 600);
 }
 
 function _refreshNoteBtn(sceneIdx, hasNote) {
-  // Find the note-btn for this scene and update its has-note class
   const wrap = document.querySelector(`[data-scene-idx="${sceneIdx}"]`);
   if (!wrap) return;
   const btn = wrap.querySelector('.note-btn');
@@ -2679,12 +2631,21 @@ function deleteInlineNote(sceneIdx) {
   updateNotesViewBtn();
 }
 
+// FIX: getNotesForLesson handles 'lesson' sceneIdx correctly (no parseInt NaN)
 function getNotesForLesson(lessonIdx) {
-  // Include lesson note (key: note-{idx}-lesson) + scene notes
   return Object.entries(notesStore)
     .filter(([k]) => k.startsWith(`note-${lessonIdx}-`))
-    .map(([k, v]) => ({ key: k, sceneIdx: parseInt(k.split('-')[2]), ...v }))
-    .sort((a, b) => a.sceneIdx - b.sceneIdx);
+    .map(([k, v]) => {
+      const rawScene = k.split('-')[2];
+      const sceneIdx = rawScene === 'lesson' ? 'lesson' : parseInt(rawScene, 10);
+      return { key: k, sceneIdx, ...v };
+    })
+    .sort((a, b) => {
+      // lesson note sorts first
+      if (a.sceneIdx === 'lesson') return -1;
+      if (b.sceneIdx === 'lesson') return 1;
+      return a.sceneIdx - b.sceneIdx;
+    });
 }
 
 function updateNotesViewBtn() {
@@ -2695,7 +2656,6 @@ function updateNotesViewBtn() {
   btn.textContent = notes.length > 0 ? `📝 Notes (${notes.length})` : '📝 Notes';
 }
 
-// Notes summary panel — inline dropdown after lesson intro
 function toggleNotesPanel() {
   _notesPanelOpen = !_notesPanelOpen;
   if (_notesPanelOpen) renderNotesPanel();
@@ -2717,12 +2677,15 @@ function renderNotesPanel() {
   const itemsHTML = notes.length === 0
     ? '<div class="notes-panel-empty">No notes yet — click ✏️ on any scene to add one.</div>'
     : notes.map(n => {
-        const scene = lesson && lesson.scenes[n.sceneIdx];
-        const sceneLabel = scene
-          ? (scene.speaker ? (scene.speaker === 'raj' ? 'Raj' : 'You') : (scene.type || 'scene'))
+        // FIX: sceneIdx can be 'lesson' — handle gracefully
+        const isLessonNote = n.sceneIdx === 'lesson';
+        const scene        = (!isLessonNote && lesson) ? lesson.scenes[n.sceneIdx] : null;
+        const sceneLabel   = isLessonNote ? 'lesson'
+          : scene ? (scene.speaker ? (scene.speaker === 'raj' ? 'Raj' : 'You') : (scene.type || 'scene'))
           : `#${n.sceneIdx}`;
+        const scrollTarget = isLessonNote ? 0 : n.sceneIdx;
         return `
-          <div class="notes-panel-item" onclick="scrollToNoteScene(${n.sceneIdx})">
+          <div class="notes-panel-item" onclick="scrollToNoteScene(${JSON.stringify(scrollTarget)})">
             <span class="notes-panel-scene-label">${esc(sceneLabel)}</span>
             <span class="notes-panel-note-text">${esc(n.text)}</span>
           </div>`;
@@ -2747,43 +2710,21 @@ function renderNotesPanel() {
 }
 
 function scrollToNoteScene(sceneIdx) {
+  if (sceneIdx === 'lesson' || sceneIdx === 0) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
   const wrap = document.querySelector(`[data-scene-idx="${sceneIdx}"]`);
   if (wrap) {
     wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    // Also open the inline note
     const noteEl = document.getElementById(`inline-note-${currentIdx}-${sceneIdx}`);
     if (noteEl && !noteEl.classList.contains('open')) noteEl.classList.add('open');
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  INIT
+//  COMPLETED LESSONS
 // ─────────────────────────────────────────────────────────────
-const LAST_LESSON_KEY = 'coderoom-v2-last-lesson';
-
-function saveLastLesson(idx) {
-  try {
-    const tag = LESSONS[idx] ? LESSONS[idx].tag : null;
-    if (tag) localStorage.setItem(LAST_LESSON_KEY, tag);
-  } catch(e) {}
-}
-function loadLastLesson() {
-  try {
-    const tag = localStorage.getItem(LAST_LESSON_KEY);
-    if (!tag) return null;
-    const idx = LESSONS.findIndex(function(l) { return l.tag === tag; });
-    return idx >= 0 ? idx : null;
-  } catch(e) { return null; }
-}
-
-// Patch selectLesson to persist choice
-const _origSelectLesson = selectLesson;
-selectLesson = function(idx, skipScrollTop) {
-  _origSelectLesson(idx, skipScrollTop);
-  if (idx !== null && idx !== undefined) saveLastLesson(idx);
-};
-
-
 const COMPLETED_KEY = 'coderoom-v2-completed';
 function loadCompleted() {
   try { return new Set(JSON.parse(localStorage.getItem(COMPLETED_KEY) || '[]')); } catch(e) { return new Set(); }
@@ -2807,14 +2748,40 @@ function toggleDone(idx) {
   updateProgress();
 }
 
+// ─────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────
+const LAST_LESSON_KEY = 'coderoom-v2-last-lesson';
+function saveLastLesson(idx) {
+  try {
+    const tag = LESSONS[idx] ? LESSONS[idx].tag : null;
+    if (tag) localStorage.setItem(LAST_LESSON_KEY, tag);
+  } catch(e) {}
+}
+function loadLastLesson() {
+  try {
+    const tag = localStorage.getItem(LAST_LESSON_KEY);
+    if (!tag) return null;
+    const idx = LESSONS.findIndex(function(l) { return l.tag === tag; });
+    return idx >= 0 ? idx : null;
+  } catch(e) { return null; }
+}
+
+const _origSelectLesson = selectLesson;
+selectLesson = function(idx, skipScrollTop) {
+  _origSelectLesson(idx, skipScrollTop);
+  if (idx !== null && idx !== undefined) saveLastLesson(idx);
+};
+
 buildSidebar();
 renderBookmarkPanel();
 
-// Restore last lesson, fall back to lesson 0
+// FIX: Guard against empty LESSONS array
 (function() {
+  if (LESSONS.length === 0) return;
   const _restored = loadLastLesson();
-  const _startIdx = (_restored !== null && LESSONS[_restored]) ? _restored : (flatLessons[0] ?? 0);
-  selectLesson(_startIdx);
+  const _startIdx = (_restored !== null && LESSONS[_restored]) ? _restored : (flatLessons[0] ?? null);
+  if (_startIdx !== null) selectLesson(_startIdx);
 })();
 </script>
 </body>
