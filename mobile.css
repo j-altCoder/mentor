@@ -11,6 +11,8 @@
   /* ── SINGLE-COLUMN GRID ── */
   .app {
     grid-template-columns: minmax(0, 1fr);
+    overflow-x: hidden;   /* prevents fixed sidebar / bookmark panel from
+                             expanding the grid container past viewport width */
   }
 
   /* ── SIDEBAR: slide-in drawer from left ──
@@ -33,7 +35,7 @@
 
   /* ── CONTENT: extra bottom padding for nav bar ── */
   .content {
-    padding: 2rem 1.2rem 5rem;
+    padding: 2rem 1.5rem 5rem;
   }
 
   /* ── SIDEBAR TOPBAR: tighter on small screens ── */
