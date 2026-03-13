@@ -112,7 +112,8 @@ body {
   color:        var(--text);
   font-family:  'Newsreader', serif;
   min-height:   100vh;
-  overflow-x:   hidden;
+  /* overflow-x:hidden removed — it creates a clipping scroll context that
+     prevents .code-body's horizontal scroll from working on small screens. */
 }
 
 /* ── GRID BACKGROUND ── */
@@ -272,7 +273,7 @@ header p {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 260px 1fr;   /* default: sidebar + content */
+  grid-template-columns: 260px minmax(0, 1fr);   /* default: sidebar + content */
   align-items: start;
 }
 
