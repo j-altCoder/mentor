@@ -241,6 +241,7 @@ header p {
 }
 .progress-track {
   flex: 1;
+  min-width: 0;   /* allows flex item to shrink below content size on small screens */
   height: 3px;
   background: var(--border);
   border-radius: 2px;
@@ -444,6 +445,7 @@ header p {
   line-height: 1.15;
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
+  overflow-wrap: break-word;
 }
 .lesson-intro {
   color: var(--muted);
@@ -538,7 +540,7 @@ header p {
   border-radius: 50%;
   background: currentColor;
 }
-.dialogue             { font-size: 1rem; line-height: 1.85; color: var(--text); }
+.dialogue             { font-size: 1rem; line-height: 1.85; color: var(--text); overflow-wrap: break-word; word-break: break-word; }
 .dialogue em          { color: var(--raj); font-style: normal; font-weight: 600; }
 .dialogue strong      { color: var(--you); }
 
@@ -586,6 +588,10 @@ header p {
   white-space: pre;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  width: 100%;           /* constrains to card width so overflow-x:auto actually
+                            creates a scroll container — without this, the element
+                            expands to fit the pre content and never scrolls */
+  box-sizing: border-box;
 }
 
 /* ── SUMMARY CARD ── */
