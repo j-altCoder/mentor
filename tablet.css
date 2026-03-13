@@ -7,9 +7,14 @@
 
 @media (min-width: 768px) and (max-width: 1139px) {
 
-  /* ── 2-COLUMN GRID: sidebar + content ── */
+  /* ── 2-COLUMN GRID: narrower sidebar frees up content column ──
+     At 768px: 200px sidebar + 568px content (was 260+508 — too tight).
+     At 1139px: 200px sidebar + 939px content.
+     minmax(0,1fr) prevents the content cell from blowing out when
+     a wide code block exceeds available width — no overflow:hidden
+     needed on .content (which would break code block scroll).    */
   .app {
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 200px minmax(0, 1fr);
   }
 
   /* ── SIDEBAR: sticky, full height below progress bar ── */
@@ -20,9 +25,9 @@
     transform: none;
   }
 
-  /* ── CONTENT: slightly reduced horizontal padding ── */
+  /* ── CONTENT: tighter padding on tablet ── */
   .content {
-    padding: 2.5rem 2rem 5rem;
+    padding: 2rem 1.5rem 5rem;
   }
 
   /* ── BOOKMARK PANEL: hidden (no 3rd column) ── */
