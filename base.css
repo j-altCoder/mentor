@@ -112,8 +112,10 @@ body {
   color:        var(--text);
   font-family:  'Newsreader', serif;
   min-height:   100vh;
-  /* overflow-x:hidden removed — it creates a clipping scroll context that
-     prevents .code-body's horizontal scroll from working on small screens. */
+  overflow-x:   hidden;   /* prevents viewport expanding to fit wide code lines,
+                              which would scale the whole page down on mobile.
+                              child overflow-x:auto containers (code blocks) are
+                              unaffected — they scroll within their own context. */
 }
 
 /* ── GRID BACKGROUND ── */
