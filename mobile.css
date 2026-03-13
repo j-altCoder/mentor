@@ -10,7 +10,7 @@
 
   /* ── SINGLE-COLUMN GRID ── */
   .app {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   /* ── SIDEBAR: slide-in drawer from left ──
