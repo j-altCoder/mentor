@@ -9,7 +9,7 @@
 
   /* ── 3-COLUMN GRID ── */
   .app {
-    grid-template-columns: 260px 1fr 260px;
+    grid-template-columns: 260px minmax(0, 1fr) 260px;
   }
 
   /* ── BOOKMARK PANEL: always visible as right column ── */
