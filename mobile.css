@@ -1,0 +1,157 @@
+/* =============================================================
+   mobile.css
+   Layout and overrides for screens up to 767px.
+   Loaded after base.css.
+   Applies: single-column, slide-in sidebar, bottom nav bar,
+            bookmark bottom sheet, search overlay adjustments.
+   ============================================================= */
+
+@media (max-width: 767px) {
+
+  /* ── SINGLE-COLUMN GRID ── */
+  .app {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── SIDEBAR: slide-in drawer from left ──
+     Starts below progress bar so the sticky bar
+     is never obscured by the sliding panel.          */
+  .sidebar {
+    position: fixed;
+    top: var(--progress-h);
+    left: 0;
+    width: 82vw;
+    max-width: 300px;
+    height: calc(100vh - var(--progress-h));
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* ── CONTENT: extra bottom padding for nav bar ── */
+  .content {
+    padding: 2rem 1.2rem 5rem;
+  }
+
+  /* ── SIDEBAR TOPBAR: tighter on small screens ── */
+  .sidebar-topbar {
+    padding: 1.2rem 1rem 0.8rem;
+  }
+
+  /* ── BOOKMARK PANEL: bottom sheet ──
+     Capped at 55vh (was 72vh) so it doesn't
+     dominate the screen on small phones.             */
+  .bookmark-panel {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    height: 55vh;
+    max-height: 55vh;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    border-radius: 1rem 1rem 0 0;
+    z-index: 160;
+    transform: translateY(105%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+  }
+  .bookmark-panel.mobile-open {
+    transform: translateY(0);
+  }
+
+  /* ── BOOKMARK DRAG HANDLE ── */
+  .bookmark-mobile-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0.75rem auto 0;
+    flex-shrink: 0;
+  }
+
+  /* ── LEGACY FLOATING BUTTONS: suppress ──
+     Replaced entirely by .mobile-bottom-nav.         */
+  .mobile-nav-toggle      { display: none !important; }
+  .mobile-bookmark-toggle { display: none !important; }
+
+  /* ── BOTTOM NAV BAR ──
+     4-tab bar: Lessons / Bookmarks / Search / Notes.
+     z-index 200 keeps it above all panels.           */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    align-items: stretch;
+  }
+  .mobile-nav-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    position: relative;
+    padding: 0;
+  }
+  .mobile-nav-tab:active { background: var(--hover-bg); }
+  .mobile-nav-tab.active { color: var(--raj); }
+  .mobile-nav-tab .tab-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+  .mobile-nav-tab .tab-badge {
+    position: absolute;
+    top: 6px;
+    right: calc(50% - 18px);
+    background: var(--cat5);
+    color: #000;
+    font-size: 0.5rem;
+    font-weight: 700;
+    padding: 0.08rem 0.32rem;
+    border-radius: 1rem;
+    min-width: 14px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── PROGRESS BAR: hide read-time to prevent overflow ── */
+  .progress-read-time {
+    display: none !important;
+  }
+
+  /* ── SEARCH OVERLAY: adapt to virtual keyboard ──
+     Reduced top padding so results stay visible
+     when the keyboard pushes the viewport up.        */
+  .search-overlay {
+    padding-top: 1rem;
+    align-items: flex-start;
+  }
+  .search-box {
+    max-height: calc(100vh - 2rem);
+    border-radius: 0.75rem;
+    margin-top: env(safe-area-inset-top, 0px);
+  }
+
+}

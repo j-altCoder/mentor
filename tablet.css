@@ -1,0 +1,43 @@
+/* =============================================================
+   tablet.css
+   Layout and overrides for screens 768px–1139px.
+   Loaded after base.css, before desktop.css.
+   Applies: 2-column grid, sidebar sticky, bookmark panel hidden.
+   ============================================================= */
+
+@media (min-width: 768px) and (max-width: 1139px) {
+
+  /* ── 2-COLUMN GRID: sidebar + content ── */
+  .app {
+    grid-template-columns: 260px 1fr;
+  }
+
+  /* ── SIDEBAR: sticky, full height below progress bar ── */
+  .sidebar {
+    position: sticky;
+    top: var(--progress-h);
+    height: calc(100vh - var(--progress-h));
+    transform: none;
+  }
+
+  /* ── CONTENT: slightly reduced horizontal padding ── */
+  .content {
+    padding: 2.5rem 2rem 5rem;
+  }
+
+  /* ── BOOKMARK PANEL: hidden (no 3rd column) ── */
+  .bookmark-panel {
+    display: none;
+  }
+
+  /* ── PROGRESS BAR: show read-time label ── */
+  .progress-read-time {
+    display: flex;
+  }
+
+  /* ── MOBILE NAV: not needed on tablet ── */
+  .mobile-bottom-nav      { display: none; }
+  .mobile-nav-toggle      { display: none; }
+  .mobile-bookmark-toggle { display: none; }
+
+}

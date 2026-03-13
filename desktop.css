@@ -1,0 +1,20 @@
+/* =============================================================
+   desktop.css
+   Layout and overrides for screens wider than 1139px.
+   Loaded after base.css and tablet.css.
+   Applies: 3-column grid, bookmark panel visible, full sidebar.
+   ============================================================= */
+
+@media (min-width: 1140px) {
+
+  /* ── 3-COLUMN GRID ── */
+  .app {
+    grid-template-columns: 260px 1fr 260px;
+  }
+
+  /* ── BOOKMARK PANEL: always visible as right column ── */
+  .bookmark-panel {
+    display: flex !important;
+  }
+
+}
