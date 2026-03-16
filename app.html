@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="description" content="The Coderoom — Senior dev mentorship in dialogue form. Raj explains the hard stuff. You ask the real questions."/>
 <title>The Coderoom — Vol. 2</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0e11'/%3E%3Cpath d='M8 10h10M8 16h16M8 22h12' stroke='%23f0a442' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lora:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@400;500&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
@@ -1912,7 +1913,8 @@ const CATEGORY_META = {
 // ═══════════════════════════════════════════════════════════════
 //  SECTION 4 — CENTRAL STATE
 //  Single source of truth. All reads via State.get().
-//  All writes via State.set(patch) — triggers a render pass.
+//  All writes via State.set(patch). No reactive subscriptions —
+//  callers are responsible for re-rendering after set().
 // ═══════════════════════════════════════════════════════════════
 const State = (() => {
   let _state = {
@@ -1927,14 +1929,12 @@ const State = (() => {
     lessonNoteTimers: {},
   };
 
-  const _listeners = [];
-
   function get() { return _state; }
 
   function set(patch) {
     _state = Object.assign({}, _state, patch);
-    // No framework — callers are responsible for re-rendering
-    // after set(). This keeps the update path explicit.
+    // Callers are responsible for any re-rendering after set().
+    // There is no reactive subscription — updates are explicit.
   }
 
   return { get, set };
@@ -1977,7 +1977,7 @@ const Router = (() => {
       const idx = e.state && e.state.lessonIdx != null
         ? e.state.lessonIdx
         : readCurrent();
-      if (idx !== null) _selectLesson(idx, true);
+      if (idx !== null) selectLesson(idx, true);
     });
   }
 
@@ -2341,13 +2341,17 @@ function openAllNotes() {
       const catM   = lesson ? CATEGORY_META[lesson.category] : null;
       const color  = catM ? catM.color : '#888';
       const icon   = catM ? catM.icon  : 'icon-notes';
-      const items  = byLesson[li].slice().sort((a, b) => (a.sceneIdx || 0) - (b.sceneIdx || 0));
+      const items  = byLesson[li].slice().sort((a, b) => {
+        if (a.sceneIdx === 'lesson') return -1;
+        if (b.sceneIdx === 'lesson') return  1;
+        return (a.sceneIdx ?? 0) - (b.sceneIdx ?? 0);
+      });
 
       const rows = items.map(note => {
         const sceneLabel = note.sceneIdx === 'lesson' ? 'lesson note' : note.sceneIdx >= 0 ? 'scene ' + (note.sceneIdx + 1) : '';
         const date       = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
         const meta       = [sceneLabel, date].filter(Boolean).join(' · ');
-        return `<div class="all-notes-item" onclick="closeAllNotes();selectLesson(${li},true);setTimeout(()=>scrollToNoteScene(${JSON.stringify(note.sceneIdx||0)}),250)">
+        return `<div class="all-notes-item" onclick="closeAllNotes();selectLesson(${li},true);setTimeout(()=>scrollToNoteScene(${JSON.stringify(note.sceneIdx === 'lesson' ? 'lesson' : note.sceneIdx)}),250)">
           <div class="all-notes-item-meta">${_esc(meta)}</div>
           <div class="all-notes-item-text">${_esc(note.text)}</div>
         </div>`;
@@ -2464,11 +2468,34 @@ function deleteBookmark(e, id) {
 }
 
 function clearAllBookmarks() {
-  const s = State.get();
-  s.bookmarks.forEach(b => removeHighlight(b.id));
-  State.set({ bookmarks: [] });
-  Storage.saveBookmarks([]);
-  renderBookmarkPanel();
+  const btn = document.querySelector('.bookmark-clear');
+  if (!btn) return;
+
+  if (btn.dataset.armed === 'true') {
+    // Second click — execute
+    clearTimeout(btn._resetTimer);
+    const s = State.get();
+    s.bookmarks.forEach(b => removeHighlight(b.id));
+    State.set({ bookmarks: [] });
+    Storage.saveBookmarks([]);
+    renderBookmarkPanel();
+    return;
+  }
+
+  // First click — arm the button
+  btn.dataset.armed = 'true';
+  btn.textContent   = 'Tap again to confirm';
+  btn.style.borderColor = 'var(--coral)';
+  btn.style.color       = 'var(--coral)';
+
+  // Auto-reset after 3 seconds if not confirmed
+  btn._resetTimer = setTimeout(() => {
+    if (!btn) return;
+    btn.dataset.armed     = 'false';
+    btn.textContent       = 'Clear all bookmarks';
+    btn.style.borderColor = '';
+    btn.style.color       = '';
+  }, 3000);
 }
 
 function removeHighlight(id) {
@@ -3020,7 +3047,7 @@ function renderNotesPanel() {
         const sceneLabel   = isLessonNote ? 'lesson'
           : scene ? (scene.speaker ? (scene.speaker === 'raj' ? 'Raj' : 'You') : (scene.type || 'scene'))
           : `#${n.sceneIdx}`;
-        return `<div class="notes-panel-item" onclick="scrollToNoteScene(${JSON.stringify(isLessonNote ? 0 : n.sceneIdx)})">
+        return `<div class="notes-panel-item" onclick="scrollToNoteScene(${JSON.stringify(isLessonNote ? 'lesson' : n.sceneIdx)})">
           <span class="notes-panel-scene-label">${_esc(sceneLabel)}</span>
           <span class="notes-panel-note-text">${_esc(n.text)}</span>
         </div>`;
@@ -3044,7 +3071,9 @@ function renderNotesPanel() {
 }
 
 function scrollToNoteScene(sceneIdx) {
-  if (sceneIdx === 'lesson' || sceneIdx === 0) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  // 'lesson' is the lesson-level note — scroll to top
+  if (sceneIdx === 'lesson') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  // sceneIdx 0 is the first real scene — scroll to it, not to top
   const wrap = document.querySelector(`[data-scene-idx="${sceneIdx}"]`);
   if (wrap) {
     wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
