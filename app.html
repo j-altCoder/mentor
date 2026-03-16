@@ -1,0 +1,3126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="The Coderoom — Senior dev mentorship in dialogue form. Raj explains the hard stuff. You ask the real questions."/>
+<title>The Coderoom — Vol. 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lora:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@400;500&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   THE CODEROOM — Stylesheet v3
+   Fonts: Playfair Display · Lora · JetBrains Mono
+═══════════════════════════════════════════════════════════ */
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── TOKENS ── */
+:root {
+  --nav-h:         44px;
+  --sidebar-w:     268px;
+  --bookmark-w:    256px;
+  --content-max:   780px;
+  --mobile-nav-h:  54px;
+
+  --bg:            #0d0e11;
+  --surface:       #13151a;
+  --surface-2:     #191c23;
+  --card:          #1a1d26;
+  --border:        #252836;
+  --border-subtle: #1c1f2b;
+
+  --text-primary:  #e8e6e0;
+  --text-secondary:#9a97a0;
+  --text-muted:    #5c5a65;
+
+  --amber:         #f0a442;
+  --amber-dim:     rgba(240,164,66,0.12);
+  --coral:         #f07060;
+  --coral-dim:     rgba(240,112,96,0.10);
+  --sage:          #6ec99a;
+  --sage-dim:      rgba(110,201,154,0.10);
+  --sky:           #5bb8f5;
+  --violet:        #b388f5;
+
+  --raj:           var(--amber);
+  --you:           var(--sage);
+  --raj-bg:        rgba(240,164,66,0.04);
+  --you-bg:        rgba(110,201,154,0.03);
+
+  --code-bg:       #060709;
+  --code-bar:      #0c0e14;
+  --code-text:     #8b99b0;
+  --code-border:   #252836;
+
+  --analogy-bg:    rgba(240,164,66,0.05);
+  --analogy-border:rgba(240,164,66,0.2);
+  --summary-bg:    rgba(110,201,154,0.05);
+  --summary-border:rgba(110,201,154,0.2);
+
+  --hover:         rgba(255,255,255,0.03);
+  --active:        rgba(255,255,255,0.055);
+
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:     0 16px 48px rgba(0,0,0,0.7);
+  --shadow-glow:   0 0 0 1px rgba(255,255,255,0.04);
+
+  --font-display:  'Playfair Display', Georgia, serif;
+  --font-body:     'Lora', Georgia, serif;
+  --font-dialogue: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono:     'JetBrains Mono', 'Courier New', monospace;
+
+  --t-fast:        0.12s ease;
+  --t-base:        0.2s ease;
+
+  /* ── Z-INDEX SCALE ──
+     100  sticky desktop sidebar / header elements
+     200  sticky progress bar (always visible, above sidebar on scroll)
+     210  storage warning banner (above progress bar)
+     300  desktop bookmark panel
+     400  mobile overlay dim
+     410  mobile sidebar slide-in
+     420  mobile bookmark sheet
+     430  mobile bottom nav (above panels it controls)
+     500  search overlay
+     600  all-notes overlay
+     700  keyboard shortcuts modal
+     9000 selection toolbar (must float above everything)
+  */
+  --z-sticky:      100;
+  --z-progress:    200;
+  --z-warning:     210;
+  --z-overlay:     400;
+  --z-sidebar-mob: 410;
+  --z-bookmark-mob:420;
+  --z-bottomnav:   430;
+  --z-search:      500;
+  --z-notes-modal: 600;
+  --z-kb-modal:    700;
+  --z-toolbar:     9000;
+
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg:            #f6f3ed;
+  --surface:       #faf8f4;
+  --surface-2:     #f0ece4;
+  --card:          #ece8de;
+  --border:        #d8d3c8;
+  --border-subtle: #e2ddd4;
+  --text-primary:  #1a1813;
+  --text-secondary:#5a574f;
+  --text-muted:    #9a968c;
+  --amber:         #b87820;
+  --amber-dim:     rgba(184,120,32,0.10);
+  --coral:         #c0402c;
+  --coral-dim:     rgba(192,64,44,0.08);
+  --sage:          #1e7a52;
+  --sage-dim:      rgba(30,122,82,0.08);
+  --raj-bg:        rgba(184,120,32,0.04);
+  --you-bg:        rgba(30,122,82,0.03);
+  --code-bg:       #f0ece2;
+  --code-bar:      #e8e4d8;
+  --code-text:     #5a6070;
+  --code-border:   #d4cfc4;
+  --analogy-bg:    rgba(184,120,32,0.06);
+  --analogy-border:rgba(184,120,32,0.22);
+  --summary-bg:    rgba(30,122,82,0.05);
+  --summary-border:rgba(30,122,82,0.2);
+  --hover:         rgba(0,0,0,0.03);
+  --active:        rgba(0,0,0,0.06);
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.12);
+  --shadow-lg:     0 16px 48px rgba(0,0,0,0.18);
+  --shadow-glow:   0 0 0 1px rgba(0,0,0,0.06);
+  --card-shadow:   0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+/* ── BASE ── */
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+html[data-theme="light"] body {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px);
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+button:focus:not(:focus-visible) { outline: none; }
+
+/* ── SVG ICONS ── */
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.icon-lg { width: 1.15em; height: 1.15em; }
+.icon-sm { width: 0.85em; height: 0.85em; }
+
+/* ── THEME TOGGLE ── */
+.theme-toggle {
+  position: absolute;
+  top: 1.1rem; right: 1.2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 0.32rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: border-color var(--t-base), transform var(--t-fast);
+}
+.theme-toggle:hover { border-color: var(--amber); transform: scale(1.05); }
+
+/* ── HEADER ── */
+header {
+  position: relative;
+  z-index: 1;
+  padding: 4.5rem 2rem 3.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+header h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+/* Intentional: one accent word, no gradient */
+header h1 em {
+  font-style: italic;
+  color: var(--amber);
+}
+
+header > p {
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: 0.85rem;
+  font-size: 1.05rem;
+}
+
+.header-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1.6rem;
+  flex-wrap: wrap;
+}
+
+.header-speaker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.speaker-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-progress);
+  height: var(--nav-h);
+  padding: 0 1.4rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.progress-track {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--amber);
+  border-radius: 99px;
+  width: 0%;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+.progress-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.progress-read-time {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* ── STORAGE WARNING BANNER ── */
+.storage-warning {
+  display: none;
+  background: rgba(240,112,96,0.12);
+  border-bottom: 1px solid rgba(240,112,96,0.3);
+  padding: 0.55rem 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--coral);
+  letter-spacing: 0.02em;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+  z-index: var(--z-warning);
+}
+.storage-warning.visible { display: flex; }
+.storage-warning-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--coral);
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+.storage-warning-close:hover { opacity: 1; }
+
+/* ── APP LAYOUT ── */
+.app {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  align-items: start;
+  min-height: calc(100vh - var(--nav-h));
+}
+
+@media (min-width: 1160px) {
+  .app { grid-template-columns: var(--sidebar-w) 1fr var(--bookmark-w); }
+  .bookmark-panel { display: flex !important; }
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  border-right: 1px solid var(--border-subtle);
+  position: sticky;
+  top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  min-width: 0;
+  z-index: var(--z-sticky);
+}
+
+.sidebar-topbar {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.sidebar-topbar-row1 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem 0.55rem;
+}
+
+.sidebar-topbar-row2 {
+  padding: 0 0.75rem 0.7rem;
+}
+
+.sidebar-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.45rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  text-align: left;
+}
+
+.sidebar-search-btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-dim);
+}
+
+.sidebar-search-shortcut {
+  margin-left: auto;
+  font-size: 0.56rem;
+  opacity: 0.45;
+  background: var(--border);
+  border-radius: 3px;
+  padding: 0.1rem 0.35rem;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.sidebar-brand {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-right: auto;
+}
+
+.icon-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.3rem 0.45rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.02em;
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.icon-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+
+.sidebar-nav-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.75rem 0 1.5rem;
+}
+
+.sidebar-section { margin-bottom: 0.25rem; }
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.cat-header .icon { opacity: 0.6; }
+
+.lesson-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  padding: 0.52rem 1rem 0.52rem 1.1rem;
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  line-height: 1.4;
+  transition: color var(--t-fast), background var(--t-fast), border-color var(--t-fast);
+}
+
+.lesson-btn:hover  { color: var(--text-primary); background: var(--hover); }
+.lesson-btn.active {
+  color: var(--text-primary);
+  background: var(--active);
+  border-left-color: var(--active-color, var(--coral));
+}
+
+.lesson-btn.completed::after {
+  content: "";
+  display: inline-block;
+  width: 14px; height: 14px;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ec99a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* ── MAIN CONTENT ── */
+.content {
+  padding: 3rem 2.5rem 5rem;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Empty state — hidden by default, shown only when explicitly needed */
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.empty-state.visible { display: flex; }
+.empty-state .big-icon { font-size: 2.5rem; opacity: 0.3; }
+.empty-state p { font-style: italic; font-size: 0.95rem; }
+
+/* Error state */
+.error-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 1rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2rem;
+}
+.error-state.visible { display: flex; }
+.error-state-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--coral);
+}
+.error-state-msg {
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.7;
+  max-width: 380px;
+}
+
+/* ── LESSON CHROME ── */
+.lesson { animation: fadeUp 0.28s ease; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.lesson-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.lesson-cat-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.65rem;
+  border-radius: 4px;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.lesson-sub-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+.notes-view-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 0.25rem 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  flex-shrink: 0;
+}
+
+.notes-view-btn:hover { border-color: var(--amber); color: var(--amber); }
+.notes-view-btn.has-notes { border-color: rgba(240,164,66,0.4); color: var(--amber); background: var(--amber-dim); }
+
+.lesson-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.7rem, 3.5vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.65rem;
+  color: var(--text-primary);
+}
+
+.lesson-intro {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 0.97rem;
+  line-height: 1.75;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* ── SCENE CARDS ── */
+.scene-wrap { position: relative; }
+
+.scene {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.4rem 1.5rem 1.4rem 1.75rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Raj: warm tint. You: cool tint. Subtle but readable rhythm. */
+.scene.scene-raj { background: var(--raj-bg); }
+.scene.scene-you { background: var(--you-bg); }
+
+/* Light mode: cards need shadow to lift off the warm paper background */
+html[data-theme="light"] .scene,
+html[data-theme="light"] .analogy-card,
+html[data-theme="light"] .code-card,
+html[data-theme="light"] .summary-card {
+  box-shadow: var(--card-shadow);
+}
+.scene-accent {
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  border-radius: 10px 0 0 10px;
+}
+
+.speaker-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dialogue {
+  font-family: var(--font-dialogue);
+  font-size: 0.96rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.dialogue em   { color: var(--amber); font-style: normal; font-weight: 500; }
+.dialogue strong { color: var(--sage); font-weight: 600; }
+
+/* ── ANALOGY CARD ── */
+.analogy-card {
+  background: var(--analogy-bg);
+  border: 1px solid var(--analogy-border);
+  border-left: 3px solid var(--amber);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.analogy-text {
+  color: var(--text-secondary);
+  font-size: 0.97rem;
+  line-height: 1.75;
+  font-style: italic;
+  font-family: var(--font-body);
+}
+
+/* ── CODE CARD ── */
+.code-card {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.code-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--code-border);
+  background: var(--code-bar);
+  flex-shrink: 0;
+}
+
+.code-topbar-dots {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.code-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.code-lang {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.code-body {
+  padding: 1.2rem 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.83rem;
+  line-height: 1.85;
+  color: var(--code-text);
+  white-space: pre;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  tab-size: 2;
+}
+
+/* ── SUMMARY CARD ── */
+.summary-card {
+  background: var(--summary-bg);
+  border: 1px solid var(--summary-border);
+  border-left: 3px solid var(--sage);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.summary-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--sage);
+  margin-bottom: 1rem;
+}
+
+.summary-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+
+.summary-list li {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  padding-left: 1.4rem;
+  position: relative;
+  line-height: 1.7;
+}
+
+.summary-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--sage);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+/* ── SCENE NOTE BUTTON ── */
+.scene-wrap .note-btn {
+  position: absolute;
+  top: 0.6rem; right: 0.6rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.26rem 0.38rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--t-fast), border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  z-index: 2;
+}
+
+.scene-wrap:hover .note-btn,
+.scene-wrap .note-btn.has-note { opacity: 1; }
+
+.scene-wrap .note-btn.has-note {
+  color: var(--amber);
+  border-color: rgba(240,164,66,0.3);
+  background: var(--amber-dim);
+}
+
+.scene-wrap .note-btn:hover {
+  color: var(--amber);
+  border-color: rgba(240,164,66,0.4);
+  background: var(--amber-dim);
+}
+
+/* ── INLINE NOTES ── */
+.inline-note {
+  display: none;
+  margin: -0.3rem 0 1rem;
+  border: 1px solid var(--border);
+  border-top: 2px solid rgba(240,164,66,0.45);
+  border-radius: 0 0 10px 10px;
+  background: var(--card);
+  overflow: hidden;
+  animation: noteDown 0.14s ease;
+}
+
+@keyframes noteDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.inline-note.open { display: block; }
+
+.inline-note-textarea {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0.75rem 1rem 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  resize: none;
+  min-height: 58px;
+  max-height: 360px;
+  overflow-y: hidden;
+  line-height: 1.7;
+  caret-color: var(--amber);
+}
+
+.inline-note-textarea::placeholder { color: var(--text-muted); font-style: italic; }
+
+.inline-note-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.2rem 0.8rem 0.45rem;
+}
+
+.inline-note-status {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.inline-note-del {
+  background: none; border: none;
+  color: var(--text-muted); cursor: pointer;
+  font-family: var(--font-mono); font-size: 0.58rem;
+  padding: 0.12rem 0.3rem; border-radius: 4px;
+  transition: color var(--t-fast);
+  opacity: 0.65;
+}
+.inline-note-del:hover { color: var(--coral); opacity: 1; }
+
+/* ── LESSON-LEVEL NOTE ── */
+.lesson-note-wrap {
+  margin-bottom: 2rem;
+  border: 1px solid var(--border);
+  border-top: 2px solid rgba(240,164,66,0.35);
+  border-radius: 10px;
+  background: var(--card);
+  overflow: hidden;
+}
+
+.lesson-note-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  opacity: 0.7;
+  padding: 0.6rem 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lesson-note-del {
+  background: none; border: none;
+  color: var(--text-muted); cursor: pointer;
+  font-family: var(--font-mono); font-size: 0.56rem;
+  padding: 0.1rem 0.3rem; border-radius: 4px;
+  opacity: 0;
+  transition: opacity var(--t-fast), color var(--t-fast);
+}
+.lesson-note-wrap:hover .lesson-note-del,
+.lesson-note-del.visible { opacity: 1; }
+.lesson-note-del:hover { color: var(--coral); }
+
+.lesson-note-textarea {
+  display: block; width: 100%; background: transparent;
+  border: none; outline: none;
+  padding: 0.5rem 1rem 0.65rem;
+  font-family: var(--font-body); font-size: 0.92rem;
+  color: var(--text-primary); resize: none;
+  min-height: 56px; max-height: 360px; overflow-y: hidden;
+  line-height: 1.7; caret-color: var(--amber);
+}
+.lesson-note-textarea::placeholder { color: var(--text-muted); font-style: italic; opacity: 0.5; }
+
+.lesson-note-status {
+  font-family: var(--font-mono); font-size: 0.56rem;
+  color: var(--text-muted); padding: 0 1rem 0.4rem;
+  display: block; min-height: 1.1em; opacity: 0.5;
+}
+
+/* ── NOTES INLINE PANEL ── */
+.notes-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  animation: fadeUp 0.18s ease;
+}
+
+.notes-panel-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.notes-panel-title {
+  font-family: var(--font-mono); font-size: 0.62rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); flex: 1;
+}
+
+.notes-panel-close {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 0.8rem; line-height: 1;
+  padding: 0.1rem 0.3rem; border-radius: 4px;
+  transition: color var(--t-fast);
+}
+.notes-panel-close:hover { color: var(--text-primary); }
+
+.notes-panel-item {
+  display: flex; gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+.notes-panel-item:last-child { border-bottom: none; }
+.notes-panel-item:hover { background: var(--hover); }
+
+.notes-panel-scene-label {
+  font-family: var(--font-mono); font-size: 0.58rem;
+  color: var(--text-muted); white-space: nowrap;
+  padding-top: 0.2rem; min-width: 3rem; opacity: 0.7;
+}
+
+.notes-panel-note-text {
+  font-size: 0.84rem; font-family: var(--font-body);
+  color: var(--text-primary); line-height: 1.55; word-break: break-word;
+}
+.notes-panel-empty {
+  padding: 1.5rem 1rem; text-align: center;
+  color: var(--text-muted); font-style: italic; font-size: 0.85rem;
+}
+
+/* ── MARK DONE ── */
+.mark-done-btn {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  width: fit-content; margin: 2rem auto 0; padding: 0.55rem 1.5rem;
+  border-radius: 99px; border: 1.5px solid var(--border);
+  background: transparent; color: var(--text-muted);
+  font-family: var(--font-mono); font-size: 0.7rem; cursor: pointer;
+  transition: border-color var(--t-base), color var(--t-base), background var(--t-base);
+  letter-spacing: 0.04em;
+}
+.mark-done-btn:hover { border-color: var(--sage); color: var(--sage); }
+.mark-done-btn.done  { border-color: var(--sage); color: var(--sage); background: var(--sage-dim); }
+
+/* ── LESSON NAV ── */
+.lesson-nav {
+  display: flex; justify-content: space-between;
+  margin-top: 3.5rem; padding-top: 2rem;
+  border-top: 1px solid var(--border-subtle); gap: 1rem;
+}
+
+.nav-btn-arrow {
+  font-family: var(--font-mono); font-size: 0.75rem;
+  padding: 0.65rem 1.4rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--text-secondary); cursor: pointer;
+  transition: border-color var(--t-base), color var(--t-base), background var(--t-base);
+  letter-spacing: 0.02em; display: flex; align-items: center; gap: 0.5rem;
+}
+.nav-btn-arrow:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+.nav-btn-arrow:disabled { opacity: 0.22; cursor: not-allowed; }
+.nav-btn-arrow.next-btn { background: var(--amber); color: #1a1000; border-color: var(--amber); font-weight: 600; }
+.nav-btn-arrow.next-btn:hover:not(:disabled) { opacity: 0.85; color: #1a1000; }
+
+/* ── BOOKMARK PANEL ── */
+.bookmark-panel {
+  display: none; flex-direction: column;
+  border-left: 1px solid var(--border-subtle);
+  background: var(--surface);
+  position: sticky; top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  overflow: hidden; min-width: 0;
+}
+
+.bookmark-mobile-handle {
+  display: none; width: 36px; height: 4px;
+  background: var(--border); border-radius: 99px;
+  margin: 0.75rem auto 0; flex-shrink: 0;
+}
+
+.bookmark-header {
+  padding: 1.1rem 1rem 0.85rem;
+  font-family: var(--font-mono); font-size: 0.6rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted); border-bottom: 1px solid var(--border-subtle);
+  display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;
+}
+
+.bookmark-badge {
+  background: var(--coral); color: #fff;
+  font-size: 0.52rem; padding: 0.08rem 0.42rem;
+  border-radius: 99px; font-weight: 600;
+  min-width: 16px; text-align: center;
+}
+
+.bookmark-hint {
+  padding: 1.4rem 1rem; color: var(--text-muted);
+  font-size: 0.8rem; font-style: italic;
+  text-align: center; line-height: 1.65; font-family: var(--font-body);
+}
+.bookmark-hint strong { font-style: normal; color: var(--coral); font-weight: 500; }
+
+.bookmark-items { flex: 1; overflow-y: auto; overflow-x: hidden; }
+
+.bookmark-group { border-bottom: 1px solid var(--border-subtle); }
+.bookmark-group:last-child { border-bottom: none; }
+
+/* Current lesson group floats to top and is visually distinct */
+.bookmark-group-current > .bookmark-group-header {
+  background: var(--amber-dim);
+  border-left: 2px solid var(--amber);
+}
+.bookmark-group-current > .bookmark-group-header .bookmark-group-name {
+  color: var(--amber);
+}
+
+.bookmark-group-header {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 0.85rem; cursor: pointer;
+  background: var(--surface-2);
+  transition: background var(--t-fast); user-select: none;
+}
+.bookmark-group-header:hover { background: var(--hover); }
+
+.bookmark-group-name {
+  flex: 1; font-family: var(--font-mono); font-size: 0.6rem;
+  letter-spacing: 0.06em; color: var(--text-primary);
+  text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+}
+
+.bookmark-group-count {
+  font-family: var(--font-mono); font-size: 0.55rem;
+  background: var(--coral); color: #fff;
+  padding: 0.08rem 0.38rem; border-radius: 99px; flex-shrink: 0;
+}
+
+.bookmark-group-chevron {
+  color: var(--text-muted); transition: transform var(--t-base); flex-shrink: 0;
+}
+.bookmark-group.collapsed .bookmark-group-chevron { transform: rotate(-90deg); }
+.bookmark-group-body { display: block; }
+.bookmark-group.collapsed .bookmark-group-body { display: none; }
+
+.bookmark-entry {
+  display: flex; align-items: flex-start; gap: 0.4rem;
+  padding: 0.5rem 0.85rem 0.5rem 1.25rem;
+  cursor: pointer; border-left: 2px solid transparent;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.bookmark-entry:hover { background: var(--hover); border-left-color: var(--coral); }
+
+.bookmark-entry-text {
+  flex: 1; font-size: 0.78rem; font-family: var(--font-body);
+  color: var(--text-primary); line-height: 1.5; word-break: break-word;
+}
+
+.bookmark-entry-del {
+  flex-shrink: 0; background: none; border: none;
+  color: var(--text-muted); cursor: pointer; font-size: 0.65rem;
+  padding: 2px 3px; line-height: 1; border-radius: 4px;
+  transition: color var(--t-fast); opacity: 0;
+  display: flex; align-items: center;
+}
+.bookmark-entry:hover .bookmark-entry-del { opacity: 1; }
+.bookmark-entry-del:hover { color: var(--coral); opacity: 1; }
+
+.bookmark-clear {
+  margin: 0.6rem 0.85rem 1rem;
+  padding: 0.4rem 0.6rem; width: calc(100% - 1.7rem);
+  background: none; border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text-muted);
+  font-family: var(--font-mono); font-size: 0.62rem;
+  cursor: pointer; transition: border-color var(--t-fast), color var(--t-fast);
+  text-align: center; letter-spacing: 0.03em;
+}
+.bookmark-clear:hover { border-color: var(--coral); color: var(--coral); }
+
+/* ── BOOKMARK HIGHLIGHTS ── */
+.bookmark-mark {
+  background: rgba(240,112,96,0.18);
+  border-bottom: 1px solid rgba(240,112,96,0.45);
+  border-radius: 2px; cursor: pointer;
+  transition: background var(--t-base);
+}
+.bookmark-mark:hover { background: rgba(240,112,96,0.32); }
+.bookmark-mark.flash { background: rgba(240,112,96,0.5) !important; }
+
+.search-match-flash {
+  background: rgba(240,164,66,0.22); border-radius: 3px;
+  outline: 2px solid rgba(240,164,66,0.45);
+  transition: background 0.6s, outline 0.6s;
+}
+.search-match-flash.fade { background: transparent; outline-color: transparent; }
+
+/* ── SELECTION TOOLBAR ── */
+#sel-toolbar {
+  position: fixed; z-index: var(--z-toolbar);
+  background: var(--surface);
+  border: 1px solid rgba(240,164,66,0.4);
+  border-radius: 8px; padding: 0.28rem;
+  display: flex; align-items: center; gap: 0.2rem;
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--t-fast);
+  max-width: calc(100vw - 16px);
+}
+#sel-toolbar.show { opacity: 1; pointer-events: all; }
+
+.sel-btn {
+  background: var(--amber); color: #1a1000;
+  border: none; border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  font-family: var(--font-mono); font-size: 0.66rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: opacity var(--t-fast), transform var(--t-fast);
+  line-height: 1; letter-spacing: 0.02em;
+  display: flex; align-items: center; gap: 0.35rem;
+}
+.sel-btn:hover { opacity: 0.88; }
+.sel-btn:active { transform: scale(0.96); }
+
+.sel-label {
+  font-family: var(--font-mono); font-size: 0.58rem;
+  color: var(--text-muted); padding: 0 0.3rem; white-space: nowrap;
+}
+
+/* ── SEARCH OVERLAY ── */
+.search-overlay {
+  position: fixed; inset: 0; z-index: var(--z-search);
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: clamp(3.5rem, 8vh, 7rem);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--t-base);
+}
+.search-overlay.open { opacity: 1; pointer-events: all; }
+html[data-theme="light"] .search-overlay { background: rgba(160,155,140,0.7); }
+
+.search-box {
+  width: min(640px, 92vw); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; box-shadow: var(--shadow-lg), var(--shadow-glow);
+  display: flex; flex-direction: column; max-height: 72vh;
+}
+
+.search-input-row {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+
+.search-icon-wrap { color: var(--text-muted); flex-shrink: 0; display: flex; align-items: center; }
+
+#searchInput {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text-primary); font-family: var(--font-mono);
+  font-size: 0.92rem; caret-color: var(--amber); min-width: 0;
+}
+#searchInput::placeholder { color: var(--text-muted); }
+
+.search-close-btn {
+  background: none; border: 1px solid var(--border);
+  border-radius: 5px; color: var(--text-muted); cursor: pointer;
+  font-family: var(--font-mono); font-size: 0.58rem;
+  padding: 0.2rem 0.45rem;
+  transition: color var(--t-fast), border-color var(--t-fast);
+  flex-shrink: 0; letter-spacing: 0.04em;
+}
+.search-close-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+
+.search-results { overflow-y: auto; flex: 1; background: var(--surface); }
+
+.search-empty {
+  padding: 2.5rem 1.5rem; text-align: center;
+  color: var(--text-muted); font-style: italic;
+  font-size: 0.88rem; font-family: var(--font-body);
+}
+
+.search-hint {
+  padding: 1.5rem; color: var(--text-muted); font-size: 0.8rem;
+  font-family: var(--font-mono); text-align: center; opacity: 0.65;
+}
+
+.search-result-group { border-bottom: 1px solid var(--border-subtle); }
+.search-result-group:last-child { border-bottom: none; }
+
+.search-result-lesson-header {
+  padding: 0.6rem 1.1rem 0.38rem; font-family: var(--font-mono);
+  font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); background: var(--surface-2);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.search-result-lesson-header .lesson-hit-name { color: var(--text-primary); font-size: 0.65rem; }
+
+.search-hit {
+  padding: 0.65rem 1.1rem; cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background var(--t-fast), border-color var(--t-fast);
+  display: flex; flex-direction: column; gap: 0.22rem;
+}
+.search-hit:hover { background: var(--hover); border-left-color: var(--amber); }
+
+.search-hit-type {
+  font-family: var(--font-mono); font-size: 0.56rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); opacity: 0.7;
+}
+
+.search-hit-snippet { font-size: 0.83rem; font-family: var(--font-body); color: var(--text-primary); line-height: 1.55; }
+.search-hit-snippet mark { background: rgba(240,164,66,0.25); color: var(--amber); border-radius: 2px; padding: 0 2px; font-style: normal; }
+
+.search-count {
+  font-family: var(--font-mono); font-size: 0.6rem;
+  color: var(--text-muted); padding: 0.6rem 1.1rem;
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0; background: var(--surface);
+}
+
+/* ── KB MODAL ── */
+.kb-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: var(--z-kb-modal);
+  align-items: center; justify-content: center;
+}
+.kb-overlay.open { display: flex; }
+
+.kb-modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.75rem 2rem;
+  max-width: 340px; width: 90%; box-shadow: var(--shadow-lg);
+}
+
+.kb-title {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 1.25rem;
+}
+
+.kb-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.42rem 0; border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.82rem; font-family: var(--font-body);
+}
+.kb-row:last-child { border-bottom: none; }
+.kb-label { color: var(--text-secondary); }
+
+kbd {
+  font-family: var(--font-mono); font-size: 0.64rem;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 5px; padding: 0.12rem 0.42rem; color: var(--amber);
+}
+
+/* ── ALL NOTES OVERLAY ── */
+.all-notes-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: var(--z-notes-modal);
+  align-items: flex-start; justify-content: center;
+  padding: 5vh 1rem 2rem; overflow-y: auto;
+}
+.all-notes-overlay.open { display: flex; }
+
+.all-notes-modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; width: min(660px, 100%);
+  max-height: 84vh; overflow-y: auto;
+  position: relative; box-shadow: var(--shadow-lg); margin-bottom: 2rem;
+}
+
+.all-notes-header {
+  position: sticky; top: 0; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1.1rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between; z-index: 1;
+}
+
+.all-notes-title {
+  font-family: var(--font-mono); font-size: 0.64rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted);
+}
+
+.all-notes-close {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 1rem; padding: 0.2rem 0.4rem;
+  border-radius: 4px; transition: color var(--t-fast); line-height: 1;
+}
+.all-notes-close:hover { color: var(--text-primary); }
+
+.all-notes-empty {
+  padding: 3rem 2rem; text-align: center;
+  color: var(--text-muted); font-size: 0.85rem;
+  font-style: italic; font-family: var(--font-body); line-height: 1.7;
+}
+
+.all-notes-group { border-bottom: 1px solid var(--border-subtle); }
+.all-notes-group:last-child { border-bottom: none; }
+
+.all-notes-group-hdr {
+  padding: 0.8rem 1.5rem 0.3rem; font-family: var(--font-mono);
+  font-size: 0.57rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;
+  background: var(--surface-2);
+}
+
+.all-notes-item { padding: 0.55rem 1.5rem 0.9rem; cursor: pointer; transition: background var(--t-fast); }
+.all-notes-item:hover { background: var(--hover); }
+
+.all-notes-item-meta {
+  font-family: var(--font-mono); font-size: 0.56rem;
+  color: var(--text-muted); margin-bottom: 0.3rem; opacity: 0.7;
+}
+
+.all-notes-item-text {
+  font-size: 0.86rem; font-family: var(--font-body);
+  line-height: 1.65; color: var(--text-primary); white-space: pre-wrap;
+}
+
+/* ── MOBILE OVERLAY ── */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.58); z-index: var(--z-overlay); }
+.overlay.show { display: block; }
+
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-bottom-nav { display: none; }
+
+/* ── ACCESSIBILITY ── */
+[hidden] { display: none !important; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 767px) {
+  .app { grid-template-columns: 1fr; }
+
+  .sidebar {
+    position: fixed; top: var(--nav-h); left: 0;
+    width: 82vw; max-width: 300px;
+    height: calc(100vh - var(--nav-h));
+    z-index: var(--z-sidebar-mob);
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .content { padding: 2rem 1.1rem calc(var(--mobile-nav-h) + 2.5rem); }
+  .code-body { font-size: 0.72rem; }
+
+  .bookmark-panel {
+    display: flex !important; position: fixed;
+    bottom: var(--mobile-nav-h); left: 0; right: 0; top: auto;
+    height: 65vh; max-height: 65vh;
+    border-left: none; border-top: 1px solid var(--border);
+    border-radius: 14px 14px 0 0; z-index: var(--z-bookmark-mob);
+    transform: translateY(105%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto; box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
+  }
+  .bookmark-panel.mobile-open { transform: translateY(0); }
+  .bookmark-mobile-handle { display: block; }
+
+  .mobile-nav-toggle, .mobile-bookmark-toggle { display: none !important; }
+
+  .mobile-bottom-nav {
+    display: flex; position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: var(--mobile-nav-h);
+    background: var(--surface);
+    border-top: 1px solid var(--border-subtle);
+    z-index: var(--z-bottomnav); align-items: stretch;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .mobile-nav-tab {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 4px;
+    background: none; border: none; color: var(--text-muted);
+    font-family: var(--font-mono); font-size: 0.57rem;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    cursor: pointer; transition: color var(--t-fast), background var(--t-fast);
+    position: relative; padding: 0 0.25rem;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-nav-tab:active { background: var(--hover); }
+  .mobile-nav-tab.active { color: var(--amber); }
+  .mobile-nav-tab .tab-icon { line-height: 1; display: flex; align-items: center; justify-content: center; }
+
+  .mobile-nav-tab .tab-badge {
+    position: absolute; top: 6px; right: calc(50% - 18px);
+    background: var(--coral); color: #fff; font-size: 0.48rem;
+    font-weight: 700; padding: 0.06rem 0.32rem;
+    border-radius: 99px; min-width: 14px; text-align: center; line-height: 1.5;
+  }
+
+  .progress-read-time { display: none !important; }
+
+  .search-overlay { padding-top: 1rem; align-items: flex-start; }
+  .search-box { max-height: calc(100svh - 2rem); margin-top: env(safe-area-inset-top, 0px); border-radius: 10px; }
+
+  .lesson-title { font-size: 1.55rem; }
+  .lesson-nav { margin-top: 2.5rem; }
+  .nav-btn-arrow { padding: 0.6rem 1rem; font-size: 0.7rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- SVG sprite — all icons defined once, used anywhere via <use> -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="icon-notes" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+  <symbol id="icon-keyboard" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></symbol>
+  <symbol id="icon-bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+  <symbol id="icon-chevron-down" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="icon-arrow-left" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+  <symbol id="icon-arrow-right" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+  <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></symbol>
+  <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+  <symbol id="icon-menu" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="icon-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+</svg>
+
+<header>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">
+    <svg class="icon icon-sm" id="themeIcon"><use href="#icon-sun"/></svg>
+    <span id="themeLabel">Light</span>
+  </button>
+  <h1>The Coderoom — <em>Vol. 2</em></h1>
+  <p>Raj explains the hard stuff. You ask the real questions.</p>
+  <div class="header-meta">
+    <span class="header-speaker">
+      <span class="speaker-dot" style="background:#f0a442"></span>
+      Raj — Senior Dev
+    </span>
+    <span class="header-speaker">
+      <span class="speaker-dot" style="background:#6ec99a"></span>
+      You — Mid Dev
+    </span>
+  </div>
+</header>
+
+<div class="storage-warning" id="storageWarning">
+  <svg class="icon icon-sm"><use href="#icon-alert"/></svg>
+  <span id="storageWarningMsg">Storage quota reached — your latest changes could not be saved.</span>
+  <button class="storage-warning-close" onclick="Storage.dismissWarning()">
+    <svg class="icon icon-sm"><use href="#icon-x"/></svg>
+  </button>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="progress-label" id="progressLabel">0 / 0</span>
+  <span class="progress-read-time" id="readTimeLabel" style="display:none">
+    <svg class="icon icon-sm"><use href="#icon-check"/></svg>
+    <span id="readTimeTxt"></span>
+  </span>
+</div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-topbar">
+      <div class="sidebar-topbar-row1">
+        <span class="sidebar-brand">Lessons</span>
+        <button class="icon-btn" onclick="openAllNotes()" title="All notes">
+          <svg class="icon"><use href="#icon-notes"/></svg>
+        </button>
+        <button class="icon-btn" onclick="showKeyboardHelp()" title="Shortcuts" style="opacity:0.55">
+          <svg class="icon"><use href="#icon-keyboard"/></svg>
+        </button>
+      </div>
+      <div class="sidebar-topbar-row2">
+        <button class="sidebar-search-btn" onclick="openSearch()" title="Search (/)">
+          <svg class="icon"><use href="#icon-search"/></svg>
+          <span>Search lessons…</span>
+          <span class="sidebar-search-shortcut">/</span>
+        </button>
+      </div>
+    </div>
+    <div class="sidebar-nav-scroll" id="sidebarContent"></div>
+  </aside>
+
+  <main class="content" id="mainContent">
+    <div class="empty-state" id="emptyState">
+      <div class="big-icon">
+        <svg class="icon" style="width:2.5rem;height:2.5rem;stroke:var(--text-muted)"><use href="#icon-notes"/></svg>
+      </div>
+      <p>Select a lesson from the sidebar to begin.</p>
+    </div>
+    <div class="error-state" id="errorState">
+      <div class="error-state-title">Failed to load lesson</div>
+      <p class="error-state-msg" id="errorStateMsg">An unexpected error occurred while rendering this lesson.</p>
+    </div>
+    <div id="lessonView" style="display:none"></div>
+  </main>
+
+  <aside class="bookmark-panel" id="bookmarkPanel">
+    <div class="bookmark-mobile-handle"></div>
+    <div class="bookmark-header">
+      <svg class="icon icon-sm"><use href="#icon-bookmark"/></svg>
+      Bookmarks
+      <span class="bookmark-badge" id="bookmarkBadge">0</span>
+    </div>
+    <div id="bookmarkBody">
+      <p class="bookmark-hint">Select any text in a lesson, then tap <strong>Bookmark</strong> to save it here.</p>
+    </div>
+  </aside>
+</div>
+
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <button class="mobile-nav-tab" id="tabLessons" onclick="toggleMobileSidebar()">
+    <span class="tab-icon"><svg class="icon" style="width:1.3rem;height:1.3rem"><use href="#icon-menu"/></svg></span>
+    <span>Lessons</span>
+  </button>
+  <button class="mobile-nav-tab" id="tabBookmarks" onclick="toggleMobileBookmark()">
+    <span class="tab-icon"><svg class="icon" style="width:1.3rem;height:1.3rem"><use href="#icon-bookmark"/></svg></span>
+    <span>Saves</span>
+    <span class="tab-badge" id="mobileBookmarkCount" style="display:none"></span>
+  </button>
+  <button class="mobile-nav-tab" onclick="openSearch()">
+    <span class="tab-icon"><svg class="icon" style="width:1.3rem;height:1.3rem"><use href="#icon-search"/></svg></span>
+    <span>Search</span>
+  </button>
+  <button class="mobile-nav-tab" onclick="openAllNotes()">
+    <span class="tab-icon"><svg class="icon" style="width:1.3rem;height:1.3rem"><use href="#icon-notes"/></svg></span>
+    <span>Notes</span>
+  </button>
+</nav>
+
+<div id="sel-toolbar">
+  <button class="sel-btn" id="selSaveBtn">
+    <svg class="icon icon-sm"><use href="#icon-bookmark"/></svg>
+    Bookmark
+  </button>
+  <span class="sel-label">selected text</span>
+</div>
+
+<div class="search-overlay" id="searchOverlay" onclick="handleSearchOverlayClick(event)">
+  <div class="search-box" id="searchBox">
+    <div class="search-input-row">
+      <span class="search-icon-wrap"><svg class="icon"><use href="#icon-search"/></svg></span>
+      <input type="text" id="searchInput" placeholder="Search lessons, code, dialogue…" autocomplete="off" spellcheck="false"/>
+      <button class="search-close-btn" onclick="closeSearch()">ESC</button>
+    </div>
+    <div class="search-results" id="searchResults">
+      <div class="search-hint">Type to search across all lessons</div>
+    </div>
+  </div>
+</div>
+
+<div class="all-notes-overlay" id="allNotesOverlay" onclick="closeAllNotes()">
+  <div class="all-notes-modal" onclick="event.stopPropagation()">
+    <div class="all-notes-header">
+      <span class="all-notes-title">All Notes</span>
+      <button class="all-notes-close" onclick="closeAllNotes()">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div id="allNotesBody"></div>
+  </div>
+</div>
+
+<div class="kb-overlay" id="kbOverlay" onclick="hideKeyboardHelp()">
+  <div class="kb-modal" onclick="event.stopPropagation()">
+    <div class="kb-title">Keyboard Shortcuts</div>
+    <div class="kb-row"><span class="kb-label">Next lesson</span><span><kbd>L</kbd> / <kbd>→</kbd></span></div>
+    <div class="kb-row"><span class="kb-label">Prev lesson</span><span><kbd>H</kbd> / <kbd>←</kbd></span></div>
+    <div class="kb-row"><span class="kb-label">Mark done</span><kbd>D</kbd></div>
+    <div class="kb-row"><span class="kb-label">Search</span><kbd>/</kbd></div>
+    <div class="kb-row"><span class="kb-label">This help</span><kbd>?</kbd></div>
+    <div class="kb-row"><span class="kb-label">Close / dismiss</span><kbd>Esc</kbd></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- Lesson files — loaded as globals before app script -->
+<script src="lesson-auth.js"          onerror="console.warn('lesson-auth.js not found')"></script>
+<script src="lesson-tooling.js"       onerror="console.warn('lesson-tooling.js not found')"></script>
+<script src="lesson-packages.js"      onerror="console.warn('lesson-packages.js not found')"></script>
+<script src="lesson-backend-libs.js"  onerror="console.warn('lesson-backend-libs.js not found')"></script>
+<script src="lesson-scaling.js"       onerror="console.warn('lesson-scaling.js not found')"></script>
+<script src="lesson-performance.js"   onerror="console.warn('lesson-performance.js not found')"></script>
+<script src="lesson-mongodb.js"       onerror="console.warn('lesson-mongodb.js not found')"></script>
+<script src="lesson-security.js"      onerror="console.warn('lesson-security.js not found')"></script>
+<script src="lesson-devops.js"        onerror="console.warn('lesson-devops.js not found')"></script>
+<script src="lesson-observability.js" onerror="console.warn('lesson-observability.js not found')"></script>
+<script src="lesson-distributed.js"   onerror="console.warn('lesson-distributed.js not found')"></script>
+<script src="lesson-code-quality.js"  onerror="console.warn('lesson-code-quality.js not found')"></script>
+<script src="lesson-debugging.js"     onerror="console.warn('lesson-debugging.js not found')"></script>
+<script src="lesson-datetime.js"      onerror="console.warn('lesson-datetime.js not found')"></script>
+<script src="lesson-code-review.js"   onerror="console.warn('lesson-code-review.js not found')"></script>
+<script src="lesson-api-design.js"    onerror="console.warn('lesson-api-design.js not found')"></script>
+<script src="lesson-concurrency.js"   onerror="console.warn('lesson-concurrency.js not found')"></script>
+<script src="lesson-realtime.js"      onerror="console.warn('lesson-realtime.js not found')"></script>
+<script src="lesson-product-thinking.js"      onerror="console.warn('lesson-product-thinking.js not found')"></script>
+<script src="lesson-incidents.js"             onerror="console.warn('lesson-incidents.js not found')"></script>
+<script src="lesson-networking.js"            onerror="console.warn('lesson-networking.js not found')"></script>
+<script src="lesson-browser-security.js"      onerror="console.warn('lesson-browser-security.js not found')"></script>
+<script src="lesson-build-tooling.js"         onerror="console.warn('lesson-build-tooling.js not found')"></script>
+<script src="lesson-js-runtime.js"            onerror="console.warn('lesson-js-runtime.js not found')"></script>
+<script src="lesson-react-traps.js"           onerror="console.warn('lesson-react-traps.js not found')"></script>
+<script src="lesson-nodejs-backend.js"        onerror="console.warn('lesson-nodejs-backend.js not found')"></script>
+<script src="lesson-architecture-thinking.js" onerror="console.warn('lesson-architecture-thinking.js not found')"></script>
+<script src="lesson-microservices.js"         onerror="console.warn('lesson-microservices.js not found')"></script>
+<script src="lesson-dependency-security.js"   onerror="console.warn('lesson-dependency-security.js not found')"></script>
+<script src="lesson-aws-deployment.js"        onerror="console.warn('lesson-aws-deployment.js not found')"></script>
+<script src="lesson-microservices-scenarios.js" onerror="console.warn('lesson-microservices-scenarios.js not found')"></script>
+<script src="lesson-design-patterns.js"       onerror="console.warn('lesson-design-patterns.js not found')"></script>
+<script src="lesson-date-manipulation.js"     onerror="console.warn('lesson-date-manipulation.js not found')"></script>
+<script src="lesson-hr-interviews.js"         onerror="console.warn('lesson-hr-interviews.js not found')"></script>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 1 — SAFE HTML TEMPLATE TAG
+//  Auto-escapes all interpolated values by default.
+//  Use html.raw(str) to opt a value out of escaping.
+// ═══════════════════════════════════════════════════════════════
+const _escMap = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' };
+function _esc(str) {
+  return String(str == null ? '' : str).replace(/[&<>"']/g, c => _escMap[c]);
+}
+
+function html(strings, ...values) {
+  return strings.reduce((out, str, i) => {
+    const val = values[i - 1];
+    if (val === undefined) return out + str;
+    const safe = (val && val.__raw) ? val.__raw : _esc(val);
+    return out + safe + str;
+  });
+}
+
+// Overload: called as html(strings, ...values) via tag, but also
+// works as html`...` template tag. Attach .raw helper.
+html.raw = (str) => ({ __raw: String(str == null ? '' : str) });
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 2 — STORAGE ABSTRACTION
+//  Single interface for all persistence. Handles quota errors,
+//  schema versioning, and user-facing warnings.
+// ═══════════════════════════════════════════════════════════════
+const Storage = (() => {
+  const SCHEMA_VERSION = 2;
+  const KEYS = {
+    bookmarks:  'coderoom-v2-bookmarks',
+    notes:      'coderoom-v2-notes',
+    completed:  'coderoom-v2-completed',
+    theme:      'coderoom-theme',
+    lastLesson: 'coderoom-v2-last-lesson',
+    schema:     'coderoom-schema-version',
+  };
+
+  function _read(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw == null ? fallback : JSON.parse(raw);
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function _write(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (e) {
+      // QuotaExceededError or similar
+      _showWarning('Storage quota reached — your latest changes could not be saved. Consider exporting your data.');
+      return false;
+    }
+  }
+
+  function _showWarning(msg) {
+    const el = document.getElementById('storageWarning');
+    const msgEl = document.getElementById('storageWarningMsg');
+    if (!el) return;
+    if (msgEl) msgEl.textContent = msg;
+    el.classList.add('visible');
+  }
+
+  function dismissWarning() {
+    const el = document.getElementById('storageWarning');
+    if (el) el.classList.remove('visible');
+  }
+
+  // Run once on load — migrate old schemas if needed
+  function migrate() {
+    const v = _read(KEYS.schema, 1);
+    if (v < SCHEMA_VERSION) {
+      // Future: add migration transforms here
+      _write(KEYS.schema, SCHEMA_VERSION);
+    }
+  }
+
+  return {
+    migrate,
+    dismissWarning,
+
+    loadBookmarks:  ()      => _read(KEYS.bookmarks, []),
+    saveBookmarks:  (list)  => _write(KEYS.bookmarks, list),
+
+    loadNotes:      ()      => _read(KEYS.notes, {}),
+    saveNotes:      (store) => _write(KEYS.notes, store),
+
+    loadCompleted:  ()      => new Set(_read(KEYS.completed, [])),
+    saveCompleted:  (set)   => _write(KEYS.completed, [...set]),
+
+    loadTheme:      ()      => _read(KEYS.theme, null),
+    saveTheme:      (theme) => _write(KEYS.theme, theme),
+
+    loadLastLesson: ()      => _read(KEYS.lastLesson, null),
+    saveLastLesson: (tag)   => _write(KEYS.lastLesson, tag),
+
+    // Export all user data as a downloadable JSON file
+    exportData() {
+      const data = {
+        schema:    SCHEMA_VERSION,
+        exported:  new Date().toISOString(),
+        bookmarks: _read(KEYS.bookmarks, []),
+        notes:     _read(KEYS.notes, {}),
+        completed: _read(KEYS.completed, []),
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `coderoom-backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+  };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 3 — LESSON DATA & VALIDATION
+//  Reads lesson globals, validates shape, builds LESSONS array.
+// ═══════════════════════════════════════════════════════════════
+const LESSON_MAP = [
+  { ref: () => typeof LESSON_TOOLING               !== 'undefined' ? LESSON_TOOLING               : null, category: "Language & Framework Fundamentals", tag: "Dev Tooling" },
+  { ref: () => typeof LESSON_JS_RUNTIME            !== 'undefined' ? LESSON_JS_RUNTIME            : null, category: "Language & Framework Fundamentals", tag: "JS Runtime & Async" },
+  { ref: () => typeof LESSON_NETWORKING            !== 'undefined' ? LESSON_NETWORKING            : null, category: "Language & Framework Fundamentals", tag: "Networking & HTTP" },
+  { ref: () => typeof LESSON_BACKEND_LIBS          !== 'undefined' ? LESSON_BACKEND_LIBS          : null, category: "Language & Framework Fundamentals", tag: "Express & Middleware" },
+  { ref: () => typeof LESSON_NODEJS_BACKEND        !== 'undefined' ? LESSON_NODEJS_BACKEND        : null, category: "Language & Framework Fundamentals", tag: "Node.js in Production" },
+  { ref: () => typeof LESSON_MONGODB               !== 'undefined' ? LESSON_MONGODB               : null, category: "Language & Framework Fundamentals", tag: "MongoDB" },
+  { ref: () => typeof LESSON_DATETIME              !== 'undefined' ? LESSON_DATETIME              : null, category: "Language & Framework Fundamentals", tag: "Date & Time" },
+  { ref: () => typeof LESSON_DATE_MANIPULATION     !== 'undefined' ? LESSON_DATE_MANIPULATION     : null, category: "Language & Framework Fundamentals", tag: "Date Manipulation" },
+  { ref: () => typeof LESSON_REACT_TRAPS           !== 'undefined' ? LESSON_REACT_TRAPS           : null, category: "Language & Framework Fundamentals", tag: "React Internals" },
+  { ref: () => typeof LESSON_BUILD_TOOLING         !== 'undefined' ? LESSON_BUILD_TOOLING         : null, category: "Language & Framework Fundamentals", tag: "Build Tooling" },
+  { ref: () => typeof LESSON_API_DESIGN            !== 'undefined' ? LESSON_API_DESIGN            : null, category: "Architecture & System Design",      tag: "API Design" },
+  { ref: () => typeof LESSON_CONCURRENCY           !== 'undefined' ? LESSON_CONCURRENCY           : null, category: "Architecture & System Design",      tag: "Concurrency & Race Conditions" },
+  { ref: () => typeof LESSON_REALTIME              !== 'undefined' ? LESSON_REALTIME              : null, category: "Architecture & System Design",      tag: "Real-Time (WebSockets & SSE)" },
+  { ref: () => typeof LESSON_SCALING               !== 'undefined' ? LESSON_SCALING               : null, category: "Architecture & System Design",      tag: "Scaling Strategies" },
+  { ref: () => typeof LESSON_DISTRIBUTED          !== 'undefined' ? LESSON_DISTRIBUTED           : null, category: "Architecture & System Design",      tag: "Distributed Systems" },
+  { ref: () => typeof LESSON_MICROSERVICES         !== 'undefined' ? LESSON_MICROSERVICES         : null, category: "Architecture & System Design",      tag: "Microservices" },
+  { ref: () => typeof LESSON_MICROSERVICES_SCENARIOS !== 'undefined' ? LESSON_MICROSERVICES_SCENARIOS : null, category: "Architecture & System Design", tag: "Microservices Scenarios" },
+  { ref: () => typeof LESSON_ARCHITECTURE_THINKING !== 'undefined' ? LESSON_ARCHITECTURE_THINKING : null, category: "Architecture & System Design",      tag: "Architecture Thinking" },
+  { ref: () => typeof LESSON_DESIGN_PATTERNS      !== 'undefined' ? LESSON_DESIGN_PATTERNS       : null, category: "Architecture & System Design",      tag: "Design Patterns" },
+  { ref: () => typeof LESSON_DEVOPS               !== 'undefined' ? LESSON_DEVOPS                : null, category: "Architecture & System Design",      tag: "DevOps & CI/CD" },
+  { ref: () => typeof LESSON_AWS_DEPLOYMENT       !== 'undefined' ? LESSON_AWS_DEPLOYMENT        : null, category: "Architecture & System Design",      tag: "MERN Deployment on AWS" },
+  { ref: () => typeof LESSON_PRODUCT_THINKING     !== 'undefined' ? LESSON_PRODUCT_THINKING      : null, category: "Architecture & System Design",      tag: "Product Thinking" },
+  { ref: () => typeof LESSON_PERFORMANCE          !== 'undefined' ? LESSON_PERFORMANCE           : null, category: "Scalability & Performance",         tag: "Performance Optimisation" },
+  { ref: () => typeof LESSON_CODE_QUALITY         !== 'undefined' ? LESSON_CODE_QUALITY          : null, category: "Code Quality & Debugging",          tag: "Code Quality" },
+  { ref: () => typeof LESSON_PACKAGES             !== 'undefined' ? LESSON_PACKAGES              : null, category: "Code Quality & Debugging",          tag: "Packages & Dependencies" },
+  { ref: () => typeof LESSON_CODE_REVIEW          !== 'undefined' ? LESSON_CODE_REVIEW           : null, category: "Code Quality & Debugging",          tag: "Code Review" },
+  { ref: () => typeof LESSON_DEBUGGING            !== 'undefined' ? LESSON_DEBUGGING             : null, category: "Code Quality & Debugging",          tag: "Debugging" },
+  { ref: () => typeof LESSON_AUTH                 !== 'undefined' ? LESSON_AUTH                  : null, category: "Security & Production Operations",  tag: "Authentication" },
+  { ref: () => typeof LESSON_SECURITY             !== 'undefined' ? LESSON_SECURITY              : null, category: "Security & Production Operations",  tag: "Application Security" },
+  { ref: () => typeof LESSON_BROWSER_SECURITY     !== 'undefined' ? LESSON_BROWSER_SECURITY      : null, category: "Security & Production Operations",  tag: "Browser Security (XSS/CSRF)" },
+  { ref: () => typeof LESSON_DEPENDENCY_SECURITY  !== 'undefined' ? LESSON_DEPENDENCY_SECURITY   : null, category: "Security & Production Operations",  tag: "Dependency Security" },
+  { ref: () => typeof LESSON_OBSERVABILITY        !== 'undefined' ? LESSON_OBSERVABILITY         : null, category: "Security & Production Operations",  tag: "Observability & Monitoring" },
+  { ref: () => typeof LESSON_INCIDENTS            !== 'undefined' ? LESSON_INCIDENTS             : null, category: "Security & Production Operations",  tag: "Production Incident Response" },
+  { ref: () => typeof LESSON_HR_INTERVIEWS        !== 'undefined' ? LESSON_HR_INTERVIEWS         : null, category: "Career & Interviews",               tag: "HR & Salary Negotiation" },
+];
+
+function _validateLesson(lesson, tag) {
+  if (!lesson || typeof lesson !== 'object') {
+    console.warn(`[Coderoom] Lesson "${tag}" is not an object — skipped.`);
+    return false;
+  }
+  if (typeof lesson.title !== 'string' || !lesson.title.trim()) {
+    console.warn(`[Coderoom] Lesson "${tag}" missing title — skipped.`);
+    return false;
+  }
+  if (!Array.isArray(lesson.scenes) || lesson.scenes.length === 0) {
+    console.warn(`[Coderoom] Lesson "${tag}" has no scenes — skipped.`);
+    return false;
+  }
+  return true;
+}
+
+const LESSONS = LESSON_MAP
+  .map(entry => {
+    const lesson = entry.ref();
+    if (!lesson) return null;
+    if (!_validateLesson(lesson, entry.tag)) return null;
+    return Object.assign({}, lesson, {
+      category: entry.category || lesson.category,
+      tag:      entry.tag      || lesson.tag,
+    });
+  })
+  .filter(Boolean);
+
+const CATEGORIES = [
+  "Language & Framework Fundamentals",
+  "Architecture & System Design",
+  "Scalability & Performance",
+  "Code Quality & Debugging",
+  "Security & Production Operations",
+  "Career & Interviews",
+];
+
+const CATEGORY_META = {
+  "Language & Framework Fundamentals": { icon: 'icon-check',    color: "#6ec99a" },
+  "Architecture & System Design":      { icon: 'icon-notes',    color: "#f0a442" },
+  "Scalability & Performance":         { icon: 'icon-arrow-right', color: "#b388f5" },
+  "Code Quality & Debugging":          { icon: 'icon-search',   color: "#5bb8f5" },
+  "Security & Production Operations":  { icon: 'icon-alert',    color: "#f07060" },
+  "Career & Interviews":               { icon: 'icon-bookmark', color: "#f07060" },
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 4 — CENTRAL STATE
+//  Single source of truth. All reads via State.get().
+//  All writes via State.set(patch) — triggers a render pass.
+// ═══════════════════════════════════════════════════════════════
+const State = (() => {
+  let _state = {
+    currentIdx:       null,   // active lesson index into LESSONS[]
+    flatLessons:      [],     // ordered list of lesson indices
+    bookmarks:        [],     // loaded from Storage
+    notesStore:       {},     // loaded from Storage
+    completedLessons: null,   // Set, loaded from Storage
+    notesPanelOpen:   false,
+    bookmarkGroupCollapsed: {},
+    autoSaveTimers:   {},
+    lessonNoteTimers: {},
+  };
+
+  const _listeners = [];
+
+  function get() { return _state; }
+
+  function set(patch) {
+    _state = Object.assign({}, _state, patch);
+    // No framework — callers are responsible for re-rendering
+    // after set(). This keeps the update path explicit.
+  }
+
+  return { get, set };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 5 — URL ROUTING
+//  Lessons are addressable via /#lesson/slug
+//  history.pushState on navigate, popstate to restore.
+// ═══════════════════════════════════════════════════════════════
+const Router = (() => {
+  function _tagToSlug(tag) {
+    return tag.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  function _slugToIdx(slug) {
+    return LESSONS.findIndex(l => _tagToSlug(l.tag) === slug);
+  }
+
+  function push(idx) {
+    if (idx === null || idx === undefined || !LESSONS[idx]) return;
+    const slug = _tagToSlug(LESSONS[idx].tag);
+    const url  = '#lesson/' + slug;
+    if (window.location.hash !== url) {
+      history.pushState({ lessonIdx: idx }, '', url);
+    }
+  }
+
+  function readCurrent() {
+    const hash = window.location.hash;
+    if (!hash.startsWith('#lesson/')) return null;
+    const slug = hash.slice('#lesson/'.length);
+    const idx  = _slugToIdx(slug);
+    return idx >= 0 ? idx : null;
+  }
+
+  function init() {
+    window.addEventListener('popstate', (e) => {
+      const idx = e.state && e.state.lessonIdx != null
+        ? e.state.lessonIdx
+        : readCurrent();
+      if (idx !== null) _selectLesson(idx, true);
+    });
+  }
+
+  return { push, readCurrent, init };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 6 — SIDEBAR
+// ═══════════════════════════════════════════════════════════════
+function buildSidebar() {
+  const container = document.getElementById('sidebarContent');
+  const s = State.get();
+
+  if (LESSONS.length === 0) {
+    container.innerHTML = '<p style="padding:1.5rem;color:var(--text-muted);font-size:0.85rem;font-style:italic;">No lessons found. Make sure lesson JS files are present.</p>';
+    document.getElementById('emptyState').classList.add('visible');
+    document.getElementById('lessonView').style.display = 'none';
+    return;
+  }
+
+  // Rebuild flatLessons atomically
+  const newFlatLessons = [];
+  const grouped = {};
+  LESSONS.forEach((lesson, idx) => {
+    const cat = lesson.category;
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push({ tag: lesson.tag, idx });
+    newFlatLessons.push(idx);
+  });
+  State.set({ flatLessons: newFlatLessons });
+
+  let markup = '';
+  CATEGORIES.forEach(cat => {
+    if (!grouped[cat]) return;
+    const meta = CATEGORY_META[cat];
+    markup += `<div class="sidebar-section">
+      <div class="cat-header">
+        <svg class="icon icon-sm" style="color:${meta.color}"><use href="#${meta.icon}"/></svg>
+        <span>${cat}</span>
+      </div>`;
+    grouped[cat].forEach(({ tag, idx }) => {
+      const isDone = s.completedLessons.has(idx);
+      markup += `<button class="lesson-btn${isDone ? ' completed' : ''}" id="sidebarBtn-${idx}"
+        style="--active-color:${meta.color}"
+        onclick="selectLesson(${idx})">${_esc(tag)}</button>`;
+    });
+    markup += '</div>';
+  });
+
+  container.innerHTML = markup;
+  updateProgress();
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 7 — LESSON RENDERER
+//  selectLesson is the single entry point for all navigation.
+//  Wrapped in an error boundary — broken lessons show a graceful
+//  error state instead of crashing the app.
+// ═══════════════════════════════════════════════════════════════
+function selectLesson(idx, skipScrollTop) {
+  if (idx === null || idx === undefined || !LESSONS[idx]) return;
+
+  State.set({ currentIdx: idx, notesPanelOpen: false });
+  Storage.saveLastLesson(LESSONS[idx].tag);
+  Router.push(idx);
+
+  document.querySelectorAll('.lesson-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('sidebarBtn-' + idx);
+  if (btn) btn.classList.add('active');
+
+  document.getElementById('emptyState').classList.remove('visible');
+  document.getElementById('errorState').classList.remove('visible');
+
+  const view = document.getElementById('lessonView');
+  view.style.display = 'block';
+
+  // Error boundary — if rendering throws, show graceful error state
+  try {
+    _renderLesson(idx, view);
+  } catch (err) {
+    console.error('[Coderoom] Failed to render lesson:', LESSONS[idx].tag, err);
+    view.style.display = 'none';
+    const errEl  = document.getElementById('errorState');
+    const msgEl  = document.getElementById('errorStateMsg');
+    if (msgEl) msgEl.textContent = `Could not render "${LESSONS[idx].tag}". Check the console for details.`;
+    errEl.classList.add('visible');
+    return;
+  }
+
+  updateProgress();
+  if (!skipScrollTop) window.scrollTo({ top: 0, behavior: 'smooth' });
+  closeSidebar();
+  hideToolbar();
+  reapplyBookmarkHighlights();
+  renderBookmarkPanel(); // re-sort so current lesson group is always on top
+
+  const s = State.get();
+  const lnTa = document.getElementById('lesson-note-ta-' + idx);
+  if (lnTa && lnTa.value) resizeTextarea(lnTa);
+  updateNotesViewBtn();
+}
+
+function _renderLesson(idx, view) {
+  const lesson  = LESSONS[idx];
+  const catMeta = CATEGORY_META[lesson.category] || { icon: 'icon-check', color: '#888' };
+  const s       = State.get();
+
+  const scenesHTML = lesson.scenes.map((scene, si) => renderScene(scene, catMeta, si)).join('');
+
+  const pos     = s.flatLessons.indexOf(idx);
+  const hasPrev = pos > 0;
+  const hasNext = pos < s.flatLessons.length - 1;
+  const prevIdx = hasPrev ? s.flatLessons[pos - 1] : null;
+  const nextIdx = hasNext ? s.flatLessons[pos + 1] : null;
+
+  const lnKey  = 'note-' + idx + '-lesson';
+  const lnNote = s.notesStore[lnKey] || null;
+  const lnText = lnNote ? _esc(lnNote.text) : '';
+
+  view.innerHTML = `
+    <div class="lesson">
+      <div class="lesson-eyebrow">
+        <span class="lesson-cat-tag" style="color:${catMeta.color};border-color:${catMeta.color}44;background:${catMeta.color}11">
+          <svg class="icon icon-sm"><use href="#${catMeta.icon}"/></svg>
+          ${_esc(lesson.category)}
+        </span>
+        <span class="lesson-sub-tag">/ ${_esc(lesson.tag)}</span>
+        <button class="notes-view-btn" id="notesViewBtn" onclick="toggleNotesPanel()">
+          <svg class="icon icon-sm"><use href="#icon-notes"/></svg>
+          Notes
+        </button>
+      </div>
+      <h2 class="lesson-title">${_esc(lesson.title)}</h2>
+      <p class="lesson-intro">${lesson.intro || ''}</p>
+      <div class="lesson-note-wrap">
+        <div class="lesson-note-label">
+          Lesson note
+          <button class="lesson-note-del${lnNote ? ' visible' : ''}" id="lesson-note-del-${idx}" onclick="deleteLessonNote(${idx})">delete</button>
+        </div>
+        <textarea class="lesson-note-textarea" id="lesson-note-ta-${idx}" placeholder="Add a note about this lesson…" maxlength="1200" oninput="autoSaveLessonNote(${idx},this)">${lnText}</textarea>
+        <span class="lesson-note-status" id="lesson-note-status-${idx}"></span>
+      </div>
+      ${scenesHTML}
+      <div style="text-align:center">
+        <button class="mark-done-btn ${s.completedLessons.has(idx) ? 'done' : ''}" id="markDoneBtn" onclick="toggleDone(${idx})">
+          <svg class="icon icon-sm"><use href="#icon-check"/></svg>
+          ${s.completedLessons.has(idx) ? 'Completed' : 'Mark as done'}
+        </button>
+      </div>
+      <div class="lesson-nav">
+        <button class="nav-btn-arrow" onclick="selectLesson(${prevIdx})" ${!hasPrev ? 'disabled' : ''}>
+          <svg class="icon icon-sm"><use href="#icon-arrow-left"/></svg> Prev
+        </button>
+        <button class="nav-btn-arrow next-btn" onclick="selectLesson(${nextIdx})" ${!hasNext ? 'disabled' : ''}>
+          ${hasNext ? 'Next <svg class="icon icon-sm"><use href="#icon-arrow-right"/></svg>' : '<svg class="icon icon-sm"><use href="#icon-check"/></svg> Done'}
+        </button>
+      </div>
+    </div>`;
+
+  updateNotesViewBtn();
+}
+
+function renderScene(s, catMeta, si) {
+  const sceneIdx = si !== undefined ? si : -1;
+  const idxAttr  = sceneIdx >= 0 ? ` data-scene-idx="${sceneIdx}"` : '';
+  const state    = State.get();
+  const noteKey  = `note-${state.currentIdx}-${sceneIdx}`;
+  const hasNote  = !!(state.notesStore[noteKey]);
+
+  const noteBtn = sceneIdx >= 0
+    ? `<button class="note-btn${hasNote ? ' has-note' : ''}" title="Add note" onclick="openNoteDialog(${sceneIdx})">
+         <svg class="icon icon-sm"><use href="#icon-edit"/></svg>
+       </button>`
+    : '';
+
+  const inlineNote = sceneIdx >= 0 ? `
+    <div class="inline-note${hasNote ? ' open' : ''}" id="inline-note-${state.currentIdx}-${sceneIdx}">
+      <textarea class="inline-note-textarea" placeholder="Add a note…" maxlength="600"
+        oninput="autoSaveNote(${sceneIdx},this)"
+        onfocus="markNoteOpen(${sceneIdx})"
+      >${hasNote ? _esc(state.notesStore[noteKey].text) : ''}</textarea>
+      <div class="inline-note-footer">
+        <span class="inline-note-status" id="note-status-${state.currentIdx}-${sceneIdx}"></span>
+        ${hasNote ? `<button class="inline-note-del" onclick="deleteInlineNote(${sceneIdx})">delete note</button>` : ''}
+      </div>
+    </div>` : '';
+
+  if (s.type === 'analogy') return `
+    <div class="scene-wrap"${idxAttr}>
+      ${noteBtn}
+      <div class="analogy-card">
+        <div class="analogy-text">${s.text || ''}</div>
+      </div>
+    </div>${inlineNote}`;
+
+  if (s.type === 'code') return `
+    <div class="scene-wrap"${idxAttr}>
+      ${noteBtn}
+      <div class="code-card">
+        <div class="code-topbar">
+          <div class="code-topbar-dots">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#febc2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+          </div>
+          <span class="code-lang">js</span>
+        </div>
+        <div class="code-body">${s.text || ''}</div>
+      </div>
+    </div>${inlineNote}`;
+
+  if (s.type === 'summary') return `
+    <div class="scene-wrap"${idxAttr}>
+      ${noteBtn}
+      <div class="summary-card">
+        <ul class="summary-list">${(s.points || []).map(p => `<li>${p}</li>`).join('')}</ul>
+      </div>
+    </div>${inlineNote}`;
+
+  // Dialogue scene
+  const isRaj  = s.speaker === 'raj';
+  const color  = isRaj ? 'var(--raj)' : 'var(--you)';
+  const label  = isRaj ? 'Raj' : 'You';
+  const toneClass = isRaj ? 'scene-raj' : 'scene-you';
+
+  return `
+    <div class="scene-wrap"${idxAttr}>
+      ${noteBtn}
+      <div class="scene ${toneClass}">
+        <div class="scene-accent" style="background:${color}"></div>
+        <div class="speaker-label" style="color:${color}">
+          <svg class="icon icon-sm"><use href="#icon-${isRaj ? 'notes' : 'edit'}"/></svg>
+          ${label}
+        </div>
+        <div class="dialogue">${s.text || ''}</div>
+      </div>
+    </div>${inlineNote}`;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 8 — PROGRESS & READING TIME
+// ═══════════════════════════════════════════════════════════════
+function countWords(lesson) {
+  let w = (lesson.intro || '').split(/\s+/).length;
+  (lesson.scenes || []).forEach(s => {
+    if (s.text)   w += s.text.split(/\s+/).length;
+    if (s.points) s.points.forEach(p => { w += p.split(/\s+/).length; });
+  });
+  return w;
+}
+
+function updateReadingTime() {
+  const rtEl  = document.getElementById('readTimeLabel');
+  const rtTxt = document.getElementById('readTimeTxt');
+  const s     = State.get();
+  if (!rtEl || !rtTxt || s.currentIdx === null || !LESSONS[s.currentIdx]) {
+    if (rtEl) rtEl.style.display = 'none';
+    return;
+  }
+  const view = document.getElementById('lessonView');
+  if (!view || view.style.display === 'none') { rtEl.style.display = 'none'; return; }
+
+  const totalWords  = countWords(LESSONS[s.currentIdx]);
+  const viewRect    = view.getBoundingClientRect();
+  const scrolled    = Math.max(0, -viewRect.top + window.innerHeight * 0.5);
+  const scrollRatio = view.scrollHeight > 0 ? Math.min(1, scrolled / view.scrollHeight) : 0;
+  const wordsLeft   = Math.max(0, totalWords - Math.round(totalWords * scrollRatio));
+  const minsLeft    = Math.max(1, Math.round(wordsLeft / 200));
+
+  rtTxt.textContent = scrollRatio < 0.05
+    ? `${Math.max(1, Math.round(totalWords / 200))} min read`
+    : minsLeft === 1 ? '< 1 min left' : `${minsLeft} min left`;
+
+  rtEl.style.display = 'flex';
+}
+
+window.addEventListener('scroll', updateReadingTime, { passive: true });
+
+function updateProgress() {
+  const s     = State.get();
+  const total = LESSONS.length;
+  const done  = s.completedLessons.size;
+  const pct   = total > 0 ? (done / total) * 100 : 0;
+  document.getElementById('progressFill').style.width  = pct + '%';
+  document.getElementById('progressLabel').textContent = done + ' / ' + total + ' done';
+  updateReadingTime();
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 9 — MOBILE NAV
+// ═══════════════════════════════════════════════════════════════
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  const tab     = document.getElementById('tabLessons');
+  const isOpen  = sidebar.classList.contains('open');
+  document.getElementById('bookmarkPanel').classList.remove('mobile-open');
+  document.getElementById('tabBookmarks').classList.remove('active');
+  sidebar.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('show', !isOpen);
+  tab.classList.toggle('active', !isOpen);
+}
+
+function toggleMobileBookmark() {
+  const panel   = document.getElementById('bookmarkPanel');
+  const overlay = document.getElementById('overlay');
+  const tab     = document.getElementById('tabBookmarks');
+  const isOpen  = panel.classList.contains('mobile-open');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('tabLessons').classList.remove('active');
+  panel.classList.toggle('mobile-open', !isOpen);
+  overlay.classList.toggle('show', !isOpen);
+  tab.classList.toggle('active', !isOpen);
+}
+
+function closeAll() {
+  closeSidebar();
+  document.getElementById('bookmarkPanel').classList.remove('mobile-open');
+  document.getElementById('tabLessons').classList.remove('active');
+  document.getElementById('tabBookmarks').classList.remove('active');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  const tab = document.getElementById('tabLessons');
+  if (tab) tab.classList.remove('active');
+}
+
+function showKeyboardHelp() { document.getElementById('kbOverlay').classList.add('open'); }
+function hideKeyboardHelp() { document.getElementById('kbOverlay').classList.remove('open'); }
+
+function openAllNotes() {
+  const body = document.getElementById('allNotesBody');
+  const s    = State.get();
+  const byLesson = {};
+
+  Object.entries(s.notesStore).forEach(([key, note]) => {
+    if (!note || !note.text) return;
+    const li = note.lessonIdx;
+    if (li === undefined || li === null) return;
+    if (!byLesson[li]) byLesson[li] = [];
+    byLesson[li].push(note);
+  });
+
+  const lessonIdxs = Object.keys(byLesson).map(Number).sort((a, b) => {
+    const ia = s.flatLessons.indexOf(a), ib = s.flatLessons.indexOf(b);
+    return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+  });
+
+  if (lessonIdxs.length === 0) {
+    body.innerHTML = '<div class="all-notes-empty">No notes yet.<br>Click the edit icon on any scene to add one.</div>';
+  } else {
+    body.innerHTML = lessonIdxs.map(li => {
+      const lesson = LESSONS[li];
+      const name   = lesson ? _esc(lesson.tag) : 'Lesson ' + li;
+      const catM   = lesson ? CATEGORY_META[lesson.category] : null;
+      const color  = catM ? catM.color : '#888';
+      const icon   = catM ? catM.icon  : 'icon-notes';
+      const items  = byLesson[li].slice().sort((a, b) => (a.sceneIdx || 0) - (b.sceneIdx || 0));
+
+      const rows = items.map(note => {
+        const sceneLabel = note.sceneIdx === 'lesson' ? 'lesson note' : note.sceneIdx >= 0 ? 'scene ' + (note.sceneIdx + 1) : '';
+        const date       = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
+        const meta       = [sceneLabel, date].filter(Boolean).join(' · ');
+        return `<div class="all-notes-item" onclick="closeAllNotes();selectLesson(${li},true);setTimeout(()=>scrollToNoteScene(${JSON.stringify(note.sceneIdx||0)}),250)">
+          <div class="all-notes-item-meta">${_esc(meta)}</div>
+          <div class="all-notes-item-text">${_esc(note.text)}</div>
+        </div>`;
+      }).join('');
+
+      return `<div class="all-notes-group">
+        <div class="all-notes-group-hdr">
+          <svg class="icon icon-sm" style="color:${color}"><use href="#${icon}"/></svg>
+          <span>${name}</span>
+        </div>
+        ${rows}
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('allNotesOverlay').classList.add('open');
+}
+
+function closeAllNotes() {
+  document.getElementById('allNotesOverlay').classList.remove('open');
+}
+
+function updateMobileBookmarkBadge() {
+  const badge = document.getElementById('mobileBookmarkCount');
+  if (!badge) return;
+  const count = State.get().bookmarks.length;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'inline' : 'none';
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 10 — BOOKMARKS
+// ═══════════════════════════════════════════════════════════════
+function renderBookmarkPanel() {
+  const s     = State.get();
+  const badge = document.getElementById('bookmarkBadge');
+  const body  = document.getElementById('bookmarkBody');
+  if (!body) return;
+
+  badge.textContent = s.bookmarks.length;
+  updateMobileBookmarkBadge();
+
+  if (s.bookmarks.length === 0) {
+    body.innerHTML = '<p class="bookmark-hint">Select any text in a lesson, then tap <strong>Bookmark</strong> to save it here.</p>';
+    return;
+  }
+
+  const groups = {};
+  const groupOrder = [];
+  s.bookmarks.forEach(b => {
+    const key = b.lessonIdx !== undefined ? b.lessonIdx : '__none__';
+    if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
+    groups[key].push(b);
+  });
+
+  // Current lesson group always floats to top
+  const currentKey = s.currentIdx !== null ? String(s.currentIdx) : null;
+  const sortedOrder = groupOrder.slice().sort((a, b) => {
+    if (String(a) === currentKey) return -1;
+    if (String(b) === currentKey) return  1;
+    return 0;
+  });
+
+  const groupsHTML = sortedOrder.map(key => {
+    const items     = groups[key];
+    const lesson    = key !== '__none__' && LESSONS[key] ? LESSONS[key] : null;
+    const name      = lesson ? _esc(lesson.tag) : 'Unsorted';
+    const isOpen    = !s.bookmarkGroupCollapsed[key];
+    const isCurrent = String(key) === currentKey;
+
+    const itemsHTML = items.map(b => `
+      <div class="bookmark-entry" onclick="jumpToBookmark('${b.id}')">
+        <span class="bookmark-entry-text">${_esc(b.text)}</span>
+        <button class="bookmark-entry-del" onclick="deleteBookmark(event,'${b.id}')" title="Remove">
+          <svg class="icon icon-sm"><use href="#icon-x"/></svg>
+        </button>
+      </div>`).join('');
+
+    return `
+      <div class="bookmark-group${isOpen ? '' : ' collapsed'}${isCurrent ? ' bookmark-group-current' : ''}" id="bookmark-group-${key}">
+        <div class="bookmark-group-header" onclick="toggleBookmarkGroup('${key}')">
+          <span class="bookmark-group-name">${isCurrent ? '▸ ' : ''}${name}</span>
+          <span class="bookmark-group-count">${items.length}</span>
+          <svg class="icon bookmark-group-chevron" style="width:0.75rem;height:0.75rem"><use href="#icon-chevron-down"/></svg>
+        </div>
+        <div class="bookmark-group-body">${itemsHTML}</div>
+      </div>`;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="bookmark-items">${groupsHTML}</div>
+    <button class="bookmark-clear" onclick="clearAllBookmarks()">Clear all bookmarks</button>`;
+}
+
+function toggleBookmarkGroup(key) {
+  const s = State.get();
+  const updated = Object.assign({}, s.bookmarkGroupCollapsed, { [key]: !s.bookmarkGroupCollapsed[key] });
+  State.set({ bookmarkGroupCollapsed: updated });
+  renderBookmarkPanel();
+}
+
+function deleteBookmark(e, id) {
+  e.stopPropagation();
+  const s   = State.get();
+  const idx = s.bookmarks.findIndex(b => b.id === id);
+  if (idx === -1) return;
+  removeHighlight(s.bookmarks[idx].id);
+  const updated = s.bookmarks.slice();
+  updated.splice(idx, 1);
+  State.set({ bookmarks: updated });
+  Storage.saveBookmarks(updated);
+  renderBookmarkPanel();
+}
+
+function clearAllBookmarks() {
+  const s = State.get();
+  s.bookmarks.forEach(b => removeHighlight(b.id));
+  State.set({ bookmarks: [] });
+  Storage.saveBookmarks([]);
+  renderBookmarkPanel();
+}
+
+function removeHighlight(id) {
+  const el = document.getElementById(id);
+  if (!el || !el.parentNode) return;
+  const parent = el.parentNode;
+  while (el.firstChild) parent.insertBefore(el.firstChild, el);
+  parent.removeChild(el);
+}
+
+function jumpToBookmark(id) {
+  const s        = State.get();
+  const bookmark = s.bookmarks.find(f => f.id === id);
+  if (!bookmark) return;
+
+  const scrollToMark = (attemptsLeft) => {
+    let el = document.getElementById(id);
+    if (!el) {
+      const view = document.getElementById('lessonView');
+      if (view) injectHighlight(view, bookmark.text, id, bookmark.sceneIdx);
+      el = document.getElementById(id);
+    }
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 900);
+    } else if (attemptsLeft > 0) {
+      setTimeout(() => scrollToMark(attemptsLeft - 1), 80);
+    }
+  };
+
+  if (bookmark.lessonIdx !== s.currentIdx) {
+    selectLesson(bookmark.lessonIdx, true);
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollToMark(5)));
+  } else {
+    scrollToMark(3);
+  }
+}
+
+function reapplyBookmarkHighlights() {
+  const s    = State.get();
+  const view = document.getElementById('lessonView');
+  if (!view) return;
+  s.bookmarks
+    .filter(b => b.lessonIdx === s.currentIdx)
+    .forEach(b => {
+      if (!document.getElementById(b.id)) injectHighlight(view, b.text, b.id, b.sceneIdx);
+    });
+}
+
+function injectHighlight(root, searchText, id, sceneIdx) {
+  if (sceneIdx !== undefined && sceneIdx >= 0) {
+    const wrap = root.querySelector(`[data-scene-idx="${sceneIdx}"]`);
+    if (wrap) root = wrap;
+  }
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      // Skip text already inside an existing bookmark mark to prevent double-wrapping
+      if (node.parentElement && node.parentElement.closest('.bookmark-mark')) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes = [];
+  let full = '', node;
+  while ((node = walker.nextNode())) { nodes.push({ node, start: full.length }); full += node.textContent; }
+
+  const normFull   = full.replace(/\s+/g, ' ');
+  const normSearch = searchText.replace(/\s+/g, ' ').trim();
+  const matchIdx   = normFull.indexOf(normSearch);
+  if (matchIdx === -1) return;
+
+  const origStart = _mapNormToOrig(full, matchIdx);
+  const origEnd   = _mapNormToOrig(full, matchIdx + normSearch.length);
+  const range     = document.createRange();
+  let placed      = false;
+
+  for (const { node: n, start } of nodes) {
+    const end = start + n.textContent.length;
+    if (!placed && origStart >= start && origStart < end) { range.setStart(n, origStart - start); placed = true; }
+    if (placed  && origEnd   >= start && origEnd   <= end) { range.setEnd(n,   origEnd   - start); break; }
+  }
+  if (!placed) return;
+
+  try {
+    const mark = document.createElement('mark');
+    mark.className = 'bookmark-mark';
+    mark.id        = id;
+    mark.title     = 'Bookmarked — click to jump here';
+    mark.addEventListener('click', () => jumpToBookmark(id));
+    try { range.surroundContents(mark); }
+    catch (_) { const frag = range.extractContents(); mark.appendChild(frag); range.insertNode(mark); }
+  } catch (err) { /* cross-element selection — skip */ }
+}
+
+function _mapNormToOrig(orig, normPos) {
+  let o = 0, n = 0;
+  while (o < orig.length && n < normPos) {
+    if (/\s/.test(orig[o])) { while (o < orig.length && /\s/.test(orig[o])) o++; n++; }
+    else { o++; n++; }
+  }
+  while (o < orig.length && /\s/.test(orig[o])) o++;
+  return o;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 11 — SELECTION TOOLBAR
+// ═══════════════════════════════════════════════════════════════
+const toolbar  = document.getElementById('sel-toolbar');
+const saveBtn  = document.getElementById('selSaveBtn');
+let activeRange = null;
+let activeText  = '';
+
+function _positionToolbar(rect) {
+  const tbW  = toolbar.offsetWidth || 120;
+  let   left = rect.left + rect.width / 2 - tbW / 2;
+  let   top  = rect.top - toolbar.offsetHeight - 10;
+  left = Math.max(8, Math.min(left, window.innerWidth - tbW - 8));
+  if (top < 8) top = rect.bottom + 10;
+  toolbar.style.left = left + 'px';
+  toolbar.style.top  = top  + 'px';
+}
+
+function hideToolbar() {
+  toolbar.classList.remove('show');
+  activeRange = null;
+  activeText  = '';
+}
+
+function _onSelectionEnd() {
+  const sel  = window.getSelection();
+  const text = sel ? sel.toString().trim() : '';
+  if (!text || text.length < 2) { hideToolbar(); return; }
+  const view = document.getElementById('lessonView');
+  if (!view || !sel.rangeCount) { hideToolbar(); return; }
+  const range = sel.getRangeAt(0);
+  if (!view.contains(range.commonAncestorContainer)) { hideToolbar(); return; }
+  activeText  = text;
+  activeRange = range.cloneRange();
+  const rect  = range.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) { hideToolbar(); return; }
+  _positionToolbar(rect);
+  toolbar.classList.add('show');
+}
+
+document.addEventListener('mouseup',  (e) => { if (!toolbar.contains(e.target)) setTimeout(_onSelectionEnd, 10); });
+document.addEventListener('touchend', (e) => { if (!toolbar.contains(e.target)) setTimeout(_onSelectionEnd, 50); });
+document.addEventListener('mousedown',(e) => { if (!toolbar.contains(e.target)) hideToolbar(); });
+
+saveBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (!activeRange || !activeText) return;
+
+  const text = activeText.slice(0, 150);
+  const s    = State.get();
+  if (s.bookmarks.some(b => b.text === text)) { hideToolbar(); return; }
+
+  const id       = 'bm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+  const anchorNode = activeRange.startContainer;
+  const sceneWrap  = anchorNode.nodeType === Node.ELEMENT_NODE
+    ? anchorNode.closest('[data-scene-idx]')
+    : anchorNode.parentElement?.closest('[data-scene-idx]');
+  const sceneIdx = sceneWrap ? parseInt(sceneWrap.getAttribute('data-scene-idx'), 10) : -1;
+
+  try {
+    const mark = document.createElement('mark');
+    mark.className = 'bookmark-mark';
+    mark.id        = id;
+    mark.title     = 'Bookmarked — click to jump here';
+    mark.addEventListener('click', () => jumpToBookmark(id));
+    try { activeRange.surroundContents(mark); }
+    catch (_) { const frag = activeRange.extractContents(); mark.appendChild(frag); activeRange.insertNode(mark); }
+  } catch (err) { console.warn('Could not highlight selection:', err); }
+
+  const updated = [{ id, text, lessonIdx: s.currentIdx, sceneIdx }, ...s.bookmarks];
+  State.set({ bookmarks: updated });
+  Storage.saveBookmarks(updated);
+  renderBookmarkPanel();
+  hideToolbar();
+  window.getSelection()?.removeAllRanges();
+});
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 12 — SEARCH
+// ═══════════════════════════════════════════════════════════════
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('searchInput').focus(), 60);
+}
+
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '<div class="search-hint">Type to search across all lessons</div>';
+}
+
+function handleSearchOverlayClick(e) {
+  if (!document.getElementById('searchBox').contains(e.target)) closeSearch();
+}
+
+document.addEventListener('keydown', (e) => {
+  const inInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+  if (e.key === 'Escape')      { closeSearch(); hideKeyboardHelp(); closeAllNotes(); return; }
+  if (inInput) return;
+  const s   = State.get();
+  const pos = s.currentIdx !== null ? s.flatLessons.indexOf(s.currentIdx) : -1;
+  if (e.key === '/')           { e.preventDefault(); openSearch(); return; }
+  if (e.key === 'l' || e.key === 'L' || e.key === 'ArrowRight') {
+    if (pos < s.flatLessons.length - 1) { e.preventDefault(); selectLesson(s.flatLessons[pos + 1]); }
+    return;
+  }
+  if (e.key === 'h' || e.key === 'H' || e.key === 'ArrowLeft') {
+    if (pos > 0) { e.preventDefault(); selectLesson(s.flatLessons[pos - 1]); }
+    return;
+  }
+  if (e.key === 'd' || e.key === 'D') { if (s.currentIdx !== null) toggleDone(s.currentIdx); return; }
+  if (e.key === '?') { showKeyboardHelp(); return; }
+});
+
+function _sceneToText(s) {
+  if (s.type === 'code')    return { type: 'code',      text: _stripHtml(s.text) };
+  if (s.type === 'analogy') return { type: 'analogy',   text: _stripHtml(s.text) };
+  if (s.type === 'summary') return { type: 'takeaways', text: (s.points || []).map(_stripHtml).join(' ') };
+  return { type: s.speaker === 'raj' ? 'Raj' : 'You', text: _stripHtml(s.text) };
+}
+
+function _stripHtml(str) {
+  return String(str || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function _excerpt(text, query, radius = 80) {
+  const lo  = text.toLowerCase();
+  const idx = lo.indexOf(query.toLowerCase());
+  if (idx === -1) return _esc(text.slice(0, radius * 2)) + '…';
+  const start = Math.max(0, idx - radius);
+  const end   = Math.min(text.length, idx + query.length + radius);
+  let   snip  = (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
+  const re    = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return _esc(snip).replace(re, '<mark>$1</mark>');
+}
+
+function doSearch(query) {
+  const q         = query.trim();
+  const resultsEl = document.getElementById('searchResults');
+  if (q.length < 2) { resultsEl.innerHTML = '<div class="search-hint">Type to search across all lessons</div>'; return; }
+
+  const ql     = q.toLowerCase();
+  const s      = State.get();
+  const groups = [];
+  let totalHits = 0;
+
+  LESSONS.forEach((lesson, lessonIdx) => {
+    const hits = [];
+    [{ type: 'title', text: lesson.title }, { type: 'intro', text: _stripHtml(lesson.intro) }]
+      .forEach(({ type, text }) => { if (text.toLowerCase().includes(ql)) hits.push({ type, text, sceneIdx: -1 }); });
+
+    const lnData = s.notesStore['note-' + lessonIdx + '-lesson'];
+    if (lnData && lnData.text && lnData.text.toLowerCase().includes(ql))
+      hits.push({ type: 'note', text: lnData.text, sceneIdx: -1 });
+
+    lesson.scenes.forEach((scene, sceneIdx) => {
+      const { type, text } = _sceneToText(scene);
+      if (text.toLowerCase().includes(ql)) hits.push({ type, text, sceneIdx });
+      const noteData = s.notesStore['note-' + lessonIdx + '-' + sceneIdx];
+      if (noteData && noteData.text && noteData.text.toLowerCase().includes(ql))
+        hits.push({ type: 'note', text: noteData.text, sceneIdx });
+    });
+
+    if (hits.length) { groups.push({ lessonIdx, lesson, hits: hits.slice(0, 4) }); totalHits += hits.length; }
+  });
+
+  if (groups.length === 0) { resultsEl.innerHTML = `<div class="search-empty">No results for "<strong>${_esc(q)}</strong>"</div>`; return; }
+
+  // Store search results on data attributes — no global registry needed
+  const html = groups.map(({ lessonIdx, lesson, hits }) => {
+    const meta     = CATEGORY_META[lesson.category] || { color: '#888', icon: 'icon-notes' };
+    const hitsHTML = hits.map(h => `
+      <div class="search-hit"
+        data-lesson-idx="${lessonIdx}"
+        data-scene-idx="${h.sceneIdx}"
+        data-query="${_esc(q)}"
+        onclick="searchGoTo(this)">
+        <span class="search-hit-type">${_esc(h.type)}</span>
+        <span class="search-hit-snippet">${_excerpt(h.text, q)}</span>
+      </div>`).join('');
+
+    return `
+      <div class="search-result-group">
+        <div class="search-result-lesson-header">
+          <svg class="icon icon-sm" style="color:${meta.color}"><use href="#${meta.icon}"/></svg>
+          <span class="lesson-hit-name">${_esc(lesson.tag)}</span>
+          <span style="margin-left:auto;opacity:0.5">${hits.length} hit${hits.length > 1 ? 's' : ''}</span>
+        </div>
+        ${hitsHTML}
+      </div>`;
+  }).join('');
+
+  resultsEl.innerHTML = html + `<div class="search-count">${totalHits} result${totalHits !== 1 ? 's' : ''} across ${groups.length} lesson${groups.length !== 1 ? 's' : ''}</div>`;
+}
+
+function searchGoTo(el) {
+  const lessonIdx = parseInt(el.dataset.lessonIdx, 10);
+  const sceneIdx  = parseInt(el.dataset.sceneIdx, 10);
+  const query     = el.dataset.query;
+  closeSearch();
+
+  const doHighlight = () => {
+    const view = document.getElementById('lessonView');
+    if (!view) return;
+    let root = view;
+    if (sceneIdx >= 0) {
+      const sceneEl = view.querySelector(`[data-scene-idx="${sceneIdx}"]`);
+      if (sceneEl) root = sceneEl;
+    }
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    let node;
+    while ((node = walker.nextNode())) {
+      const idx = node.textContent.toLowerCase().indexOf(query.toLowerCase());
+      if (idx === -1) continue;
+      const range = document.createRange();
+      range.setStart(node, idx);
+      range.setEnd(node, idx + query.length);
+      const mark = document.createElement('span');
+      mark.className = 'search-match-flash';
+      try { range.surroundContents(mark); }
+      catch (_) { const frag = range.extractContents(); mark.appendChild(frag); range.insertNode(mark); }
+      mark.scrollIntoView({ block: 'center' });
+      setTimeout(() => mark.classList.add('fade'), 1400);
+      setTimeout(() => { if (mark.parentNode) { while (mark.firstChild) mark.parentNode.insertBefore(mark.firstChild, mark); mark.parentNode.removeChild(mark); } }, 2200);
+      break;
+    }
+  };
+
+  const s = State.get();
+  if (s.currentIdx === lessonIdx) doHighlight();
+  else { selectLesson(lessonIdx, true); requestAnimationFrame(() => requestAnimationFrame(doHighlight)); }
+}
+
+document.getElementById('searchInput').addEventListener('input', function () { doSearch(this.value); });
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 13 — THEME
+// ═══════════════════════════════════════════════════════════════
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const iconEl  = document.getElementById('themeIcon');
+  const labelEl = document.getElementById('themeLabel');
+  if (iconEl)  iconEl.querySelector('use').setAttribute('href', theme === 'light' ? '#icon-moon' : '#icon-sun');
+  if (labelEl) labelEl.textContent = theme === 'light' ? 'Dark' : 'Light';
+  Storage.saveTheme(theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'light' ? 'dark' : 'light');
+}
+
+(function initTheme() {
+  const saved = Storage.loadTheme();
+  if (saved) applyTheme(saved);
+  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) applyTheme('light');
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 14 — NOTES SYSTEM
+// ═══════════════════════════════════════════════════════════════
+function resizeTextarea(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 400) + 'px';
+}
+
+function getNoteByKey(key) { return State.get().notesStore[key] || null; }
+
+function openNoteDialog(sceneIdx) {
+  const s      = State.get();
+  const noteEl = document.getElementById(`inline-note-${s.currentIdx}-${sceneIdx}`);
+  if (!noteEl) return;
+  const isOpen = noteEl.classList.contains('open');
+  if (isOpen) {
+    noteEl.classList.remove('open');
+    const ta = noteEl.querySelector('.inline-note-textarea');
+    if (ta && !ta.value.trim()) {
+      const key = `note-${s.currentIdx}-${sceneIdx}`;
+      const updated = Object.assign({}, s.notesStore);
+      delete updated[key];
+      State.set({ notesStore: updated });
+      Storage.saveNotes(updated);
+      _refreshNoteBtn(sceneIdx, false);
+    }
+  } else {
+    noteEl.classList.add('open');
+    markNoteOpen(sceneIdx);
+    setTimeout(() => { const ta = noteEl.querySelector('.inline-note-textarea'); if (ta) ta.focus(); }, 40);
+  }
+  updateNotesViewBtn();
+}
+
+function markNoteOpen(sceneIdx) { _refreshNoteBtn(sceneIdx, true); }
+
+function autoSaveLessonNote(lessonIdx, ta) {
+  resizeTextarea(ta);
+  const key      = 'note-' + lessonIdx + '-lesson';
+  const statusEl = document.getElementById('lesson-note-status-' + lessonIdx);
+  const delBtn   = document.getElementById('lesson-note-del-' + lessonIdx);
+  if (statusEl) { statusEl.textContent = 'typing…'; statusEl.style.opacity = '0.6'; }
+
+  const s = State.get();
+  clearTimeout(s.lessonNoteTimers[lessonIdx]);
+  const timerId = setTimeout(() => {
+    const text    = ta.value.trim();
+    const updated = Object.assign({}, State.get().notesStore);
+    if (text) {
+      updated[key] = { text, lessonIdx, sceneIdx: 'lesson', updatedAt: new Date().toISOString() };
+      if (delBtn) delBtn.classList.add('visible');
+    } else {
+      delete updated[key];
+      if (delBtn) delBtn.classList.remove('visible');
+    }
+    State.set({ notesStore: updated });
+    Storage.saveNotes(updated);
+    if (statusEl) { statusEl.textContent = 'saved'; setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 1400); }
+    updateNotesViewBtn();
+    if (State.get().notesPanelOpen) renderNotesPanel();
+  }, 600);
+
+  const updatedTimers = Object.assign({}, s.lessonNoteTimers, { [lessonIdx]: timerId });
+  State.set({ lessonNoteTimers: updatedTimers });
+}
+
+function deleteLessonNote(lessonIdx) {
+  const key     = 'note-' + lessonIdx + '-lesson';
+  const ta      = document.getElementById('lesson-note-ta-' + lessonIdx);
+  const delBtn  = document.getElementById('lesson-note-del-' + lessonIdx);
+  const updated = Object.assign({}, State.get().notesStore);
+  delete updated[key];
+  State.set({ notesStore: updated });
+  Storage.saveNotes(updated);
+  if (ta) { ta.value = ''; resizeTextarea(ta); }
+  if (delBtn) delBtn.classList.remove('visible');
+  updateNotesViewBtn();
+  if (State.get().notesPanelOpen) renderNotesPanel();
+}
+
+function autoSaveNote(sceneIdx, ta) {
+  resizeTextarea(ta);
+  const s        = State.get();
+  const key      = `note-${s.currentIdx}-${sceneIdx}`;
+  const statusEl = document.getElementById(`note-status-${s.currentIdx}-${sceneIdx}`);
+  if (statusEl) { statusEl.textContent = 'typing…'; statusEl.style.opacity = '0.6'; }
+
+  clearTimeout(s.autoSaveTimers[key]);
+  const timerId = setTimeout(() => {
+    const text    = ta.value.trim();
+    const cur     = State.get();
+    const updated = Object.assign({}, cur.notesStore);
+    if (text) {
+      updated[key] = { text, lessonIdx: cur.currentIdx, sceneIdx, updatedAt: new Date().toISOString() };
+      _refreshNoteBtn(sceneIdx, true);
+      const footer = ta.closest('.inline-note')?.querySelector('.inline-note-footer');
+      if (footer && !footer.querySelector('.inline-note-del')) {
+        footer.innerHTML = `<span class="inline-note-status" id="note-status-${cur.currentIdx}-${sceneIdx}"></span>
+          <button class="inline-note-del" onclick="deleteInlineNote(${sceneIdx})">delete note</button>`;
+      }
+    } else {
+      delete updated[key];
+      _refreshNoteBtn(sceneIdx, false);
+    }
+    State.set({ notesStore: updated });
+    Storage.saveNotes(updated);
+    const st = document.getElementById(`note-status-${State.get().currentIdx}-${sceneIdx}`);
+    if (st) { st.textContent = 'saved'; setTimeout(() => { if (st) st.textContent = ''; }, 1400); }
+    if (State.get().notesPanelOpen) renderNotesPanel();
+    updateNotesViewBtn();
+  }, 600);
+
+  const updatedTimers = Object.assign({}, s.autoSaveTimers, { [key]: timerId });
+  State.set({ autoSaveTimers: updatedTimers });
+}
+
+function _refreshNoteBtn(sceneIdx, hasNote) {
+  const wrap = document.querySelector(`[data-scene-idx="${sceneIdx}"]`);
+  if (!wrap) return;
+  const btn = wrap.querySelector('.note-btn');
+  if (btn) btn.classList.toggle('has-note', hasNote);
+}
+
+function deleteInlineNote(sceneIdx) {
+  const s      = State.get();
+  const key    = `note-${s.currentIdx}-${sceneIdx}`;
+  const noteEl = document.getElementById(`inline-note-${s.currentIdx}-${sceneIdx}`);
+  const updated = Object.assign({}, s.notesStore);
+  delete updated[key];
+  State.set({ notesStore: updated });
+  Storage.saveNotes(updated);
+  if (noteEl) {
+    const ta = noteEl.querySelector('.inline-note-textarea');
+    if (ta) ta.value = '';
+    const footer = noteEl.querySelector('.inline-note-footer');
+    if (footer) footer.innerHTML = `<span class="inline-note-status" id="note-status-${s.currentIdx}-${sceneIdx}"></span>`;
+    noteEl.classList.remove('open');
+  }
+  _refreshNoteBtn(sceneIdx, false);
+  if (State.get().notesPanelOpen) renderNotesPanel();
+  updateNotesViewBtn();
+}
+
+function getNotesForLesson(lessonIdx) {
+  return Object.entries(State.get().notesStore)
+    .filter(([k]) => { const p = k.split('-'); return p[0] === 'note' && p[1] === String(lessonIdx); })
+    .map(([k, v]) => { const p = k.split('-'); return { key: k, sceneIdx: p[2] === 'lesson' ? 'lesson' : parseInt(p[2], 10), ...v }; })
+    .sort((a, b) => { if (a.sceneIdx === 'lesson') return -1; if (b.sceneIdx === 'lesson') return 1; return a.sceneIdx - b.sceneIdx; });
+}
+
+function updateNotesViewBtn() {
+  const btn = document.getElementById('notesViewBtn');
+  if (!btn) return;
+  const notes = getNotesForLesson(State.get().currentIdx);
+  btn.classList.toggle('has-notes', notes.length > 0);
+  btn.innerHTML = notes.length > 0
+    ? `<svg class="icon icon-sm"><use href="#icon-notes"/></svg> Notes (${notes.length})`
+    : `<svg class="icon icon-sm"><use href="#icon-notes"/></svg> Notes`;
+}
+
+function toggleNotesPanel() {
+  const s = State.get();
+  State.set({ notesPanelOpen: !s.notesPanelOpen });
+  if (State.get().notesPanelOpen) renderNotesPanel();
+  else { const el = document.getElementById('notesInlinePanel'); if (el) el.remove(); }
+}
+
+function renderNotesPanel() {
+  const el = document.getElementById('notesInlinePanel');
+  if (el) el.remove();
+
+  const s      = State.get();
+  const notes  = getNotesForLesson(s.currentIdx);
+  const lesson = LESSONS[s.currentIdx];
+  const view   = document.getElementById('lessonView');
+  if (!view) return;
+
+  const itemsHTML = notes.length === 0
+    ? '<div class="notes-panel-empty">No notes yet — click the edit icon on any scene to add one.</div>'
+    : notes.map(n => {
+        const isLessonNote = n.sceneIdx === 'lesson';
+        const scene        = (!isLessonNote && lesson) ? lesson.scenes[n.sceneIdx] : null;
+        const sceneLabel   = isLessonNote ? 'lesson'
+          : scene ? (scene.speaker ? (scene.speaker === 'raj' ? 'Raj' : 'You') : (scene.type || 'scene'))
+          : `#${n.sceneIdx}`;
+        return `<div class="notes-panel-item" onclick="scrollToNoteScene(${JSON.stringify(isLessonNote ? 0 : n.sceneIdx)})">
+          <span class="notes-panel-scene-label">${_esc(sceneLabel)}</span>
+          <span class="notes-panel-note-text">${_esc(n.text)}</span>
+        </div>`;
+      }).join('');
+
+  const panel = document.createElement('div');
+  panel.id        = 'notesInlinePanel';
+  panel.className = 'notes-panel';
+  panel.innerHTML = `
+    <div class="notes-panel-header">
+      <span class="notes-panel-title">Notes — ${_esc(lesson ? lesson.tag : '')}</span>
+      <button class="notes-panel-close" onclick="toggleNotesPanel()">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    ${itemsHTML}`;
+
+  const intro = view.querySelector('.lesson-intro');
+  if (intro && intro.nextSibling) view.querySelector('.lesson').insertBefore(panel, intro.nextSibling);
+  else view.querySelector('.lesson').appendChild(panel);
+}
+
+function scrollToNoteScene(sceneIdx) {
+  if (sceneIdx === 'lesson' || sceneIdx === 0) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  const wrap = document.querySelector(`[data-scene-idx="${sceneIdx}"]`);
+  if (wrap) {
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const noteEl = document.getElementById(`inline-note-${State.get().currentIdx}-${sceneIdx}`);
+    if (noteEl && !noteEl.classList.contains('open')) noteEl.classList.add('open');
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 15 — COMPLETED LESSONS
+// ═══════════════════════════════════════════════════════════════
+function toggleDone(idx) {
+  const s    = State.get();
+  const done = new Set(s.completedLessons);
+  if (done.has(idx)) done.delete(idx); else done.add(idx);
+  State.set({ completedLessons: done });
+  Storage.saveCompleted(done);
+
+  const btn = document.getElementById('markDoneBtn');
+  if (btn) {
+    btn.classList.toggle('done', done.has(idx));
+    btn.innerHTML = done.has(idx)
+      ? `<svg class="icon icon-sm"><use href="#icon-check"/></svg> Completed`
+      : `<svg class="icon icon-sm"><use href="#icon-check"/></svg> Mark as done`;
+  }
+  const sb = document.getElementById('sidebarBtn-' + idx);
+  if (sb) sb.classList.toggle('completed', done.has(idx));
+  updateProgress();
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 16 — INIT
+//  Runs once. Loads all persisted state, builds UI,
+//  resolves starting lesson from URL → lastLesson → first.
+// ═══════════════════════════════════════════════════════════════
+(function init() {
+  Storage.migrate();
+
+  // Load all persisted state into central store
+  State.set({
+    bookmarks:        Storage.loadBookmarks(),
+    notesStore:       Storage.loadNotes(),
+    completedLessons: Storage.loadCompleted(),
+  });
+
+  Router.init();
+  buildSidebar();
+  renderBookmarkPanel();
+
+  if (LESSONS.length === 0) {
+    document.getElementById('emptyState').classList.add('visible');
+    return;
+  }
+
+  // Resolve start: URL hash → lastLesson tag → first lesson
+  let startIdx = Router.readCurrent();
+
+  if (startIdx === null) {
+    const lastTag = Storage.loadLastLesson();
+    if (lastTag) {
+      const found = LESSONS.findIndex(l => l.tag === lastTag);
+      if (found >= 0) startIdx = found;
+    }
+  }
+
+  if (startIdx === null) startIdx = State.get().flatLessons[0] ?? null;
+
+  // Select without pushing to history on initial load
+  if (startIdx !== null) {
+    selectLesson(startIdx, true);
+    // Replace state so back button works correctly from first lesson
+    history.replaceState({ lessonIdx: startIdx }, '', window.location.hash || '#lesson/' + LESSONS[startIdx].tag.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+  }
+})();
+</script>
+</body>
+</html>
