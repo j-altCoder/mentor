@@ -366,6 +366,15 @@ header > p {
   .bookmark-panel { display: flex !important; }
 }
 
+/* ── TABLET (768px–1159px) ──
+   Sidebar stays visible. Bookmark panel hidden (no room).
+   Content padding tightened. No hamburger needed.
+*/
+@media (min-width: 768px) and (max-width: 1159px) {
+  :root { --sidebar-w: 220px; }
+  .content { padding: 2.5rem 1.8rem 4rem; }
+}
+
 /* ── SIDEBAR ── */
 .sidebar {
   border-right: 1px solid var(--border-subtle);
@@ -518,13 +527,26 @@ header > p {
   width: 14px; height: 14px;
   margin-left: 0.5rem;
   flex-shrink: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ec99a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  /* mask-image inherits currentColor so works in both light and dark themes */
+  background-color: var(--sage);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
-/* ── MAIN CONTENT ── */
+/* Completed lessons are dimmed to help unread lessons stand out */
+.lesson-btn.completed {
+  opacity: 0.55;
+}
+.lesson-btn.completed:hover,
+.lesson-btn.completed.active {
+  opacity: 1;
+}
 .content {
   padding: 3rem 2.5rem 5rem;
   max-width: var(--content-max);
@@ -1016,17 +1038,25 @@ html[data-theme="light"] .summary-card {
 }
 
 /* ── MARK DONE ── */
-.mark-done-btn {
-  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+.mark-done-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem;
   width: fit-content; margin: 2rem auto 0; padding: 0.55rem 1.5rem;
   border-radius: 99px; border: 1.5px solid var(--border);
   background: transparent; color: var(--text-muted);
   font-family: var(--font-mono); font-size: 0.7rem; cursor: pointer;
   transition: border-color var(--t-base), color var(--t-base), background var(--t-base);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.04em; flex-direction: column;
 }
 .mark-done-btn:hover { border-color: var(--sage); color: var(--sage); }
 .mark-done-btn.done  { border-color: var(--sage); color: var(--sage); background: var(--sage-dim); }
+
+/* When completed, show an undo hint on hover so users know it's toggleable */
+.mark-done-btn.done .btn-main  { display: flex; align-items: center; gap: 0.5rem; }
+.mark-done-btn.done .btn-hint  {
+  font-size: 0.58rem; opacity: 0; color: var(--text-muted);
+  transition: opacity var(--t-base); letter-spacing: 0.02em;
+  margin-top: 0.1rem;
+}
+.mark-done-btn.done:hover .btn-hint { opacity: 0.7; }
 
 /* ── LESSON NAV ── */
 .lesson-nav {
@@ -1785,6 +1815,7 @@ const Storage = (() => {
   return {
     migrate,
     dismissWarning,
+    _showWarningPublic: _showWarning,
 
     loadBookmarks:  ()      => _read(KEYS.bookmarks, []),
     saveBookmarks:  (list)  => _write(KEYS.bookmarks, list),
@@ -1957,10 +1988,15 @@ const Router = (() => {
 
   function push(idx) {
     if (idx === null || idx === undefined || !LESSONS[idx]) return;
-    const slug = _tagToSlug(LESSONS[idx].tag);
-    const url  = '#lesson/' + slug;
+    const slug  = _tagToSlug(LESSONS[idx].tag);
+    const url   = '#lesson/' + slug;
+    const title = LESSONS[idx].tag + ' — The Coderoom';
+    document.title = title;
     if (window.location.hash !== url) {
-      history.pushState({ lessonIdx: idx }, '', url);
+      history.pushState({ lessonIdx: idx }, title, url);
+    } else {
+      // Same URL but title may need updating (e.g. on initial load)
+      history.replaceState({ lessonIdx: idx }, title, url);
     }
   }
 
@@ -2125,8 +2161,10 @@ function _renderLesson(idx, view) {
       ${scenesHTML}
       <div style="text-align:center">
         <button class="mark-done-btn ${s.completedLessons.has(idx) ? 'done' : ''}" id="markDoneBtn" onclick="toggleDone(${idx})">
-          <svg class="icon icon-sm"><use href="#icon-check"/></svg>
-          ${s.completedLessons.has(idx) ? 'Completed' : 'Mark as done'}
+          ${s.completedLessons.has(idx)
+            ? `<span class="btn-main"><svg class="icon icon-sm"><use href="#icon-check"/></svg> Completed</span><span class="btn-hint">click to mark as unread</span>`
+            : `<svg class="icon icon-sm"><use href="#icon-check"/></svg> Mark as done`
+          }
         </button>
       </div>
       <div class="lesson-nav">
@@ -2351,7 +2389,7 @@ function openAllNotes() {
         const sceneLabel = note.sceneIdx === 'lesson' ? 'lesson note' : note.sceneIdx >= 0 ? 'scene ' + (note.sceneIdx + 1) : '';
         const date       = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
         const meta       = [sceneLabel, date].filter(Boolean).join(' · ');
-        return `<div class="all-notes-item" onclick="closeAllNotes();selectLesson(${li},true);setTimeout(()=>scrollToNoteScene(${JSON.stringify(note.sceneIdx === 'lesson' ? 'lesson' : note.sceneIdx)}),250)">
+        return `<div class="all-notes-item" onclick="closeAllNotes();selectLesson(${li},true);requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToNoteScene(${JSON.stringify(note.sceneIdx === 'lesson' ? 'lesson' : note.sceneIdx)})))">
           <div class="all-notes-item-meta">${_esc(meta)}</div>
           <div class="all-notes-item-text">${_esc(note.text)}</div>
         </div>`;
@@ -2765,7 +2803,11 @@ function doSearch(query) {
         hits.push({ type: 'note', text: noteData.text, sceneIdx });
     });
 
-    if (hits.length) { groups.push({ lessonIdx, lesson, hits: hits.slice(0, 4) }); totalHits += hits.length; }
+    if (hits.length) {
+      const sliced = hits.slice(0, 4);
+      groups.push({ lessonIdx, lesson, hits: sliced });
+      totalHits += sliced.length;
+    }
   });
 
   if (groups.length === 0) { resultsEl.innerHTML = `<div class="search-empty">No results for "<strong>${_esc(q)}</strong>"</div>`; return; }
@@ -3097,7 +3139,7 @@ function toggleDone(idx) {
   if (btn) {
     btn.classList.toggle('done', done.has(idx));
     btn.innerHTML = done.has(idx)
-      ? `<svg class="icon icon-sm"><use href="#icon-check"/></svg> Completed`
+      ? `<span class="btn-main"><svg class="icon icon-sm"><use href="#icon-check"/></svg> Completed</span><span class="btn-hint">click to mark as unread</span>`
       : `<svg class="icon icon-sm"><use href="#icon-check"/></svg> Mark as done`;
   }
   const sb = document.getElementById('sidebarBtn-' + idx);
@@ -3119,6 +3161,18 @@ function toggleDone(idx) {
     bookmarks:        Storage.loadBookmarks(),
     notesStore:       Storage.loadNotes(),
     completedLessons: Storage.loadCompleted(),
+  });
+
+  // Global error boundary — surfaces uncaught errors to the user
+  // rather than failing silently with no feedback.
+  window.addEventListener('error', (e) => {
+    console.error('[Coderoom] Uncaught error:', e.message, e.filename, e.lineno);
+    Storage._showWarningPublic(`Unexpected error: ${e.message || 'unknown'}. The app may behave unexpectedly.`);
+  });
+
+  window.addEventListener('unhandledrejection', (e) => {
+    console.error('[Coderoom] Unhandled promise rejection:', e.reason);
+    Storage._showWarningPublic(`Unexpected error: ${e.reason?.message || 'unknown'}. The app may behave unexpectedly.`);
   });
 
   Router.init();
@@ -3146,8 +3200,6 @@ function toggleDone(idx) {
   // Select without pushing to history on initial load
   if (startIdx !== null) {
     selectLesson(startIdx, true);
-    // Replace state so back button works correctly from first lesson
-    history.replaceState({ lessonIdx: startIdx }, '', window.location.hash || '#lesson/' + LESSONS[startIdx].tag.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
   }
 })();
 </script>
