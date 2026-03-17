@@ -131,11 +131,11 @@ element.innerHTML = clean;`
 
 // ── The attack ──
 // evil.com loads this silently:
-// <form action="https://yourbank.com/transfer" method="POST">
-//   <input name="amount" value="9999">
-//   <input name="to"     value="attacker-account">
-// </form>
-// <script>document.forms[0].submit()</script>
+// &lt;form action="https://yourbank.com/transfer" method="POST"&gt;
+//   &lt;input name="amount" value="9999"&gt;
+//   &lt;input name="to"     value="attacker-account"&gt;
+// &lt;/form&gt;
+// &lt;script&gt;document.forms[0].submit()&lt;/script&gt;
 //
 // Browser auto-sends yourbank.com session cookie → transfer executes
 
