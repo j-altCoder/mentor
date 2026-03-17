@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jest & RTL — Junior Dev Crash Course</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #7c3aed;
+    --accent2: #06b6d4;
+    --accent3: #10b981;
+    --warn: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0d0d16;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,58,237,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,58,237,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.4);
+    color: #a78bfa;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: clamp(34px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -2px;
+  }
+
+  h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    margin-top: 14px;
+    font-size: 15px;
+    max-width: 540px;
+    line-height: 1.6;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+    margin: 32px 0 0;
+  }
+
+  .toc a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.15s;
+  }
+
+  .toc a:hover {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--accent);
+    transform: translateX(2px);
+  }
+
+  .toc a .num { color: var(--accent); font-weight: 700; }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 56px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(124,58,237,0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  h2 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+
+  .section-intro {
+    color: #94a3b8;
+    font-size: 15px;
+    margin-bottom: 28px;
+    max-width: 680px;
+    border-left: 3px solid var(--border);
+    padding-left: 16px;
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 32px 0 10px;
+    color: var(--accent2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h3::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    flex-shrink: 0;
+  }
+
+  p { color: #94a3b8; margin-bottom: 14px; font-size: 15px; }
+
+  strong { color: #cbd5e1; font-weight: 700; }
+
+  /* ── ANALOGY BOX ── */
+  .analogy {
+    background: rgba(124,58,237,0.06);
+    border: 1px solid rgba(124,58,237,0.2);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin: 18px 0;
+    font-size: 14px;
+    color: #c4b5fd;
+    line-height: 1.6;
+  }
+
+  .analogy::before {
+    content: '💡 ANALOGY';
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── INFO BOXES ── */
+  .box {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 18px 0;
+    font-size: 14px;
+    border-left: 3px solid;
+    line-height: 1.6;
+  }
+
+  .box.info { background: rgba(6,182,212,0.05); border-color: var(--accent2); color: #7dd3fc; }
+  .box.tip  { background: rgba(16,185,129,0.05); border-color: var(--accent3); color: #6ee7b7; }
+  .box.warn { background: rgba(245,158,11,0.05); border-color: var(--warn); color: #fcd34d; }
+  .box.rule { background: rgba(124,58,237,0.05); border-color: var(--accent); color: #c4b5fd; }
+
+  .box strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .box.info strong { color: var(--accent2); }
+  .box.tip  strong { color: var(--accent3); }
+  .box.warn strong { color: var(--warn); }
+  .box.rule strong { color: var(--accent); }
+
+  /* ── CODE ── */
+  .code-block { position: relative; margin: 20px 0; }
+
+  .code-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ef4444; } .dot.y { background: #f59e0b; } .dot.g { background: #10b981; }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    padding: 20px 22px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .code-block.no-label pre { border-radius: 8px; }
+
+  /* Syntax */
+  .kw  { color: #c084fc; }
+  .fn  { color: #67e8f9; }
+  .str { color: #86efac; }
+  .cm  { color: #475569; font-style: italic; }
+  .num { color: #fb923c; }
+  .op  { color: #94a3b8; }
+  .tag { color: #f87171; }
+  .attr{ color: #fbbf24; }
+  .imp { color: #a78bfa; }
+  .ann { color: #fbbf24; }
+
+  /* Inline code */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: rgba(124,58,237,0.1);
+    color: #c4b5fd;
+    border: 1px solid rgba(124,58,237,0.2);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* ── ANNOTATED LINE ── */
+  .annotated-line {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: start;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+
+  .annotated-line:last-child { border-bottom: none; }
+  .annotated-line .code-part { font-family: 'JetBrains Mono', monospace; color: #67e8f9; }
+  .annotated-line .desc-part { color: var(--muted); font-size: 12px; text-align: right; max-width: 240px; }
+
+  /* ── TABLES ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 20px 0;
+  }
+
+  th {
+    background: var(--surface2);
+    color: var(--muted);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: #94a3b8;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  td:first-child { color: #67e8f9; font-family: 'JetBrains Mono', monospace; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  /* ── QUERY PRIORITY ── */
+  .priority-list {
+    list-style: none;
+    margin: 16px 0;
+  }
+
+  .priority-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 14px;
+  }
+
+  .priority-list li:last-child { border-bottom: none; }
+
+  .priority-num {
+    min-width: 26px;
+    height: 26px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .priority-list .pl-name { color: #67e8f9; font-family: 'JetBrains Mono', monospace; font-weight: 700; display: block; margin-bottom: 2px; }
+  .priority-list .pl-desc { color: #64748b; font-size: 13px; }
+  .priority-list .pl-why  { color: #475569; font-size: 12px; margin-top: 2px; font-style: italic; }
+
+  /* ── QUERY VARIANT CARDS ── */
+  .variant-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  @media(max-width: 600px) { .variant-grid { grid-template-columns: 1fr; } }
+
+  .variant-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .variant-card h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--accent2);
+  }
+
+  .variant-card p { font-size: 13px; margin: 0; }
+  .variant-card code { display: block; margin-top: 8px; font-size: 11px; color: #86efac; background: var(--code-bg); border: 1px solid var(--border); padding: 6px 10px; border-radius: 4px; }
+
+  /* ── CHEATSHEET GRID ── */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
+  }
+
+  @media(max-width:600px) { .cheat-grid { grid-template-columns: 1fr; } }
+
+  .cheat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .cheat-card h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .cheat-card .entry { display: flex; flex-direction: column; margin-bottom: 8px; }
+  .cheat-card .entry code { display: block; font-size: 12px; color: #67e8f9; background: transparent; border: none; padding: 0; }
+  .cheat-card .entry span { font-size: 11px; color: #475569; margin-top: 1px; }
+
+  /* ── STEP LIST ── */
+  .steps { list-style: none; margin: 16px 0; }
+  .steps li {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 14px;
+    color: #94a3b8;
+  }
+  .steps li:last-child { border-bottom: none; }
+  .step-num {
+    min-width: 28px; height: 28px;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700; color: #a78bfa;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 0;
+    text-align: center;
+  }
+  footer p { color: var(--muted); font-size: 13px; }
+  footer strong { color: var(--accent2); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="badge">For Junior Devs · No Assumptions</div>
+    <h1>Testing with<br><em>Jest & React Testing Library</em></h1>
+    <p class="subtitle">A complete, ground-up crash course. We explain <em>why</em> everything exists, not just what it does. No experience required.</p>
+    <nav class="toc">
+      <a href="#s1"><span class="num">01</span> Why Test At All?</a>
+      <a href="#s2"><span class="num">02</span> Setup & Config</a>
+      <a href="#s3"><span class="num">03</span> Your First Test</a>
+      <a href="#s4"><span class="num">04</span> Matchers</a>
+      <a href="#s5"><span class="num">05</span> Lifecycle Hooks</a>
+      <a href="#s6"><span class="num">06</span> Async Testing</a>
+      <a href="#s7"><span class="num">07</span> Mocking</a>
+      <a href="#s8"><span class="num">08</span> React + RTL</a>
+      <a href="#s9"><span class="num">09</span> Querying the DOM</a>
+      <a href="#s10"><span class="num">10</span> User Events</a>
+      <a href="#s11"><span class="num">11</span> Async UI</a>
+      <a href="#s12"><span class="num">12</span> Custom Hooks</a>
+      <a href="#s13"><span class="num">13</span> Cheatsheet</a>
+    </nav>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 01 WHY TEST -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Why Test At All?</h2>
+    </div>
+    <p class="section-intro">Before writing a single line of test code, it's important to understand the problem testing solves. Skipping this leads to tests that feel like busywork.</p>
+
+    <p>Imagine you write a function <code>calculateTotal()</code>. It works great. Three months later, a teammate refactors a helper it depends on. Everything looks fine. But now <code>calculateTotal()</code> is silently returning wrong numbers — and nobody notices until a customer reports a billing error.</p>
+
+    <p><strong>Tests are an automated safety net.</strong> They let you make changes with confidence, because if anything breaks, a test will catch it immediately — not a customer three weeks later.</p>
+
+    <div class="analogy">
+      Think of tests like a smoke detector in your house. You don't install one because you expect a fire. You install one so that if something ever goes wrong, you find out right away instead of discovering the damage days later.
+    </div>
+
+    <h3>What kinds of tests exist?</h3>
+    <table>
+      <thead><tr><th>Type</th><th>What it tests</th><th>Speed</th></tr></thead>
+      <tbody>
+        <tr><td>Unit test</td><td>A single function or component in isolation. No network, no DB.</td><td>Instant (~ms)</td></tr>
+        <tr><td>Integration test</td><td>Multiple parts working together (e.g. a form + an API call).</td><td>Fast (~seconds)</td></tr>
+        <tr><td>End-to-end (E2E)</td><td>The full app in a real browser, simulating real user flows.</td><td>Slow (~minutes)</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Jest</strong> is primarily a unit and integration test runner. <strong>React Testing Library</strong> helps you write integration-style tests for React components. E2E testing (like Playwright or Cypress) is a separate topic entirely.</p>
+
+    <div class="box info">
+      <strong>What is Jest exactly?</strong>
+      Jest is a JavaScript test runner — a program that finds your test files, runs them, and tells you which passed and which failed. It also comes with utilities for making assertions, tracking function calls, and handling timers.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 02 SETUP -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Setup & Config</h2>
+    </div>
+    <p class="section-intro">There are two common setups: a plain Node.js project, and a React project. They use the same Jest core, but React needs extra tools to simulate a browser.</p>
+
+    <h3>Plain Node.js Project</h3>
+    <div class="code-block">
+      <div class="code-label"><span>terminal</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre>npm install --save-dev jest</pre>
+    </div>
+
+    <p>Then in <code>package.json</code>, add a test script so you can run tests with <code>npm test</code>:</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>package.json</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre>{
+  <span class="str">"scripts"</span>: {
+    <span class="str">"test"</span>: <span class="str">"jest"</span>,
+    <span class="str">"test:watch"</span>: <span class="str">"jest --watch"</span>   <span class="cm">// re-runs on every file save</span>
+  }
+}</pre>
+    </div>
+
+    <h3>React Project (Vite)</h3>
+    <p>React components need a fake browser environment to render in — that's what <code>jsdom</code> provides. You also need Babel to understand JSX syntax.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>terminal</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="cm"># Core: Jest itself + fake browser (jsdom) + React renderer</span>
+npm install --save-dev jest jest-environment-jsdom
+npm install --save-dev @testing-library/react @testing-library/jest-dom
+
+<span class="cm"># User interaction simulation</span>
+npm install --save-dev @testing-library/user-event
+
+<span class="cm"># Babel: lets Jest understand JSX and modern JS</span>
+npm install --save-dev babel-jest @babel/preset-env @babel/preset-react</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>jest.config.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">export default</span> {
+  <span class="cm">// Use a fake browser (jsdom) instead of Node's bare environment</span>
+  testEnvironment: <span class="str">'jsdom'</span>,
+
+  <span class="cm">// Run this file before every test — adds extra matchers like toBeInTheDocument()</span>
+  setupFilesAfterFramework: [<span class="str">'@testing-library/jest-dom'</span>],
+
+  <span class="cm">// Tell Jest to run .js/.jsx files through Babel first</span>
+  transform: {
+    <span class="str">'^.+\\.(js|jsx)$'</span>: <span class="str">'babel-jest'</span>
+  },
+
+  <span class="cm">// CSS imports would crash Jest — this replaces them with a harmless mock</span>
+  moduleNameMapper: {
+    <span class="str">'\\.css$'</span>: <span class="str">'identity-obj-proxy'</span>
+  }
+};</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>babel.config.cjs</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre>module.exports = {
+  presets: [
+    [<span class="str">'@babel/preset-env'</span>, { targets: { node: <span class="str">'current'</span> } }],
+    [<span class="str">'@babel/preset-react'</span>, { runtime: <span class="str">'automatic'</span> }]  <span class="cm">// handles JSX</span>
+  ]
+};</pre>
+    </div>
+
+    <div class="box tip">
+      <strong>Using Create React App?</strong>
+      CRA ships with Jest + RTL pre-configured. You can skip all of the above and just run <code>npm test</code>. The config is hidden inside the CRA package.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 03 FIRST TEST -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Your First Test</h2>
+    </div>
+    <p class="section-intro">Let's build a test from scratch and understand every single piece of it.</p>
+
+    <p>Say you have a utility function in <code>math.js</code>:</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>math.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="kw">export function</span> <span class="fn">add</span>(a, b) {
+  <span class="kw">return</span> a <span class="op">+</span> b;
+}</pre>
+    </div>
+
+    <p>Now create a test file. Jest automatically finds files ending in <code>.test.js</code> or <code>.spec.js</code>, or anything inside a <code>__tests__/</code> folder.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>math.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { add } <span class="imp">from</span> <span class="str">'./math'</span>;
+
+<span class="cm">// describe() groups related tests together under a label.</span>
+<span class="cm">// Think of it like a folder for tests about the same thing.</span>
+<span class="fn">describe</span>(<span class="str">'add()'</span>, () <span class="op">=></span> {
+
+  <span class="cm">// test() (or it()) defines a single test case.</span>
+  <span class="cm">// The first argument is a plain-English description of what you're checking.</span>
+  <span class="fn">test</span>(<span class="str">'adds two positive numbers'</span>, () <span class="op">=></span> {
+
+    <span class="cm">// Call your function with known inputs</span>
+    <span class="kw">const</span> result <span class="op">=</span> <span class="fn">add</span>(<span class="num">2</span>, <span class="num">3</span>);
+
+    <span class="cm">// expect() wraps a value so you can make assertions about it.</span>
+    <span class="cm">// .toBe() checks that the value is exactly equal to 5.</span>
+    <span class="fn">expect</span>(result).<span class="fn">toBe</span>(<span class="num">5</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'handles negative numbers'</span>, () <span class="op">=></span> {
+    <span class="fn">expect</span>(<span class="fn">add</span>(<span class="op">-</span><span class="num">1</span>, <span class="op">-</span><span class="num">1</span>)).<span class="fn">toBe</span>(<span class="op">-</span><span class="num">2</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'returns 0 when both inputs are 0'</span>, () <span class="op">=></span> {
+    <span class="fn">expect</span>(<span class="fn">add</span>(<span class="num">0</span>, <span class="num">0</span>)).<span class="fn">toBe</span>(<span class="num">0</span>);
+  });
+});</pre>
+    </div>
+
+    <div class="analogy">
+      The pattern is always: <strong>Arrange</strong> (set up inputs), <strong>Act</strong> (call the code), <strong>Assert</strong> (check the result). Experienced devs call this "AAA". Every test you ever write follows this same structure.
+    </div>
+
+    <h3>Running tests</h3>
+    <div class="code-block no-label">
+      <pre>npm test                  <span class="cm"># run all tests once</span>
+npm run test:watch        <span class="cm"># re-run whenever you save a file</span>
+npm test -- math          <span class="cm"># run only files whose name contains "math"</span>
+npm test -- --verbose     <span class="cm"># show every individual test name in output</span></pre>
+    </div>
+
+    <h3>What do test results look like?</h3>
+    <div class="code-block no-label">
+      <pre><span class="cm">✓ PASS  src/math.test.js
+  add()
+    ✓ adds two positive numbers (2ms)
+    ✓ handles negative numbers
+    ✓ returns 0 when both inputs are 0</span>
+
+<span class="cm">✗ FAIL  src/math.test.js
+  add()
+    ✕ adds two positive numbers
+      Expected: 5
+      Received: 6    ← Jest tells you exactly what went wrong</span></pre>
+    </div>
+
+    <div class="box rule">
+      <strong>What makes a good test name?</strong>
+      Write test names as sentences describing the expected behavior: <em>"returns an error when input is null"</em> is far more useful than <em>"test 1"</em>. When a test fails, the name is all you see in CI — make it informative.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 04 MATCHERS -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Matchers</h2>
+    </div>
+    <p class="section-intro">A <strong>matcher</strong> is the method you chain onto <code>expect()</code> to describe what you're checking. Jest has dozens. Here are the ones you'll use 90% of the time.</p>
+
+    <h3>Equality</h3>
+    <div class="code-block no-label">
+      <pre><span class="cm">// toBe uses === (strict equality). Good for numbers, strings, booleans.</span>
+<span class="fn">expect</span>(<span class="num">2</span> <span class="op">+</span> <span class="num">2</span>).<span class="fn">toBe</span>(<span class="num">4</span>);
+<span class="fn">expect</span>(<span class="str">'hello'</span>).<span class="fn">toBe</span>(<span class="str">'hello'</span>);
+
+<span class="cm">// toEqual does a DEEP comparison — checks every property recursively.</span>
+<span class="cm">// Use this for objects and arrays.</span>
+<span class="fn">expect</span>({ name: <span class="str">'Alice'</span>, age: <span class="num">30</span> }).<span class="fn">toEqual</span>({ name: <span class="str">'Alice'</span>, age: <span class="num">30</span> });
+
+<span class="cm">// Why not just use toBe for objects?</span>
+<span class="fn">expect</span>({ a: <span class="num">1</span> }).<span class="fn">toBe</span>({ a: <span class="num">1</span> });  <span class="cm">// ✗ FAILS — two different objects in memory</span>
+<span class="fn">expect</span>({ a: <span class="num">1</span> }).<span class="fn">toEqual</span>({ a: <span class="num">1</span> });  <span class="cm">// ✓ PASSES — same structure</span></pre>
+    </div>
+
+    <h3>Truthiness</h3>
+    <div class="code-block no-label">
+      <pre><span class="fn">expect</span>(<span class="kw">true</span>).<span class="fn">toBeTruthy</span>();     <span class="cm">// passes for any truthy value: true, 1, "hi", []</span>
+<span class="fn">expect</span>(<span class="kw">false</span>).<span class="fn">toBeFalsy</span>();      <span class="cm">// passes for: false, 0, "", null, undefined, NaN</span>
+<span class="fn">expect</span>(<span class="kw">null</span>).<span class="fn">toBeNull</span>();        <span class="cm">// exactly null</span>
+<span class="fn">expect</span>(<span class="kw">undefined</span>).<span class="fn">toBeUndefined</span>();
+<span class="fn">expect</span>(<span class="str">'hello'</span>).<span class="fn">toBeDefined</span>();  <span class="cm">// not undefined</span></pre>
+    </div>
+
+    <h3>Numbers</h3>
+    <div class="code-block no-label">
+      <pre><span class="fn">expect</span>(<span class="num">10</span>).<span class="fn">toBeGreaterThan</span>(<span class="num">5</span>);
+<span class="fn">expect</span>(<span class="num">3</span>).<span class="fn">toBeLessThanOrEqual</span>(<span class="num">3</span>);
+<span class="fn">expect</span>(<span class="num">0.1</span> <span class="op">+</span> <span class="num">0.2</span>).<span class="fn">toBeCloseTo</span>(<span class="num">0.3</span>);  <span class="cm">// use for floats — avoids 0.30000000000000004</span></pre>
+    </div>
+
+    <h3>Strings & Arrays</h3>
+    <div class="code-block no-label">
+      <pre><span class="fn">expect</span>(<span class="str">'Hello World'</span>).<span class="fn">toMatch</span>(<span class="str">/world/i</span>);   <span class="cm">// regex match</span>
+<span class="fn">expect</span>(<span class="str">'Hello World'</span>).<span class="fn">toContain</span>(<span class="str">'World'</span>);    <span class="cm">// substring</span>
+<span class="fn">expect</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]).<span class="fn">toContain</span>(<span class="num">2</span>);             <span class="cm">// array includes value</span>
+<span class="fn">expect</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]).<span class="fn">toHaveLength</span>(<span class="num">3</span>);          <span class="cm">// array or string length</span></pre>
+    </div>
+
+    <h3>Errors</h3>
+    <div class="code-block no-label">
+      <pre><span class="cm">// IMPORTANT: wrap the call in an arrow function — don't call it directly.</span>
+<span class="cm">// If you call it directly, the error throws BEFORE Jest can catch it.</span>
+<span class="fn">expect</span>(() <span class="op">=></span> <span class="fn">divide</span>(<span class="num">1</span>, <span class="num">0</span>)).<span class="fn">toThrow</span>();
+<span class="fn">expect</span>(() <span class="op">=></span> <span class="fn">divide</span>(<span class="num">1</span>, <span class="num">0</span>)).<span class="fn">toThrow</span>(<span class="str">'Division by zero'</span>); <span class="cm">// checks error message</span>
+<span class="fn">expect</span>(() <span class="op">=></span> <span class="fn">divide</span>(<span class="num">1</span>, <span class="num">0</span>)).<span class="fn">toThrow</span>(RangeError);        <span class="cm">// checks error type</span></pre>
+    </div>
+
+    <h3>Negating with .not</h3>
+    <div class="code-block no-label">
+      <pre><span class="cm">// Put .not before any matcher to flip it</span>
+<span class="fn">expect</span>(<span class="num">5</span>).<span class="fn">not</span>.<span class="fn">toBe</span>(<span class="num">10</span>);
+<span class="fn">expect</span>([]).<span class="fn">not</span>.<span class="fn">toContain</span>(<span class="str">'foo'</span>);
+<span class="fn">expect</span>(isAdmin).<span class="fn">not</span>.<span class="fn">toBeTruthy</span>();</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 05 LIFECYCLE -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Lifecycle Hooks</h2>
+    </div>
+    <p class="section-intro">Sometimes every test in a file needs the same setup (open a DB connection, create a temp file) or the same cleanup (close connections, reset data). Lifecycle hooks let you do this without repeating yourself.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>db.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="kw">let</span> db;
+<span class="kw">let</span> userId;
+
+<span class="cm">// Runs ONE TIME before all tests in this file.
+// Use for expensive setup that you only want to do once.</span>
+<span class="fn">beforeAll</span>(<span class="kw">async</span> () <span class="op">=></span> {
+  db <span class="op">=</span> <span class="kw">await</span> Database.<span class="fn">connect</span>();
+});
+
+<span class="cm">// Runs ONE TIME after all tests finish.
+// Use for cleanup that mirrors beforeAll.</span>
+<span class="fn">afterAll</span>(<span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">await</span> db.<span class="fn">disconnect</span>();
+});
+
+<span class="cm">// Runs before EACH individual test.
+// Use to put things back in a known state before every test.</span>
+<span class="fn">beforeEach</span>(<span class="kw">async</span> () <span class="op">=></span> {
+  userId <span class="op">=</span> <span class="kw">await</span> db.<span class="fn">insertUser</span>({ name: <span class="str">'Alice'</span> });
+});
+
+<span class="cm">// Runs after EACH individual test.
+// Use to undo changes so tests don't bleed into each other.</span>
+<span class="fn">afterEach</span>(<span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">await</span> db.<span class="fn">deleteUser</span>(userId);
+});
+
+<span class="fn">test</span>(<span class="str">'reads user by id'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> user <span class="op">=</span> <span class="kw">await</span> db.<span class="fn">findUser</span>(userId);
+  <span class="fn">expect</span>(user.name).<span class="fn">toBe</span>(<span class="str">'Alice'</span>);
+});
+
+<span class="fn">test</span>(<span class="str">'updates user name'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">await</span> db.<span class="fn">updateUser</span>(userId, { name: <span class="str">'Bob'</span> });
+  <span class="kw">const</span> user <span class="op">=</span> <span class="kw">await</span> db.<span class="fn">findUser</span>(userId);
+  <span class="fn">expect</span>(user.name).<span class="fn">toBe</span>(<span class="str">'Bob'</span>);
+});</pre>
+    </div>
+
+    <div class="box warn">
+      <strong>Test Independence is Critical</strong>
+      Tests must not depend on each other or share state. If test B only passes because test A ran first, you have a fragile suite. One test failure will cascade into many. Use <code>beforeEach</code> + <code>afterEach</code> to ensure every test starts clean.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 06 ASYNC -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Async Testing</h2>
+    </div>
+    <p class="section-intro">Real apps do async things: fetch data from APIs, read files, query databases. By default, Jest won't wait for Promises to settle — you have to tell it to.</p>
+
+    <h3>The Problem</h3>
+    <div class="code-block no-label">
+      <pre><span class="cm">// ❌ This test is broken — Jest doesn't wait for the promise to resolve.</span>
+<span class="cm">// The test finishes instantly and PASSES even if fetchUser throws an error.</span>
+<span class="fn">test</span>(<span class="str">'broken async test'</span>, () <span class="op">=></span> {
+  <span class="fn">fetchUser</span>(<span class="num">1</span>).<span class="fn">then</span>(user <span class="op">=></span> {
+    <span class="fn">expect</span>(user.name).<span class="fn">toBe</span>(<span class="str">'Alice'</span>);  <span class="cm">// Jest doesn't reach this</span>
+  });
+});</pre>
+    </div>
+
+    <h3>The Fix — async/await (recommended)</h3>
+    <div class="code-block no-label">
+      <pre><span class="cm">// ✅ Make the test function async and await the result.
+// Jest will wait until the await resolves before checking assertions.</span>
+<span class="fn">test</span>(<span class="str">'fetches user by id'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> user <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetchUser</span>(<span class="num">1</span>);
+  <span class="fn">expect</span>(user.name).<span class="fn">toBe</span>(<span class="str">'Alice'</span>);
+});</pre>
+    </div>
+
+    <h3>Testing that a Promise rejects</h3>
+    <div class="code-block no-label">
+      <pre><span class="fn">test</span>(<span class="str">'throws 404 for unknown user'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="cm">// await expect(...).rejects.toThrow() handles the rejection cleanly</span>
+  <span class="kw">await</span> <span class="fn">expect</span>(<span class="fn">fetchUser</span>(<span class="num">999</span>)).<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">'User not found'</span>);
+});</pre>
+    </div>
+
+    <h3>Alternative — .resolves / .rejects matchers</h3>
+    <div class="code-block no-label">
+      <pre><span class="cm">// Slightly terser syntax. You MUST return (or await) the promise!</span>
+<span class="fn">test</span>(<span class="str">'resolves with the right data'</span>, () <span class="op">=></span> {
+  <span class="kw">return</span> <span class="fn">expect</span>(<span class="fn">fetchUser</span>(<span class="num">1</span>)).<span class="fn">resolves</span>.<span class="fn">toMatchObject</span>({ id: <span class="num">1</span> });
+});</pre>
+    </div>
+
+    <div class="box warn">
+      <strong>Golden Rule for Async Tests</strong>
+      Always <code>await</code> or <code>return</code> your async assertions. If you do neither, Jest considers the test passed the moment the synchronous code finishes — before any assertion even runs.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 07 MOCKING -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Mocking</h2>
+    </div>
+    <p class="section-intro">Unit tests should be fast and isolated. But real code calls APIs, reads the filesystem, sends emails. Mocking replaces those real dependencies with fakes you control.</p>
+
+    <div class="analogy">
+      Imagine you're testing a function that emails a user a receipt. You don't want to actually send an email every time you run tests. A mock is like a dummy phone that records "someone tried to call this number" without actually dialing.
+    </div>
+
+    <h3>jest.fn() — Mock Functions</h3>
+    <p>Creates a fake function that records every call made to it.</p>
+    <div class="code-block no-label">
+      <pre><span class="kw">const</span> sendEmail <span class="op">=</span> jest.<span class="fn">fn</span>();  <span class="cm">// does nothing by default, returns undefined</span>
+
+<span class="cm">// If you need it to return something:</span>
+<span class="kw">const</span> greet <span class="op">=</span> jest.<span class="fn">fn</span>(() <span class="op">=></span> <span class="str">'Hello!'</span>);
+
+<span class="fn">greet</span>(<span class="str">'Alice'</span>);
+<span class="fn">greet</span>(<span class="str">'Bob'</span>);
+
+<span class="cm">// Now you can ask Jest what happened</span>
+<span class="fn">expect</span>(greet).<span class="fn">toHaveBeenCalled</span>();
+<span class="fn">expect</span>(greet).<span class="fn">toHaveBeenCalledTimes</span>(<span class="num">2</span>);
+<span class="fn">expect</span>(greet).<span class="fn">toHaveBeenCalledWith</span>(<span class="str">'Alice'</span>);
+<span class="fn">expect</span>(greet).<span class="fn">toHaveBeenLastCalledWith</span>(<span class="str">'Bob'</span>);</pre>
+    </div>
+
+    <h3>Controlling return values</h3>
+    <div class="code-block no-label">
+      <pre><span class="kw">const</span> fn <span class="op">=</span> jest.<span class="fn">fn</span>();
+
+fn.<span class="fn">mockReturnValue</span>(<span class="num">42</span>);            <span class="cm">// always returns 42</span>
+fn.<span class="fn">mockResolvedValue</span>({ id: <span class="num">1</span> });     <span class="cm">// returns a resolved Promise — use for async functions</span>
+fn.<span class="fn">mockRejectedValue</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">'fail'</span>)); <span class="cm">// returns a rejected Promise</span>
+fn.<span class="fn">mockImplementation</span>((x) <span class="op">=></span> x <span class="op">*</span> <span class="num">2</span>); <span class="cm">// full custom implementation</span>
+
+<span class="cm">// Return different values on consecutive calls</span>
+fn.<span class="fn">mockReturnValueOnce</span>(<span class="str">'first call'</span>)
+  .<span class="fn">mockReturnValueOnce</span>(<span class="str">'second call'</span>);</pre>
+    </div>
+
+    <h3>jest.mock() — Replace Whole Modules</h3>
+    <p>When your code imports another module, you can tell Jest to replace that entire module with mocks before any test runs.</p>
+    <div class="code-block">
+      <div class="code-label"><span>userService.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="cm">// This line must be at the TOP, before imports (Jest hoists it automatically)</span>
+jest.<span class="fn">mock</span>(<span class="str">'../api'</span>);
+
+<span class="cm">// Now fetchUser is a jest.fn() — a fake. The real network code never runs.</span>
+<span class="imp">import</span> { fetchUser } <span class="imp">from</span> <span class="str">'../api'</span>;
+<span class="imp">import</span> { processUser } <span class="imp">from</span> <span class="str">'../userService'</span>;
+
+<span class="fn">test</span>(<span class="str">'processUser returns uppercase display name'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="cm">// Tell the mock what to return for this test</span>
+  fetchUser.<span class="fn">mockResolvedValue</span>({ id: <span class="num">1</span>, name: <span class="str">'Alice'</span> });
+
+  <span class="kw">const</span> result <span class="op">=</span> <span class="kw">await</span> <span class="fn">processUser</span>(<span class="num">1</span>);
+
+  <span class="fn">expect</span>(result.displayName).<span class="fn">toBe</span>(<span class="str">'ALICE'</span>);
+  <span class="fn">expect</span>(fetchUser).<span class="fn">toHaveBeenCalledWith</span>(<span class="num">1</span>);
+});</pre>
+    </div>
+
+    <h3>jest.spyOn() — Watch Real Methods</h3>
+    <p>A spy is like a mock but wraps an existing real function. The original code still runs, but you can also track calls or override it temporarily.</p>
+    <div class="code-block no-label">
+      <pre><span class="cm">// Suppress console.error noise during tests</span>
+<span class="kw">const</span> spy <span class="op">=</span> jest.<span class="fn">spyOn</span>(console, <span class="str">'error'</span>).<span class="fn">mockImplementation</span>(() <span class="op">=></span> {});
+
+<span class="fn">doSomethingThatLogsErrors</span>();
+
+<span class="fn">expect</span>(spy).<span class="fn">toHaveBeenCalled</span>();
+spy.<span class="fn">mockRestore</span>();  <span class="cm">// IMPORTANT: restore original behavior after the test</span></pre>
+    </div>
+
+    <h3>Cleaning up mocks between tests</h3>
+    <div class="code-block no-label">
+      <pre><span class="fn">afterEach</span>(() <span class="op">=></span> {
+  jest.<span class="fn">clearAllMocks</span>();   <span class="cm">// resets call history (how many times called, with what args)</span>
+  <span class="cm">// jest.resetAllMocks()  — also removes return values / implementations</span>
+  <span class="cm">// jest.restoreAllMocks() — also restores spyOn mocks to their originals</span>
+});</pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 08 RTL INTRO -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s8">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>React Testing Library</h2>
+    </div>
+    <p class="section-intro">Jest runs the tests. React Testing Library (RTL) gives you tools to render React components and interact with them — like a user would — inside those tests.</p>
+
+    <div class="box rule">
+      <strong>The Core Philosophy</strong>
+      RTL's guiding principle: <em>"Test your software the way users use it."</em> That means don't query elements by CSS class names or component state. Find them the way a real user (or screen reader) would — by visible text, button labels, input names.
+    </div>
+
+    <h3>render() and screen</h3>
+    <p><code>render()</code> mounts your component into a fake DOM. <code>screen</code> is the object you use to search through that fake DOM.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>Greeting.test.jsx</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { render, screen } <span class="imp">from</span> <span class="str">'@testing-library/react'</span>;
+<span class="imp">import</span> <span class="str">'@testing-library/jest-dom'</span>;  <span class="cm">// adds extra matchers like .toBeInTheDocument()</span>
+<span class="imp">import</span> Greeting <span class="imp">from</span> <span class="str">'./Greeting'</span>;
+
+<span class="fn">test</span>(<span class="str">'displays the user name'</span>, () <span class="op">=></span> {
+  <span class="cm">// 1. Render the component with props</span>
+  <span class="fn">render</span>(<span class="tag">&lt;Greeting</span> <span class="attr">name</span>=<span class="str">"Alice"</span> <span class="tag">/&gt;</span>);
+
+  <span class="cm">// 2. Find the element. getByText finds by the text users see on screen.</span>
+  <span class="kw">const</span> heading <span class="op">=</span> screen.<span class="fn">getByText</span>(<span class="str">'Hello, Alice!'</span>);
+
+  <span class="cm">// 3. Assert about it. toBeInTheDocument() comes from @testing-library/jest-dom.</span>
+  <span class="fn">expect</span>(heading).<span class="fn">toBeInTheDocument</span>();
+});</pre>
+    </div>
+
+    <div class="box tip">
+      <strong>What does @testing-library/jest-dom add?</strong>
+      Without it, you only have basic Jest matchers. The jest-dom package adds DOM-specific matchers like <code>toBeInTheDocument()</code>, <code>toBeVisible()</code>, <code>toBeEnabled()</code>, <code>toHaveValue()</code>, and more. It's almost always worth importing.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 09 QUERYING -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s9">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Querying the DOM</h2>
+    </div>
+    <p class="section-intro">How you find elements in RTL is important. There's a recommended priority order, and then there's a choice between three variants (getBy, queryBy, findBy) depending on what you're doing.</p>
+
+    <h3>Query Priority — use higher ones first</h3>
+    <ul class="priority-list">
+      <li>
+        <div class="priority-num">1</div>
+        <div>
+          <span class="pl-name">getByRole</span>
+          <span class="pl-desc">Finds by ARIA role + accessible name. Works for buttons, inputs, headings, links, dialogs, lists, etc.</span>
+          <span class="pl-why">Best choice: matches how screen readers navigate the page. Forces you to write accessible markup.</span>
+        </div>
+      </li>
+      <li>
+        <div class="priority-num">2</div>
+        <div>
+          <span class="pl-name">getByLabelText</span>
+          <span class="pl-desc">Finds an input by its associated &lt;label&gt; text.</span>
+          <span class="pl-why">Great for form inputs. Also encourages proper label usage for accessibility.</span>
+        </div>
+      </li>
+      <li>
+        <div class="priority-num">3</div>
+        <div>
+          <span class="pl-name">getByPlaceholderText</span>
+          <span class="pl-desc">Finds an input by its placeholder text.</span>
+          <span class="pl-why">Use when there's no label. Less ideal — placeholders aren't great for accessibility.</span>
+        </div>
+      </li>
+      <li>
+        <div class="priority-num">4</div>
+        <div>
+          <span class="pl-name">getByText</span>
+          <span class="pl-desc">Finds by visible text content.</span>
+          <span class="pl-why">Good for paragraphs, spans, list items. Not for interactive elements — use getByRole instead.</span>
+        </div>
+      </li>
+      <li>
+        <div class="priority-num">5</div>
+        <div>
+          <span class="pl-name">getByDisplayValue</span>
+          <span class="pl-desc">Finds an input/select/textarea by its current value.</span>
+          <span class="pl-why">Useful when an input is already filled in.</span>
+        </div>
+      </li>
+      <li>
+        <div class="priority-num">6</div>
+        <div>
+          <span class="pl-name">getByAltText</span>
+          <span class="pl-desc">Finds elements (usually images) by their alt attribute.</span>
+          <span class="pl-why">For images with descriptive alt text.</span>
+        </div>
+      </li>
+      <li>
+        <div class="priority-num">7</div>
+        <div>
+          <span class="pl-name">getByTestId</span>
+          <span class="pl-desc">Finds by <code>data-testid</code> attribute.</span>
+          <span class="pl-why">Last resort only. If you're reaching for this, ask if the component is missing accessible markup.</span>
+        </div>
+      </li>
+    </ul>
+
+    <div class="code-block no-label">
+      <pre><span class="cm">// getByRole examples — this is what you'll use most</span>
+screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/submit/i</span> });      <span class="cm">// a button with text "Submit"</span>
+screen.<span class="fn">getByRole</span>(<span class="str">'heading'</span>, { name: <span class="str">'Welcome'</span> });     <span class="cm">// h1-h6 with text "Welcome"</span>
+screen.<span class="fn">getByRole</span>(<span class="str">'textbox'</span>, { name: <span class="str">/email/i</span> });     <span class="cm">// input linked to "Email" label</span>
+screen.<span class="fn">getByRole</span>(<span class="str">'checkbox'</span>, { name: <span class="str">/agree/i</span> });    <span class="cm">// checkbox with "Agree" label</span>
+screen.<span class="fn">getByRole</span>(<span class="str">'link'</span>, { name: <span class="str">/home/i</span> });         <span class="cm">// anchor tag</span>
+
+<span class="cm">// Using regex for name makes tests resilient to capitalization / whitespace changes</span>
+<span class="cm">// { name: /submit/i } matches "Submit", "SUBMIT", "submit order", etc.</span></pre>
+    </div>
+
+    <h3>getBy vs queryBy vs findBy — which one to use?</h3>
+
+    <div class="variant-grid">
+      <div class="variant-card">
+        <h4>getBy* — element must exist</h4>
+        <p>Throws an error immediately if the element isn't found. Use when the element must be there right now. The error message is helpful for debugging.</p>
+        <code>screen.getByRole('button', { name: /save/i })</code>
+      </div>
+      <div class="variant-card">
+        <h4>queryBy* — element might not exist</h4>
+        <p>Returns <code>null</code> if not found instead of throwing. Use when asserting that something is <em>absent</em>.</p>
+        <code>expect(screen.queryByText(/error/i)).not.toBeInTheDocument()</code>
+      </div>
+      <div class="variant-card">
+        <h4>findBy* — element will appear later</h4>
+        <p>Returns a Promise. Retries automatically for up to 1 second until the element appears. Use for elements that appear after a fetch, animation, or state change.</p>
+        <code>const msg = await screen.findByText('Saved!')</code>
+      </div>
+      <div class="variant-card">
+        <h4>*AllBy* — multiple elements</h4>
+        <p>All three variants have an "All" version that returns an array. Use when you expect more than one match.</p>
+        <code>screen.getAllByRole('listitem')  // returns array</code>
+      </div>
+    </div>
+
+    <div class="box info">
+      <strong>Debugging: screen.debug()</strong>
+      When a query fails and you're not sure why, call <code>screen.debug()</code> inside your test. It prints the current DOM to your terminal so you can see exactly what's rendered.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 10 USER EVENTS -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s10">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>Simulating User Events</h2>
+    </div>
+    <p class="section-intro">Finding elements is only half the battle. To test interactive components, you also need to simulate what users do: clicking buttons, typing in fields, selecting options.</p>
+
+    <p>RTL ships with a low-level <code>fireEvent</code> utility, but you should almost always use <code>@testing-library/user-event</code> instead. Here's why:</p>
+
+    <div class="analogy">
+      <code>fireEvent.click(button)</code> is like sending a single "click" signal directly to the DOM — it skips all the real browser behaviors that lead up to a click (focus, pointer down, pointer up, etc.).
+      <br><br>
+      <code>user.click(button)</code> fires all those events in the correct order, exactly as a real browser would. This catches bugs that only appear with real user interactions.
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>LoginForm.test.jsx</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { render, screen } <span class="imp">from</span> <span class="str">'@testing-library/react'</span>;
+<span class="imp">import</span> userEvent <span class="imp">from</span> <span class="str">'@testing-library/user-event'</span>;
+<span class="imp">import</span> <span class="str">'@testing-library/jest-dom'</span>;
+<span class="imp">import</span> LoginForm <span class="imp">from</span> <span class="str">'./LoginForm'</span>;
+
+<span class="fn">test</span>(<span class="str">'submits with email and password'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> handleSubmit <span class="op">=</span> jest.<span class="fn">fn</span>();
+
+  <span class="cm">// Step 1: Set up userEvent — do this once at the top of each test</span>
+  <span class="kw">const</span> user <span class="op">=</span> userEvent.<span class="fn">setup</span>();
+
+  <span class="cm">// Step 2: Render the component</span>
+  <span class="fn">render</span>(<span class="tag">&lt;LoginForm</span> <span class="attr">onSubmit</span>={handleSubmit} <span class="tag">/&gt;</span>);
+
+  <span class="cm">// Step 3: Interact with it. user.type() clicks the field, then types each character.</span>
+  <span class="kw">await</span> user.<span class="fn">type</span>(
+    screen.<span class="fn">getByLabelText</span>(<span class="str">/email/i</span>),
+    <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a2c3cecbc1c7e2c7dac3cfd2cec78cc1cdcf">[email&#160;protected]</a>'</span>
+  );
+  <span class="kw">await</span> user.<span class="fn">type</span>(
+    screen.<span class="fn">getByLabelText</span>(<span class="str">/password/i</span>),
+    <span class="str">'mysecret123'</span>
+  );
+
+  <span class="cm">// Step 4: Click submit</span>
+  <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/log in/i</span> }));
+
+  <span class="cm">// Step 5: Assert the result</span>
+  <span class="fn">expect</span>(handleSubmit).<span class="fn">toHaveBeenCalledWith</span>({
+    email: <span class="str">'<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="680904010b0d280d10090518040d460b0705">[email&#160;protected]</a>'</span>,
+    password: <span class="str">'mysecret123'</span>
+  });
+});</pre>
+    </div>
+
+    <h3>Common user actions</h3>
+    <table>
+      <thead><tr><th>Method</th><th>What it simulates</th></tr></thead>
+      <tbody>
+        <tr><td>user.click(el)</td><td>Full mouse click on an element</td></tr>
+        <tr><td>user.dblClick(el)</td><td>Double click</td></tr>
+        <tr><td>user.type(el, 'text')</td><td>Click the field, then type character by character</td></tr>
+        <tr><td>user.clear(el)</td><td>Select all text in field and delete it</td></tr>
+        <tr><td>user.keyboard('{Enter}')</td><td>Press a specific key (doesn't focus — use after user.click)</td></tr>
+        <tr><td>user.tab()</td><td>Press Tab to move focus to the next element</td></tr>
+        <tr><td>user.hover(el)</td><td>Move mouse over an element (triggers :hover styles / tooltips)</td></tr>
+        <tr><td>user.selectOptions(el, ['b'])</td><td>Select options in a &lt;select&gt; dropdown</td></tr>
+        <tr><td>user.upload(input, file)</td><td>Attach a File object to a file input</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 11 ASYNC UI -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s11">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2>Async UI Patterns</h2>
+    </div>
+    <p class="section-intro">Components often fetch data, show loaders, then display results. Testing this requires waiting for the DOM to update — you can't just check immediately after render.</p>
+
+    <h3>The scenario: a component that fetches on mount</h3>
+    <div class="code-block no-label">
+      <pre><span class="cm">// The component we're testing</span>
+<span class="kw">function</span> <span class="fn">UserProfile</span>({ userId }) {
+  <span class="kw">const</span> [user, setUser] <span class="op">=</span> <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="fn">useEffect</span>(() <span class="op">=></span> {
+    <span class="fn">fetch</span>(<span class="str">`/api/users/${userId}`</span>)
+      .<span class="fn">then</span>(r <span class="op">=></span> r.<span class="fn">json</span>())
+      .<span class="fn">then</span>(setUser);
+  }, [userId]);
+
+  <span class="kw">if</span> (!user) <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Loading...<span class="tag">&lt;/p&gt;</span>;
+  <span class="kw">return</span> <span class="tag">&lt;h1&gt;</span>{user.name}<span class="tag">&lt;/h1&gt;</span>;
+}</pre>
+    </div>
+
+    <h3>Testing it with findBy</h3>
+    <div class="code-block no-label">
+      <pre><span class="fn">beforeEach</span>(() <span class="op">=></span> {
+  <span class="cm">// Mock the fetch call so we don't hit a real network</span>
+  jest.<span class="fn">spyOn</span>(global, <span class="str">'fetch'</span>).<span class="fn">mockResolvedValue</span>({
+    <span class="fn">json</span>: <span class="kw">async</span> () <span class="op">=></span> ({ id: <span class="num">1</span>, name: <span class="str">'Alice'</span> })
+  });
+});
+
+<span class="fn">afterEach</span>(() <span class="op">=></span> jest.<span class="fn">restoreAllMocks</span>());
+
+<span class="fn">test</span>(<span class="str">'shows loading state then displays user name'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="fn">render</span>(<span class="tag">&lt;UserProfile</span> <span class="attr">userId</span>={<span class="num">1</span>} <span class="tag">/&gt;</span>);
+
+  <span class="cm">// Immediately after render, the fetch hasn't resolved yet — loading shows</span>
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">'Loading...'</span>)).<span class="fn">toBeInTheDocument</span>();
+
+  <span class="cm">// findByRole polls the DOM until the heading appears (or 1 second passes)</span>
+  <span class="kw">const</span> heading <span class="op">=</span> <span class="kw">await</span> screen.<span class="fn">findByRole</span>(<span class="str">'heading'</span>, { name: <span class="str">'Alice'</span> });
+  <span class="fn">expect</span>(heading).<span class="fn">toBeInTheDocument</span>();
+
+  <span class="cm">// Loading indicator should be gone now</span>
+  <span class="fn">expect</span>(screen.<span class="fn">queryByText</span>(<span class="str">'Loading...'</span>)).<span class="fn">not</span>.<span class="fn">toBeInTheDocument</span>();
+});</pre>
+    </div>
+
+    <h3>waitFor — when findBy isn't enough</h3>
+    <p><code>findBy</code> is shorthand for <code>waitFor(() => getBy(...))</code>. Sometimes you need to wait for something more complex — like multiple elements updating, or a mock being called.</p>
+    <div class="code-block no-label">
+      <pre><span class="imp">import</span> { waitFor } <span class="imp">from</span> <span class="str">'@testing-library/react'</span>;
+
+<span class="cm">// Wait until a condition is true (retries every 50ms for up to 1000ms)</span>
+<span class="kw">await</span> <span class="fn">waitFor</span>(() <span class="op">=></span> {
+  <span class="fn">expect</span>(mockSave).<span class="fn">toHaveBeenCalledTimes</span>(<span class="num">1</span>);
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">'Saved!'</span>)).<span class="fn">toBeInTheDocument</span>();
+});
+
+<span class="cm">// Wait for something to disappear</span>
+<span class="imp">import</span> { waitForElementToBeRemoved } <span class="imp">from</span> <span class="str">'@testing-library/react'</span>;
+
+<span class="kw">await</span> <span class="fn">waitForElementToBeRemoved</span>(() <span class="op">=></span> screen.<span class="fn">getByText</span>(<span class="str">'Loading...'</span>));</pre>
+    </div>
+
+    <div class="box warn">
+      <strong>"not wrapped in act(...)" warning</strong>
+      If you see this in your test output, it means a state update happened after your test finished — Jest noticed the DOM changed unexpectedly. The fix is usually to add an <code>await findBy*(...)</code> or <code>await waitFor(...)</code> to let the update finish before the test ends.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 12 HOOKS -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s12">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2>Testing Custom Hooks</h2>
+    </div>
+    <p class="section-intro">React hooks can't be called outside a component — but <code>renderHook</code> from RTL gives you a lightweight "dummy component" wrapper so you can test hooks in isolation.</p>
+
+    <p>Say you have this hook:</p>
+    <div class="code-block no-label">
+      <pre><span class="cm">// useCounter.js</span>
+<span class="kw">export function</span> <span class="fn">useCounter</span>(initialValue <span class="op">=</span> <span class="num">0</span>) {
+  <span class="kw">const</span> [count, setCount] <span class="op">=</span> <span class="fn">useState</span>(initialValue);
+  <span class="kw">const</span> increment <span class="op">=</span> () <span class="op">=></span> <span class="fn">setCount</span>(c <span class="op">=></span> c <span class="op">+</span> <span class="num">1</span>);
+  <span class="kw">const</span> decrement <span class="op">=</span> () <span class="op">=></span> <span class="fn">setCount</span>(c <span class="op">=></span> c <span class="op">-</span> <span class="num">1</span>);
+  <span class="kw">const</span> reset     <span class="op">=</span> () <span class="op">=></span> <span class="fn">setCount</span>(initialValue);
+  <span class="kw">return</span> { count, increment, decrement, reset };
+}</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>useCounter.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { renderHook, act } <span class="imp">from</span> <span class="str">'@testing-library/react'</span>;
+<span class="imp">import</span> { useCounter } <span class="imp">from</span> <span class="str">'./useCounter'</span>;
+
+<span class="fn">test</span>(<span class="str">'starts at the given initial value'</span>, () <span class="op">=></span> {
+  <span class="cm">// renderHook renders the hook inside a throw-away component</span>
+  <span class="kw">const</span> { result } <span class="op">=</span> <span class="fn">renderHook</span>(() <span class="op">=></span> <span class="fn">useCounter</span>(<span class="num">5</span>));
+
+  <span class="cm">// result.current holds whatever the hook returned</span>
+  <span class="fn">expect</span>(result.current.count).<span class="fn">toBe</span>(<span class="num">5</span>);
+});
+
+<span class="fn">test</span>(<span class="str">'increments the count'</span>, () <span class="op">=></span> {
+  <span class="kw">const</span> { result } <span class="op">=</span> <span class="fn">renderHook</span>(() <span class="op">=></span> <span class="fn">useCounter</span>());
+
+  <span class="cm">// Wrap state-changing calls in act() so React flushes the update</span>
+  <span class="fn">act</span>(() <span class="op">=></span> result.current.<span class="fn">increment</span>());
+
+  <span class="fn">expect</span>(result.current.count).<span class="fn">toBe</span>(<span class="num">1</span>);
+});
+
+<span class="fn">test</span>(<span class="str">'resets to initial value'</span>, () <span class="op">=></span> {
+  <span class="kw">const</span> { result } <span class="op">=</span> <span class="fn">renderHook</span>(() <span class="op">=></span> <span class="fn">useCounter</span>(<span class="num">10</span>));
+
+  <span class="fn">act</span>(() <span class="op">=></span> result.current.<span class="fn">increment</span>());
+  <span class="fn">act</span>(() <span class="op">=></span> result.current.<span class="fn">reset</span>());
+
+  <span class="fn">expect</span>(result.current.count).<span class="fn">toBe</span>(<span class="num">10</span>);
+});</pre>
+    </div>
+
+    <h3>If your hook needs a Context provider</h3>
+    <div class="code-block no-label">
+      <pre><span class="cm">// Pass a wrapper option to renderHook to supply any providers the hook needs</span>
+<span class="kw">const</span> wrapper <span class="op">=</span> ({ children }) <span class="op">=></span> (
+  <span class="tag">&lt;AuthProvider</span> <span class="attr">user</span>={{ id: <span class="num">1</span>, name: <span class="str">'Alice'</span> }}<span class="tag">&gt;</span>
+    {children}
+  <span class="tag">&lt;/AuthProvider&gt;</span>
+);
+
+<span class="kw">const</span> { result } <span class="op">=</span> <span class="fn">renderHook</span>(() <span class="op">=></span> <span class="fn">useCurrentUser</span>(), { wrapper });</pre>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- 13 CHEATSHEET -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="section" id="s13">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <h2>Quick Reference Cheatsheet</h2>
+    </div>
+
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <h4>Jest Matchers</h4>
+        <div class="entry"><code>.toBe(val)</code><span>Strict equality (===). Primitives only.</span></div>
+        <div class="entry"><code>.toEqual(val)</code><span>Deep equality. Objects + arrays.</span></div>
+        <div class="entry"><code>.toBeTruthy() / .toBeFalsy()</code><span>Loose truthiness check.</span></div>
+        <div class="entry"><code>.toBeNull() / .toBeUndefined()</code><span>Exact null / undefined.</span></div>
+        <div class="entry"><code>.toContain(item)</code><span>Array has item OR string has substring.</span></div>
+        <div class="entry"><code>.toHaveLength(n)</code><span>Array or string length.</span></div>
+        <div class="entry"><code>.toMatch(regex)</code><span>String matches pattern.</span></div>
+        <div class="entry"><code>.toThrow(msg?)</code><span>Function throws error. Wrap in arrow fn!</span></div>
+        <div class="entry"><code>.not.matcher()</code><span>Negate any matcher.</span></div>
+      </div>
+      <div class="cheat-card">
+        <h4>jest-dom Matchers (RTL)</h4>
+        <div class="entry"><code>.toBeInTheDocument()</code><span>Element exists in the fake DOM.</span></div>
+        <div class="entry"><code>.toBeVisible()</code><span>Not hidden (display, visibility, opacity).</span></div>
+        <div class="entry"><code>.toBeEnabled() / .toBeDisabled()</code><span>Input enabled/disabled state.</span></div>
+        <div class="entry"><code>.toHaveValue('text')</code><span>Input's current value.</span></div>
+        <div class="entry"><code>.toHaveTextContent(/regex/)</code><span>Element's text matches pattern.</span></div>
+        <div class="entry"><code>.toHaveClass('active')</code><span>Element has CSS class.</span></div>
+        <div class="entry"><code>.toHaveAttribute('href', '/')</code><span>Element has attribute + value.</span></div>
+        <div class="entry"><code>.toBeChecked()</code><span>Checkbox/radio is checked.</span></div>
+        <div class="entry"><code>.toHaveFocus()</code><span>Element has keyboard focus.</span></div>
+      </div>
+      <div class="cheat-card">
+        <h4>Mock Helpers</h4>
+        <div class="entry"><code>jest.fn()</code><span>Create a mock function.</span></div>
+        <div class="entry"><code>fn.mockReturnValue(v)</code><span>Always return v.</span></div>
+        <div class="entry"><code>fn.mockResolvedValue(v)</code><span>Return resolved Promise(v).</span></div>
+        <div class="entry"><code>fn.mockRejectedValue(e)</code><span>Return rejected Promise(e).</span></div>
+        <div class="entry"><code>fn.mockImplementation(fn)</code><span>Full custom implementation.</span></div>
+        <div class="entry"><code>fn.mockReturnValueOnce(v)</code><span>Return v on the next call only.</span></div>
+        <div class="entry"><code>jest.mock('./module')</code><span>Auto-mock entire module.</span></div>
+        <div class="entry"><code>jest.spyOn(obj, 'method')</code><span>Spy on existing method.</span></div>
+        <div class="entry"><code>jest.clearAllMocks()</code><span>Reset call counts (keep impls).</span></div>
+        <div class="entry"><code>jest.restoreAllMocks()</code><span>Restore all spies.</span></div>
+      </div>
+      <div class="cheat-card">
+        <h4>RTL Queries + Async</h4>
+        <div class="entry"><code>screen.getByRole('button', {name:/ok/i})</code><span>Throws if not found.</span></div>
+        <div class="entry"><code>screen.queryByText(/error/i)</code><span>Returns null if absent.</span></div>
+        <div class="entry"><code>await screen.findByText('Done')</code><span>Waits for element to appear.</span></div>
+        <div class="entry"><code>screen.getAllByRole('li')</code><span>Returns array of all matches.</span></div>
+        <div class="entry"><code>screen.debug()</code><span>Print current DOM to console.</span></div>
+        <div class="entry"><code>await waitFor(() => expect(...))</code><span>Retry assertion until it passes.</span></div>
+        <div class="entry"><code>await waitForElementToBeRemoved()</code><span>Wait for element to disappear.</span></div>
+        <div class="entry"><code>const user = userEvent.setup()</code><span>Init user-event (once per test).</span></div>
+        <div class="entry"><code>await user.click(el)</code><span>Realistic click simulation.</span></div>
+        <div class="entry"><code>await user.type(el, 'text')</code><span>Type character by character.</span></div>
+      </div>
+    </div>
+
+    <h3>The 5 Rules to Remember</h3>
+    <div class="box rule"><strong>1 — Test behavior, not implementation</strong>Don't test which state variables changed or what CSS classes were applied. Test what the user would see and do — visible text, button labels, form values.</div>
+    <div class="box tip"><strong>2 — Use getByRole first</strong>It's the most realistic query. If you can't find your element by role, your component probably needs better accessible markup — which is a good problem to fix.</div>
+    <div class="box info"><strong>3 — Always await async assertions</strong>If you forget <code>await</code> or <code>return</code> on async matchers, the test passes vacuously. Jest does not warn you — it just silently skips the assertion.</div>
+    <div class="box warn"><strong>4 — Each test must be independent</strong>Use <code>beforeEach</code>/<code>afterEach</code> to set up and tear down state. A test that only works if another test ran first is a bug in your test suite.</div>
+    <div class="box rule"><strong>5 — Mock at the boundary</strong>Mock the thing your code depends on (an API, a module), not the internals of what you're testing. If you mock too deeply, you end up testing the mocks instead of your own code.</div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- MERN PART 2 HEADER -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div style="padding: 64px 0 0;">
+    <div class="badge" style="background:rgba(16,185,129,0.12);border-color:rgba(16,185,129,0.4);color:#6ee7b7;">Part 2 · Practical MERN Testing</div>
+    <h2 style="font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-2px;margin-top:16px;line-height:1.1;">
+      Building &amp; Testing a <span style="background:linear-gradient(135deg,#10b981,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">MERN App</span>
+    </h2>
+    <p style="color:#64748b;margin-top:14px;font-size:15px;max-width:620px;line-height:1.6;">
+      We build a <strong style="color:#94a3b8;">Task Manager</strong> — a realistic mini-production app — and write tests at every layer: utility functions, Mongoose models, Express middleware, API routes, frontend fetch wrappers, React components, and custom hooks. Every test has a plain-English explanation of <em>why</em> it's written that way.
+    </p>
+  </div>
+
+  <!-- M-1 App Overview -->
+  <section class="section" id="mern-overview">
+    <div class="section-header">
+      <span class="section-num" style="background:rgba(16,185,129,0.1);color:#6ee7b7;">M-1</span>
+      <h2>The App We're Building</h2>
+    </div>
+    <p class="section-intro">Before writing a single test, understand the app you're testing. The structure below is what a real junior dev would encounter at their first job.</p>
+    <p>Users can register, log in, create tasks, mark them complete, and delete them. Here's the full project structure:</p>
+    <div class="code-block no-label"><pre>task-manager/
+├── backend/
+│   ├── models/
+│   │   ├── User.js          <span class="cm"># Mongoose schema — validation, virtuals, methods</span>
+│   │   └── Task.js          <span class="cm"># Mongoose schema — isOverdue virtual</span>
+│   ├── middleware/
+│   │   ├── auth.js          <span class="cm"># JWT guard — blocks unauthenticated requests</span>
+│   │   └── validate.js      <span class="cm"># Checks required fields in request body</span>
+│   ├── utils/
+│   │   ├── password.js      <span class="cm"># bcrypt hash and compare</span>
+│   │   └── token.js         <span class="cm"># JWT sign and verify</span>
+│   ├── routes/
+│   │   ├── auth.routes.js   <span class="cm"># POST /register, POST /login</span>
+│   │   └── task.routes.js   <span class="cm"># GET/POST/PATCH/DELETE /tasks</span>
+│   ├── test-helpers/
+│   │   └── db.js            <span class="cm"># Shared in-memory MongoDB helpers</span>
+│   └── app.js               <span class="cm"># Express app (no app.listen — easier to test)</span>
+└── frontend/
+    └── src/
+        ├── api/
+        │   └── taskApi.js   <span class="cm"># fetch() wrappers for backend routes</span>
+        ├── hooks/
+        │   └── useTasks.js  <span class="cm"># loading/error/data state management</span>
+        └── components/
+            ├── TaskForm.jsx <span class="cm"># add-task form</span>
+            └── TaskList.jsx <span class="cm"># list with complete/delete buttons</span></pre></div>
+
+    <div class="box info">
+      <strong>Testing strategy per layer</strong>
+      <strong style="display:inline;font-size:14px;text-transform:none;letter-spacing:0;color:#7dd3fc;">Utils:</strong> pure Jest, no mocking — known inputs, predictable outputs.
+      <strong style="display:inline;font-size:14px;text-transform:none;letter-spacing:0;color:#7dd3fc;">Mongoose models:</strong> mongodb-memory-server — real Mongoose, no real DB.
+      <strong style="display:inline;font-size:14px;text-transform:none;letter-spacing:0;color:#7dd3fc;">Middleware:</strong> call the function directly with fake req/res/next.
+      <strong style="display:inline;font-size:14px;text-transform:none;letter-spacing:0;color:#7dd3fc;">Routes:</strong> Supertest — full HTTP cycle including auth and DB.
+      <strong style="display:inline;font-size:14px;text-transform:none;letter-spacing:0;color:#7dd3fc;">Frontend API:</strong> mock global.fetch — verify URLs, headers, error handling.
+      <strong style="display:inline;font-size:14px;text-transform:none;letter-spacing:0;color:#7dd3fc;">React components:</strong> RTL + userEvent — render, interact, assert on DOM.
+      <strong style="display:inline;font-size:14px;text-transform:none;letter-spacing:0;color:#7dd3fc;">Custom hooks:</strong> renderHook + mock API module — state transitions only.
+    </div>
+  </section>
+
+  <!-- M-2 Utility Functions -->
+  <section class="section" id="mern-utils">
+    <div class="section-header">
+      <span class="section-num" style="background:rgba(16,185,129,0.1);color:#6ee7b7;">M-2</span>
+      <h2>Testing Utility Functions</h2>
+    </div>
+    <p class="section-intro">Always start here. Utilities are the simplest things to test — pure function in, pure value out. No database, no HTTP, no React. They run in milliseconds.</p>
+
+    <h3>The utility code</h3>
+    <div class="code-block">
+      <div class="code-label"><span>backend/utils/password.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> bcrypt <span class="op">=</span> <span class="fn">require</span>(<span class="str">'bcryptjs'</span>);
+
+<span class="kw">async function</span> <span class="fn">hashPassword</span>(plain) {
+  <span class="kw">if</span> (!plain || plain.length <span class="op">&lt;</span> <span class="num">8</span>) {
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Password must be at least 8 characters'</span>);
+  }
+  <span class="kw">return</span> bcrypt.<span class="fn">hash</span>(plain, <span class="num">10</span>);
+}
+
+<span class="kw">async function</span> <span class="fn">verifyPassword</span>(plain, hash) {
+  <span class="kw">return</span> bcrypt.<span class="fn">compare</span>(plain, hash);
+}
+
+module.exports <span class="op">=</span> { hashPassword, verifyPassword };</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>backend/utils/token.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> jwt <span class="op">=</span> <span class="fn">require</span>(<span class="str">'jsonwebtoken'</span>);
+<span class="kw">const</span> SECRET <span class="op">=</span> process.env.JWT_SECRET <span class="op">||</span> <span class="str">'test-secret'</span>;
+
+<span class="kw">function</span> <span class="fn">signToken</span>(payload) {
+  <span class="kw">return</span> jwt.<span class="fn">sign</span>(payload, SECRET, { expiresIn: <span class="str">'7d'</span> });
+}
+
+<span class="kw">function</span> <span class="fn">verifyToken</span>(token) {
+  <span class="kw">try</span> {
+    <span class="kw">return</span> jwt.<span class="fn">verify</span>(token, SECRET);
+  } <span class="kw">catch</span> {
+    <span class="kw">return null</span>;  <span class="cm">// return null instead of throwing — callers check for null</span>
+  }
+}
+
+module.exports <span class="op">=</span> { signToken, verifyToken };</pre>
+    </div>
+
+    <h3>Password tests</h3>
+    <div class="code-block">
+      <div class="code-label"><span>backend/utils/__tests__/password.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> { hashPassword, verifyPassword } <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../password'</span>);
+
+<span class="fn">describe</span>(<span class="str">'hashPassword()'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'returns a bcrypt hash, not the plain password'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> hash <span class="op">=</span> <span class="kw">await</span> <span class="fn">hashPassword</span>(<span class="str">'mypassword'</span>);
+    <span class="fn">expect</span>(hash).<span class="fn">not</span>.<span class="fn">toBe</span>(<span class="str">'mypassword'</span>);
+    <span class="fn">expect</span>(hash).<span class="fn">toMatch</span>(<span class="str">/^\$2b\$/</span>);  <span class="cm">// all bcrypt hashes start with $2b$</span>
+  });
+
+  <span class="fn">test</span>(<span class="str">'produces a different hash each call — proves random salting'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="cm">// If two hashes of the same password matched, attackers could use</span>
+    <span class="cm">// pre-computed "rainbow tables" to reverse-engineer passwords.</span>
+    <span class="kw">const</span> [h1, h2] <span class="op">=</span> <span class="kw">await</span> Promise.<span class="fn">all</span>([
+      <span class="fn">hashPassword</span>(<span class="str">'mypassword'</span>),
+      <span class="fn">hashPassword</span>(<span class="str">'mypassword'</span>),
+    ]);
+    <span class="fn">expect</span>(h1).<span class="fn">not</span>.<span class="fn">toBe</span>(h2);
+  });
+
+  <span class="fn">test</span>(<span class="str">'throws when password is shorter than 8 characters'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> <span class="fn">expect</span>(<span class="fn">hashPassword</span>(<span class="str">'short'</span>)).<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">'at least 8 characters'</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'throws when password is empty'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> <span class="fn">expect</span>(<span class="fn">hashPassword</span>(<span class="str">''</span>)).<span class="fn">rejects</span>.<span class="fn">toThrow</span>();
+  });
+});
+
+<span class="fn">describe</span>(<span class="str">'verifyPassword()'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'returns true when password matches the hash'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> hash <span class="op">=</span> <span class="kw">await</span> <span class="fn">hashPassword</span>(<span class="str">'correctpassword'</span>);
+    <span class="fn">expect</span>(<span class="kw">await</span> <span class="fn">verifyPassword</span>(<span class="str">'correctpassword'</span>, hash)).<span class="fn">toBe</span>(<span class="kw">true</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'returns false when password is wrong'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> hash <span class="op">=</span> <span class="kw">await</span> <span class="fn">hashPassword</span>(<span class="str">'correctpassword'</span>);
+    <span class="fn">expect</span>(<span class="kw">await</span> <span class="fn">verifyPassword</span>(<span class="str">'wrongpassword'</span>, hash)).<span class="fn">toBe</span>(<span class="kw">false</span>);
+  });
+});</pre>
+    </div>
+
+    <h3>Token tests</h3>
+    <div class="code-block">
+      <div class="code-label"><span>backend/utils/__tests__/token.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> { signToken, verifyToken } <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../token'</span>);
+
+<span class="fn">describe</span>(<span class="str">'signToken()'</span>, () <span class="op">=></span> {
+  <span class="fn">test</span>(<span class="str">'returns a string with 3 dot-separated parts (header.payload.signature)'</span>, () <span class="op">=></span> {
+    <span class="kw">const</span> token <span class="op">=</span> <span class="fn">signToken</span>({ userId: <span class="str">'abc123'</span> });
+    <span class="fn">expect</span>(token.<span class="fn">split</span>(<span class="str">'.'</span>)).<span class="fn">toHaveLength</span>(<span class="num">3</span>);
+  });
+});
+
+<span class="fn">describe</span>(<span class="str">'verifyToken()'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'returns the original payload for a valid token'</span>, () <span class="op">=></span> {
+    <span class="kw">const</span> payload <span class="op">=</span> { userId: <span class="str">'abc123'</span>, role: <span class="str">'admin'</span> };
+    <span class="kw">const</span> token <span class="op">=</span> <span class="fn">signToken</span>(payload);
+    <span class="cm">// toMatchObject — JWT also adds iat and exp fields, so toEqual would fail</span>
+    <span class="fn">expect</span>(<span class="fn">verifyToken</span>(token)).<span class="fn">toMatchObject</span>(payload);
+  });
+
+  <span class="fn">test</span>(<span class="str">'returns null for a tampered token'</span>, () <span class="op">=></span> {
+    <span class="kw">const</span> token <span class="op">=</span> <span class="fn">signToken</span>({ userId: <span class="str">'abc123'</span> });
+    <span class="fn">expect</span>(<span class="fn">verifyToken</span>(token <span class="op">+</span> <span class="str">'TAMPERED'</span>)).<span class="fn">toBeNull</span>();
+  });
+
+  <span class="fn">test</span>(<span class="str">'returns null for a completely fake token string'</span>, () <span class="op">=></span> {
+    <span class="fn">expect</span>(<span class="fn">verifyToken</span>(<span class="str">'not.a.real.token'</span>)).<span class="fn">toBeNull</span>();
+  });
+
+  <span class="fn">test</span>(<span class="str">'returns null for an empty string'</span>, () <span class="op">=></span> {
+    <span class="fn">expect</span>(<span class="fn">verifyToken</span>(<span class="str">''</span>)).<span class="fn">toBeNull</span>();
+  });
+});</pre>
+    </div>
+
+    <div class="analogy">
+      We test with a tampered token, a fake token, and an empty string — not just a valid one. In production, attackers send all kinds of garbage to your auth endpoints. These edge-case tests mean a malformed token cannot crash your middleware or sneak through undetected.
+    </div>
+  </section>
+
+  <!-- M-3 Mongoose Models -->
+  <section class="section" id="mern-models">
+    <div class="section-header">
+      <span class="section-num" style="background:rgba(16,185,129,0.1);color:#6ee7b7;">M-3</span>
+      <h2>Testing Mongoose Models</h2>
+    </div>
+    <p class="section-intro">Mongoose models enforce schema rules, transform data, and expose virtual fields and instance methods. We test all of these using <strong>mongodb-memory-server</strong> — a real MongoDB instance running in RAM, no installation needed.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>terminal</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre>npm install --save-dev mongodb-memory-server</pre>
+    </div>
+
+    <h3>Shared DB helper — used by all model and route tests</h3>
+    <div class="code-block">
+      <div class="code-label"><span>backend/test-helpers/db.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> { MongoMemoryServer } <span class="op">=</span> <span class="fn">require</span>(<span class="str">'mongodb-memory-server'</span>);
+<span class="imp">const</span> mongoose <span class="op">=</span> <span class="fn">require</span>(<span class="str">'mongoose'</span>);
+
+<span class="kw">let</span> mongod;
+
+<span class="cm">// Call in beforeAll() — spins up the in-memory MongoDB</span>
+<span class="kw">async function</span> <span class="fn">connect</span>() {
+  mongod <span class="op">=</span> <span class="kw">await</span> MongoMemoryServer.<span class="fn">create</span>();
+  <span class="kw">await</span> mongoose.<span class="fn">connect</span>(mongod.<span class="fn">getUri</span>());
+}
+
+<span class="cm">// Call in afterEach() — wipe data so tests don't bleed into each other</span>
+<span class="kw">async function</span> <span class="fn">clearAll</span>() {
+  <span class="kw">for</span> (<span class="kw">const</span> key <span class="kw">in</span> mongoose.connection.collections) {
+    <span class="kw">await</span> mongoose.connection.collections[key].<span class="fn">deleteMany</span>({});
+  }
+}
+
+<span class="cm">// Call in afterAll() — shut down the in-memory server</span>
+<span class="kw">async function</span> <span class="fn">disconnect</span>() {
+  <span class="kw">await</span> mongoose.<span class="fn">disconnect</span>();
+  <span class="kw">await</span> mongod.<span class="fn">stop</span>();
+}
+
+module.exports <span class="op">=</span> { connect, clearAll, disconnect };</pre>
+    </div>
+
+    <h3>The models</h3>
+    <div class="code-block">
+      <div class="code-label"><span>backend/models/User.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> mongoose <span class="op">=</span> <span class="fn">require</span>(<span class="str">'mongoose'</span>);
+<span class="kw">const</span> userSchema <span class="op">=</span> <span class="kw">new</span> mongoose.<span class="fn">Schema</span>({
+  name:     { type: String, required: <span class="kw">true</span>, trim: <span class="kw">true</span> },
+  email:    { type: String, required: <span class="kw">true</span>, unique: <span class="kw">true</span>, lowercase: <span class="kw">true</span> },
+  password: { type: String, required: <span class="kw">true</span> },
+  role:     { type: String, enum: [<span class="str">'user'</span>, <span class="str">'admin'</span>], default: <span class="str">'user'</span> },
+});
+
+<span class="cm">// Virtual: composite display string — not stored in DB</span>
+userSchema.<span class="fn">virtual</span>(<span class="str">'displayLabel'</span>).<span class="fn">get</span>(<span class="kw">function</span>() {
+  <span class="kw">return</span> <span class="str">`${this.name} &lt;${this.email}&gt;`</span>;
+});
+
+<span class="cm">// Instance method: strip the password before sending to frontend</span>
+userSchema.methods.<span class="fn">toSafeObject</span> <span class="op">=</span> <span class="kw">function</span>() {
+  <span class="kw">const</span> { password, __v, ...safe } <span class="op">=</span> <span class="kw">this</span>.<span class="fn">toObject</span>();
+  <span class="kw">return</span> safe;
+};
+
+module.exports <span class="op">=</span> mongoose.<span class="fn">model</span>(<span class="str">'User'</span>, userSchema);</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>backend/models/Task.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> mongoose <span class="op">=</span> <span class="fn">require</span>(<span class="str">'mongoose'</span>);
+<span class="kw">const</span> taskSchema <span class="op">=</span> <span class="kw">new</span> mongoose.<span class="fn">Schema</span>({
+  title:     { type: String, required: <span class="kw">true</span>, trim: <span class="kw">true</span>, maxlength: <span class="num">120</span> },
+  completed: { type: Boolean, default: <span class="kw">false</span> },
+  priority:  { type: String, enum: [<span class="str">'low'</span>, <span class="str">'medium'</span>, <span class="str">'high'</span>], default: <span class="str">'medium'</span> },
+  owner:     { type: mongoose.Schema.Types.ObjectId, ref: <span class="str">'User'</span>, required: <span class="kw">true</span> },
+  dueDate:   { type: Date },
+});
+
+<span class="cm">// Virtual: true if past due AND not yet completed</span>
+taskSchema.<span class="fn">virtual</span>(<span class="str">'isOverdue'</span>).<span class="fn">get</span>(<span class="kw">function</span>() {
+  <span class="kw">if</span> (!<span class="kw">this</span>.dueDate <span class="op">||</span> <span class="kw">this</span>.completed) <span class="kw">return false</span>;
+  <span class="kw">return</span> <span class="kw">this</span>.dueDate <span class="op">&lt;</span> <span class="kw">new</span> <span class="fn">Date</span>();
+});
+
+module.exports <span class="op">=</span> mongoose.<span class="fn">model</span>(<span class="str">'Task'</span>, taskSchema);</pre>
+    </div>
+
+    <h3>Model tests</h3>
+    <div class="code-block">
+      <div class="code-label"><span>backend/models/__tests__/User.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> User <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../User'</span>);
+<span class="imp">const</span> db   <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../../test-helpers/db'</span>);
+
+<span class="fn">beforeAll</span>(<span class="kw">async</span> () <span class="op">=></span> db.<span class="fn">connect</span>());
+<span class="fn">afterEach</span>(<span class="kw">async</span> () <span class="op">=></span> db.<span class="fn">clearAll</span>());
+<span class="fn">afterAll</span>(<span class="kw">async</span>  () <span class="op">=></span> db.<span class="fn">disconnect</span>());
+
+<span class="cm">// Centralise valid data — change it once here, not in every test</span>
+<span class="kw">const</span> validUser <span class="op">=</span> { name: <span class="str">'Alice Johnson'</span>, email: <span class="str">'alice@test.com'</span>, password: <span class="str">'hashed_pw_x'</span> };
+
+<span class="fn">describe</span>(<span class="str">'schema validation'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'saves a valid user successfully'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> user <span class="op">=</span> <span class="kw">await</span> User.<span class="fn">create</span>(validUser);
+    <span class="fn">expect</span>(user._id).<span class="fn">toBeDefined</span>();
+    <span class="fn">expect</span>(user.email).<span class="fn">toBe</span>(<span class="str">'alice@test.com'</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'lowercases email automatically'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> user <span class="op">=</span> <span class="kw">await</span> User.<span class="fn">create</span>({ ...validUser, email: <span class="str">'ALICE@TEST.COM'</span> });
+    <span class="fn">expect</span>(user.email).<span class="fn">toBe</span>(<span class="str">'alice@test.com'</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'defaults role to "user"'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> user <span class="op">=</span> <span class="kw">await</span> User.<span class="fn">create</span>(validUser);
+    <span class="fn">expect</span>(user.role).<span class="fn">toBe</span>(<span class="str">'user'</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'rejects when name is missing'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> { name, ...noName } <span class="op">=</span> validUser;
+    <span class="kw">await</span> <span class="fn">expect</span>(User.<span class="fn">create</span>(noName)).<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">/name.*required/i</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'rejects duplicate emails'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> User.<span class="fn">create</span>(validUser);
+    <span class="kw">await</span> <span class="fn">expect</span>(User.<span class="fn">create</span>(validUser)).<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">/duplicate key/i</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'rejects an invalid role value'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> <span class="fn">expect</span>(User.<span class="fn">create</span>({ ...validUser, role: <span class="str">'superuser'</span> }))
+      .<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">/not a valid enum/i</span>);
+  });
+});
+
+<span class="fn">describe</span>(<span class="str">'virtual: displayLabel'</span>, () <span class="op">=></span> {
+  <span class="fn">test</span>(<span class="str">'formats name and email into a single label'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> user <span class="op">=</span> <span class="kw">await</span> User.<span class="fn">create</span>(validUser);
+    <span class="fn">expect</span>(user.displayLabel).<span class="fn">toBe</span>(<span class="str">'Alice Johnson &lt;alice@test.com&gt;'</span>);
+  });
+});
+
+<span class="fn">describe</span>(<span class="str">'method: toSafeObject()'</span>, () <span class="op">=></span> {
+  <span class="fn">test</span>(<span class="str">'strips the password hash — must never appear in API responses'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> user <span class="op">=</span> <span class="kw">await</span> User.<span class="fn">create</span>(validUser);
+    <span class="kw">const</span> safe <span class="op">=</span> user.<span class="fn">toSafeObject</span>();
+    <span class="fn">expect</span>(safe.password).<span class="fn">toBeUndefined</span>();
+    <span class="fn">expect</span>(safe.name).<span class="fn">toBe</span>(<span class="str">'Alice Johnson'</span>);
+  });
+});</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>backend/models/__tests__/Task.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> User <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../User'</span>);
+<span class="imp">const</span> Task <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../Task'</span>);
+<span class="imp">const</span> db   <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../../test-helpers/db'</span>);
+
+<span class="fn">beforeAll</span>(<span class="kw">async</span> () <span class="op">=></span> db.<span class="fn">connect</span>());
+<span class="fn">afterEach</span>(<span class="kw">async</span> () <span class="op">=></span> db.<span class="fn">clearAll</span>());
+<span class="fn">afterAll</span>(<span class="kw">async</span>  () <span class="op">=></span> db.<span class="fn">disconnect</span>());
+
+<span class="kw">let</span> owner;
+<span class="fn">beforeEach</span>(<span class="kw">async</span> () <span class="op">=></span> {
+  <span class="cm">// Every task needs an owner — create a fresh user before each test</span>
+  owner <span class="op">=</span> <span class="kw">await</span> User.<span class="fn">create</span>({ name: <span class="str">'Alice'</span>, email: <span class="str">'a@test.com'</span>, password: <span class="str">'pw12345678'</span> });
+});
+
+<span class="fn">describe</span>(<span class="str">'schema validation'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'saves with correct defaults (completed=false, priority=medium)'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> task <span class="op">=</span> <span class="kw">await</span> Task.<span class="fn">create</span>({ title: <span class="str">'Buy milk'</span>, owner: owner._id });
+    <span class="fn">expect</span>(task.completed).<span class="fn">toBe</span>(<span class="kw">false</span>);
+    <span class="fn">expect</span>(task.priority).<span class="fn">toBe</span>(<span class="str">'medium'</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'rejects when title is missing'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> <span class="fn">expect</span>(Task.<span class="fn">create</span>({ owner: owner._id }))
+      .<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">/title.*required/i</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'rejects an invalid priority value'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> <span class="fn">expect</span>(Task.<span class="fn">create</span>({ title: <span class="str">'T'</span>, owner: owner._id, priority: <span class="str">'urgent'</span> }))
+      .<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">/not a valid enum/i</span>);
+  });
+});
+
+<span class="fn">describe</span>(<span class="str">'virtual: isOverdue'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'is false when no due date is set'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> task <span class="op">=</span> <span class="kw">await</span> Task.<span class="fn">create</span>({ title: <span class="str">'No date'</span>, owner: owner._id });
+    <span class="fn">expect</span>(task.isOverdue).<span class="fn">toBe</span>(<span class="kw">false</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'is true when due date is in the past and task is incomplete'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> yesterday <span class="op">=</span> <span class="kw">new</span> <span class="fn">Date</span>(Date.now() <span class="op">-</span> <span class="num">86400000</span>);
+    <span class="kw">const</span> task <span class="op">=</span> <span class="kw">await</span> Task.<span class="fn">create</span>({ title: <span class="str">'Old task'</span>, dueDate: yesterday, owner: owner._id });
+    <span class="fn">expect</span>(task.isOverdue).<span class="fn">toBe</span>(<span class="kw">true</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'is false even when past due if the task is completed'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> yesterday <span class="op">=</span> <span class="kw">new</span> <span class="fn">Date</span>(Date.now() <span class="op">-</span> <span class="num">86400000</span>);
+    <span class="kw">const</span> task <span class="op">=</span> <span class="kw">await</span> Task.<span class="fn">create</span>({
+      title: <span class="str">'Done task'</span>, dueDate: yesterday, completed: <span class="kw">true</span>, owner: owner._id
+    });
+    <span class="fn">expect</span>(task.isOverdue).<span class="fn">toBe</span>(<span class="kw">false</span>);
+  });
+});</pre>
+    </div>
+  </section>
+
+
+  <!-- M-4 Middleware -->
+  <section class="section" id="mern-middleware">
+    <div class="section-header">
+      <span class="section-num" style="background:rgba(16,185,129,0.1);color:#6ee7b7;">M-4</span>
+      <h2>Testing Express Middleware</h2>
+    </div>
+    <p class="section-intro">Middleware sits between the incoming request and your route handler. Testing it in isolation is fast and precise: you create fake <code>req</code>, <code>res</code>, and <code>next</code> objects, call the middleware directly, and check what it does — no HTTP server needed at all.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>backend/middleware/auth.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> { verifyToken } <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../utils/token'</span>);
+
+<span class="cm">// Blocks any request that doesn't carry a valid JWT in the Authorization header</span>
+<span class="kw">function</span> <span class="fn">requireAuth</span>(req, res, next) {
+  <span class="kw">const</span> authHeader <span class="op">=</span> req.headers.authorization;
+
+  <span class="kw">if</span> (!authHeader <span class="op">||</span> !authHeader.<span class="fn">startsWith</span>(<span class="str">'Bearer '</span>)) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'No token provided'</span> });
+  }
+
+  <span class="kw">const</span> decoded <span class="op">=</span> <span class="fn">verifyToken</span>(authHeader.<span class="fn">slice</span>(<span class="num">7</span>));  <span class="cm">// strip "Bearer "</span>
+  <span class="kw">if</span> (!decoded) {
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid or expired token'</span> });
+  }
+
+  req.user <span class="op">=</span> decoded;  <span class="cm">// attach decoded payload for downstream handlers</span>
+  <span class="fn">next</span>();
+}
+
+module.exports <span class="op">=</span> { requireAuth };</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>backend/middleware/validate.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="cm">// Factory: returns middleware that checks the request body for required fields</span>
+<span class="kw">function</span> <span class="fn">requireFields</span>(...fields) {
+  <span class="kw">return function</span>(req, res, next) {
+    <span class="kw">const</span> missing <span class="op">=</span> fields.<span class="fn">filter</span>(f <span class="op">=></span> !req.body[f]);
+    <span class="kw">if</span> (missing.length <span class="op">&gt;</span> <span class="num">0</span>) {
+      <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">400</span>).<span class="fn">json</span>({ error: <span class="str">`Missing fields: ${missing.join(', ')}`</span> });
+    }
+    <span class="fn">next</span>();
+  };
+}
+
+module.exports <span class="op">=</span> { requireFields };</pre>
+    </div>
+
+    <h3>Middleware tests — no HTTP server, just function calls</h3>
+    <div class="code-block">
+      <div class="code-label"><span>backend/middleware/__tests__/auth.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> { requireAuth } <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../auth'</span>);
+<span class="imp">const</span> { signToken }   <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../../utils/token'</span>);
+
+<span class="cm">// Builds a minimal fake Express res object.
+// We only stub the methods our middleware actually calls.
+// Chaining: res.status(401).json({...}) works because status() returns res.</span>
+<span class="kw">function</span> <span class="fn">mockRes</span>() {
+  <span class="kw">const</span> res <span class="op">=</span> {};
+  res.<span class="fn">status</span> <span class="op">=</span> jest.<span class="fn">fn</span>(() <span class="op">=></span> res);
+  res.<span class="fn">json</span>   <span class="op">=</span> jest.<span class="fn">fn</span>(() <span class="op">=></span> res);
+  <span class="kw">return</span> res;
+}
+
+<span class="fn">test</span>(<span class="str">'calls next() and populates req.user when token is valid'</span>, () <span class="op">=></span> {
+  <span class="kw">const</span> token <span class="op">=</span> <span class="fn">signToken</span>({ userId: <span class="str">'abc'</span>, role: <span class="str">'user'</span> });
+  <span class="kw">const</span> req   <span class="op">=</span> { headers: { authorization: <span class="str">`Bearer ${token}`</span> } };
+  <span class="kw">const</span> res   <span class="op">=</span> <span class="fn">mockRes</span>();
+  <span class="kw">const</span> next  <span class="op">=</span> jest.<span class="fn">fn</span>();
+
+  <span class="fn">requireAuth</span>(req, res, next);
+
+  <span class="fn">expect</span>(next).<span class="fn">toHaveBeenCalledTimes</span>(<span class="num">1</span>);            <span class="cm">// allowed through</span>
+  <span class="fn">expect</span>(req.user).<span class="fn">toMatchObject</span>({ userId: <span class="str">'abc'</span> }); <span class="cm">// payload attached</span>
+  <span class="fn">expect</span>(res.status).<span class="fn">not</span>.<span class="fn">toHaveBeenCalled</span>();        <span class="cm">// no error response sent</span>
+});
+
+<span class="fn">test</span>(<span class="str">'returns 401 when Authorization header is absent'</span>, () <span class="op">=></span> {
+  <span class="kw">const</span> req  <span class="op">=</span> { headers: {} };
+  <span class="kw">const</span> res  <span class="op">=</span> <span class="fn">mockRes</span>();
+  <span class="kw">const</span> next <span class="op">=</span> jest.<span class="fn">fn</span>();
+
+  <span class="fn">requireAuth</span>(req, res, next);
+
+  <span class="fn">expect</span>(res.status).<span class="fn">toHaveBeenCalledWith</span>(<span class="num">401</span>);
+  <span class="fn">expect</span>(res.json).<span class="fn">toHaveBeenCalledWith</span>({ error: <span class="str">'No token provided'</span> });
+  <span class="fn">expect</span>(next).<span class="fn">not</span>.<span class="fn">toHaveBeenCalled</span>();  <span class="cm">// request must NOT proceed</span>
+});
+
+<span class="fn">test</span>(<span class="str">'returns 401 for an invalid/tampered token'</span>, () <span class="op">=></span> {
+  <span class="kw">const</span> req  <span class="op">=</span> { headers: { authorization: <span class="str">'Bearer garbage.token.xyz'</span> } };
+  <span class="kw">const</span> res  <span class="op">=</span> <span class="fn">mockRes</span>();
+  <span class="kw">const</span> next <span class="op">=</span> jest.<span class="fn">fn</span>();
+
+  <span class="fn">requireAuth</span>(req, res, next);
+
+  <span class="fn">expect</span>(res.status).<span class="fn">toHaveBeenCalledWith</span>(<span class="num">401</span>);
+  <span class="fn">expect</span>(next).<span class="fn">not</span>.<span class="fn">toHaveBeenCalled</span>();
+});
+
+<span class="fn">test</span>(<span class="str">'returns 401 when header exists but is not Bearer format'</span>, () <span class="op">=></span> {
+  <span class="kw">const</span> req  <span class="op">=</span> { headers: { authorization: <span class="str">'Token abc123'</span> } };  <span class="cm">// wrong scheme</span>
+  <span class="kw">const</span> res  <span class="op">=</span> <span class="fn">mockRes</span>();
+  <span class="kw">const</span> next <span class="op">=</span> jest.<span class="fn">fn</span>();
+
+  <span class="fn">requireAuth</span>(req, res, next);
+
+  <span class="fn">expect</span>(res.status).<span class="fn">toHaveBeenCalledWith</span>(<span class="num">401</span>);
+  <span class="fn">expect</span>(next).<span class="fn">not</span>.<span class="fn">toHaveBeenCalled</span>();
+});</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>backend/middleware/__tests__/validate.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> { requireFields } <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../validate'</span>);
+
+<span class="kw">function</span> <span class="fn">mockRes</span>() {
+  <span class="kw">const</span> res <span class="op">=</span> {};
+  res.<span class="fn">status</span> <span class="op">=</span> jest.<span class="fn">fn</span>(() <span class="op">=></span> res);
+  res.<span class="fn">json</span>   <span class="op">=</span> jest.<span class="fn">fn</span>(() <span class="op">=></span> res);
+  <span class="kw">return</span> res;
+}
+
+<span class="fn">test</span>(<span class="str">'calls next() when all required fields are present'</span>, () <span class="op">=></span> {
+  <span class="kw">const</span> middleware <span class="op">=</span> <span class="fn">requireFields</span>(<span class="str">'email'</span>, <span class="str">'password'</span>);
+  <span class="kw">const</span> req  <span class="op">=</span> { body: { email: <span class="str">'a@b.com'</span>, password: <span class="str">'secret'</span> } };
+  <span class="kw">const</span> res  <span class="op">=</span> <span class="fn">mockRes</span>();
+  <span class="kw">const</span> next <span class="op">=</span> jest.<span class="fn">fn</span>();
+
+  <span class="fn">middleware</span>(req, res, next);
+
+  <span class="fn">expect</span>(next).<span class="fn">toHaveBeenCalled</span>();
+  <span class="fn">expect</span>(res.status).<span class="fn">not</span>.<span class="fn">toHaveBeenCalled</span>();
+});
+
+<span class="fn">test</span>(<span class="str">'returns 400 and lists missing fields'</span>, () <span class="op">=></span> {
+  <span class="kw">const</span> middleware <span class="op">=</span> <span class="fn">requireFields</span>(<span class="str">'name'</span>, <span class="str">'email'</span>, <span class="str">'password'</span>);
+  <span class="kw">const</span> req  <span class="op">=</span> { body: { email: <span class="str">'a@b.com'</span> } };  <span class="cm">// name and password are missing</span>
+  <span class="kw">const</span> res  <span class="op">=</span> <span class="fn">mockRes</span>();
+  <span class="kw">const</span> next <span class="op">=</span> jest.<span class="fn">fn</span>();
+
+  <span class="fn">middleware</span>(req, res, next);
+
+  <span class="fn">expect</span>(res.status).<span class="fn">toHaveBeenCalledWith</span>(<span class="num">400</span>);
+  <span class="fn">expect</span>(res.json).<span class="fn">toHaveBeenCalledWith</span>(
+    expect.<span class="fn">objectContaining</span>({ error: expect.<span class="fn">stringContaining</span>(<span class="str">'name'</span>) })
+  );
+  <span class="fn">expect</span>(next).<span class="fn">not</span>.<span class="fn">toHaveBeenCalled</span>();
+});</pre>
+    </div>
+
+    <div class="analogy">
+      We never start a real HTTP server in middleware tests. We just call <code>requireAuth(req, res, next)</code> like any regular function, passing in plain JavaScript objects that mimic what Express would provide. This makes tests instant and the failure messages crystal clear.
+    </div>
+  </section>
+
+  <!-- M-5 API Routes -->
+  <section class="section" id="mern-routes">
+    <div class="section-header">
+      <span class="section-num" style="background:rgba(16,185,129,0.1);color:#6ee7b7;">M-5</span>
+      <h2>Testing API Routes with Supertest</h2>
+    </div>
+    <p class="section-intro">Route (integration) tests fire real HTTP requests through your full Express stack — routing, middleware, controllers, and a real in-memory MongoDB — all in one. <strong>Supertest</strong> does this without binding to a port, so tests never conflict with each other.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>terminal</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre>npm install --save-dev supertest</pre>
+    </div>
+
+    <div class="box tip">
+      <strong>Export your Express app without calling app.listen()</strong>
+      In <code>app.js</code>, export the app object but don't call <code>app.listen()</code>. Start the server only in a separate <code>server.js</code> entry point. This way Supertest (and your tests) can import and use the app without port conflicts.
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>backend/routes/__tests__/auth.routes.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> request <span class="op">=</span> <span class="fn">require</span>(<span class="str">'supertest'</span>);
+<span class="imp">const</span> app     <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../../app'</span>);
+<span class="imp">const</span> db      <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../../test-helpers/db'</span>);
+
+<span class="fn">beforeAll</span>(<span class="kw">async</span> () <span class="op">=></span> db.<span class="fn">connect</span>());
+<span class="fn">afterEach</span>(<span class="kw">async</span> () <span class="op">=></span> db.<span class="fn">clearAll</span>());
+<span class="fn">afterAll</span>(<span class="kw">async</span>  () <span class="op">=></span> db.<span class="fn">disconnect</span>());
+
+<span class="kw">const</span> validUser <span class="op">=</span> { name: <span class="str">'Alice'</span>, email: <span class="str">'alice@test.com'</span>, password: <span class="str">'password123'</span> };
+
+<span class="fn">describe</span>(<span class="str">'POST /api/auth/register'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'201 — creates user and returns token + safe user object'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app)
+      .<span class="fn">post</span>(<span class="str">'/api/auth/register'</span>)
+      .<span class="fn">send</span>(validUser);
+
+    <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">201</span>);
+    <span class="fn">expect</span>(res.body.token).<span class="fn">toBeDefined</span>();
+    <span class="fn">expect</span>(res.body.user.email).<span class="fn">toBe</span>(<span class="str">'alice@test.com'</span>);
+    <span class="cm">// Password hash must NEVER appear in API responses — this is a security test</span>
+    <span class="fn">expect</span>(res.body.user.password).<span class="fn">toBeUndefined</span>();
+  });
+
+  <span class="fn">test</span>(<span class="str">'400 — rejects when required fields are missing'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app)
+      .<span class="fn">post</span>(<span class="str">'/api/auth/register'</span>)
+      .<span class="fn">send</span>({ email: <span class="str">'alice@test.com'</span> });  <span class="cm">// name and password missing</span>
+
+    <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">400</span>);
+    <span class="fn">expect</span>(res.body.error).<span class="fn">toMatch</span>(<span class="str">/missing fields/i</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'409 — rejects a duplicate email address'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/auth/register'</span>).<span class="fn">send</span>(validUser);
+    <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/auth/register'</span>).<span class="fn">send</span>(validUser);
+    <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">409</span>);
+    <span class="fn">expect</span>(res.body.error).<span class="fn">toMatch</span>(<span class="str">/already in use/i</span>);
+  });
+});
+
+<span class="fn">describe</span>(<span class="str">'POST /api/auth/login'</span>, () <span class="op">=></span> {
+
+  <span class="fn">beforeEach</span>(<span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/auth/register'</span>).<span class="fn">send</span>(validUser);
+  });
+
+  <span class="fn">test</span>(<span class="str">'200 — returns token with correct credentials'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app)
+      .<span class="fn">post</span>(<span class="str">'/api/auth/login'</span>)
+      .<span class="fn">send</span>({ email: validUser.email, password: validUser.password });
+    <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">200</span>);
+    <span class="fn">expect</span>(res.body.token).<span class="fn">toBeDefined</span>();
+  });
+
+  <span class="fn">test</span>(<span class="str">'401 — wrong password returns "Invalid credentials" (not "wrong password")'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app)
+      .<span class="fn">post</span>(<span class="str">'/api/auth/login'</span>)
+      .<span class="fn">send</span>({ email: validUser.email, password: <span class="str">'wrongpassword'</span> });
+    <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">401</span>);
+    <span class="fn">expect</span>(res.body.error).<span class="fn">toBe</span>(<span class="str">'Invalid credentials'</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'401 — unknown email returns the exact same error as wrong password'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app)
+      .<span class="fn">post</span>(<span class="str">'/api/auth/login'</span>)
+      .<span class="fn">send</span>({ email: <span class="str">'nobody@test.com'</span>, password: <span class="str">'password123'</span> });
+    <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">401</span>);
+    <span class="cm">// Same message prevents user enumeration attacks</span>
+    <span class="fn">expect</span>(res.body.error).<span class="fn">toBe</span>(<span class="str">'Invalid credentials'</span>);
+  });
+});</pre>
+    </div>
+
+    <div class="box warn">
+      <strong>Why "Invalid credentials" for both bad email AND bad password?</strong>
+      If your API returns "User not found" vs "Wrong password" as separate messages, attackers can quietly discover which email addresses are registered just by trying logins. Returning the exact same message for both cases is a real production security requirement — and a perfect example of why you verify the exact error text in your tests.
+    </div>
+
+    <h3>Testing protected task routes</h3>
+    <div class="code-block">
+      <div class="code-label"><span>backend/routes/__tests__/task.routes.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">const</span> request <span class="op">=</span> <span class="fn">require</span>(<span class="str">'supertest'</span>);
+<span class="imp">const</span> app     <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../../app'</span>);
+<span class="imp">const</span> db      <span class="op">=</span> <span class="fn">require</span>(<span class="str">'../../test-helpers/db'</span>);
+
+<span class="fn">beforeAll</span>(<span class="kw">async</span> () <span class="op">=></span> db.<span class="fn">connect</span>());
+<span class="fn">afterEach</span>(<span class="kw">async</span> () <span class="op">=></span> db.<span class="fn">clearAll</span>());
+<span class="fn">afterAll</span>(<span class="kw">async</span>  () <span class="op">=></span> db.<span class="fn">disconnect</span>());
+
+<span class="cm">// Most task tests require an authenticated user — centralise the setup here</span>
+<span class="kw">async function</span> <span class="fn">getAuthToken</span>() {
+  <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/auth/register'</span>)
+    .<span class="fn">send</span>({ name: <span class="str">'Alice'</span>, email: <span class="str">'a@test.com'</span>, password: <span class="str">'password123'</span> });
+  <span class="kw">const</span> login <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/auth/login'</span>)
+    .<span class="fn">send</span>({ email: <span class="str">'a@test.com'</span>, password: <span class="str">'password123'</span> });
+  <span class="kw">return</span> login.body.token;
+}
+
+<span class="fn">test</span>(<span class="str">'POST /api/tasks — 201 when authenticated, defaults completed to false'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> token <span class="op">=</span> <span class="kw">await</span> <span class="fn">getAuthToken</span>();
+  <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/tasks'</span>)
+    .<span class="fn">set</span>(<span class="str">'Authorization'</span>, <span class="str">`Bearer ${token}`</span>)
+    .<span class="fn">send</span>({ title: <span class="str">'Buy groceries'</span>, priority: <span class="str">'high'</span> });
+
+  <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">201</span>);
+  <span class="fn">expect</span>(res.body.title).<span class="fn">toBe</span>(<span class="str">'Buy groceries'</span>);
+  <span class="fn">expect</span>(res.body.completed).<span class="fn">toBe</span>(<span class="kw">false</span>);
+  <span class="fn">expect</span>(res.body._id).<span class="fn">toBeDefined</span>();
+});
+
+<span class="fn">test</span>(<span class="str">'POST /api/tasks — 401 when no token is sent'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/tasks'</span>).<span class="fn">send</span>({ title: <span class="str">'T'</span> });
+  <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">401</span>);
+});
+
+<span class="fn">test</span>(<span class="str">'GET /api/tasks — returns only tasks belonging to the authenticated user'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> token <span class="op">=</span> <span class="kw">await</span> <span class="fn">getAuthToken</span>();
+  <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/tasks'</span>)
+    .<span class="fn">set</span>(<span class="str">'Authorization'</span>, <span class="str">`Bearer ${token}`</span>).<span class="fn">send</span>({ title: <span class="str">'Task A'</span> });
+  <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/tasks'</span>)
+    .<span class="fn">set</span>(<span class="str">'Authorization'</span>, <span class="str">`Bearer ${token}`</span>).<span class="fn">send</span>({ title: <span class="str">'Task B'</span> });
+
+  <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">get</span>(<span class="str">'/api/tasks'</span>)
+    .<span class="fn">set</span>(<span class="str">'Authorization'</span>, <span class="str">`Bearer ${token}`</span>);
+
+  <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">200</span>);
+  <span class="fn">expect</span>(res.body).<span class="fn">toHaveLength</span>(<span class="num">2</span>);
+});
+
+<span class="fn">test</span>(<span class="str">'PATCH /api/tasks/:id — marks a task as completed'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> token   <span class="op">=</span> <span class="kw">await</span> <span class="fn">getAuthToken</span>();
+  <span class="kw">const</span> created <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">post</span>(<span class="str">'/api/tasks'</span>)
+    .<span class="fn">set</span>(<span class="str">'Authorization'</span>, <span class="str">`Bearer ${token}`</span>).<span class="fn">send</span>({ title: <span class="str">'Finish report'</span> });
+
+  <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">patch</span>(<span class="str">`/api/tasks/${created.body._id}`</span>)
+    .<span class="fn">set</span>(<span class="str">'Authorization'</span>, <span class="str">`Bearer ${token}`</span>)
+    .<span class="fn">send</span>({ completed: <span class="kw">true</span> });
+
+  <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">200</span>);
+  <span class="fn">expect</span>(res.body.completed).<span class="fn">toBe</span>(<span class="kw">true</span>);
+});
+
+<span class="fn">test</span>(<span class="str">'DELETE /api/tasks/:id — 404 for a task that does not exist'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> token  <span class="op">=</span> <span class="kw">await</span> <span class="fn">getAuthToken</span>();
+  <span class="kw">const</span> fakeId <span class="op">=</span> <span class="str">'64f000000000000000000000'</span>;  <span class="cm">// valid ObjectId format, but nothing saved with this</span>
+  <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">request</span>(app).<span class="fn">delete</span>(<span class="str">`/api/tasks/${fakeId}`</span>)
+    .<span class="fn">set</span>(<span class="str">'Authorization'</span>, <span class="str">`Bearer ${token}`</span>);
+  <span class="fn">expect</span>(res.status).<span class="fn">toBe</span>(<span class="num">404</span>);
+});</pre>
+    </div>
+  </section>
+
+
+  <!-- M-6 Frontend API -->
+  <section class="section" id="mern-api-layer">
+    <div class="section-header">
+      <span class="section-num" style="background:rgba(16,185,129,0.1);color:#6ee7b7;">M-6</span>
+      <h2>Testing the Frontend API Layer</h2>
+    </div>
+    <p class="section-intro">The frontend has a thin module wrapping all <code>fetch</code> calls. Testing it means mocking the global <code>fetch</code> function — no real network, no backend running. We verify that the right URLs, headers, and HTTP methods are sent, and that errors are handled correctly.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>frontend/src/api/taskApi.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="kw">const</span> BASE <span class="op">=</span> <span class="str">'/api'</span>;
+
+<span class="kw">function</span> <span class="fn">authHeaders</span>(token) {
+  <span class="kw">return</span> { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>, <span class="str">'Authorization'</span>: <span class="str">`Bearer ${token}`</span> };
+}
+
+<span class="kw">export async function</span> <span class="fn">fetchTasks</span>(token) {
+  <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE}/tasks`</span>, { headers: <span class="fn">authHeaders</span>(token) });
+  <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Failed to fetch tasks'</span>);
+  <span class="kw">return</span> res.<span class="fn">json</span>();
+}
+
+<span class="kw">export async function</span> <span class="fn">createTask</span>(token, data) {
+  <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE}/tasks`</span>, {
+    method: <span class="str">'POST'</span>,
+    headers: <span class="fn">authHeaders</span>(token),
+    body: JSON.<span class="fn">stringify</span>(data),
+  });
+  <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Failed to create task'</span>);
+  <span class="kw">return</span> res.<span class="fn">json</span>();
+}
+
+<span class="kw">export async function</span> <span class="fn">deleteTask</span>(token, id) {
+  <span class="kw">const</span> res <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`${BASE}/tasks/${id}`</span>, {
+    method: <span class="str">'DELETE'</span>,
+    headers: <span class="fn">authHeaders</span>(token),
+  });
+  <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Failed to delete task'</span>);
+}</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>frontend/src/api/__tests__/taskApi.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { fetchTasks, createTask, deleteTask } <span class="imp">from</span> <span class="str">'../taskApi'</span>;
+
+<span class="cm">// Helper: creates a minimal fake fetch response
+// ok=true simulates a 200-range response; ok=false simulates 4xx/5xx</span>
+<span class="kw">function</span> <span class="fn">mockFetch</span>(data, ok <span class="op">=</span> <span class="kw">true</span>) {
+  <span class="kw">return</span> jest.<span class="fn">fn</span>().<span class="fn">mockResolvedValue</span>({
+    ok,
+    <span class="fn">json</span>: <span class="kw">async</span> () <span class="op">=></span> data
+  });
+}
+
+<span class="fn">afterEach</span>(() <span class="op">=></span> jest.<span class="fn">restoreAllMocks</span>());
+
+<span class="fn">describe</span>(<span class="str">'fetchTasks()'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'calls GET /api/tasks with correct Authorization header'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    global.fetch <span class="op">=</span> <span class="fn">mockFetch</span>([{ _id: <span class="str">'1'</span>, title: <span class="str">'Buy milk'</span> }]);
+
+    <span class="kw">const</span> tasks <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetchTasks</span>(<span class="str">'my-token'</span>);
+
+    <span class="fn">expect</span>(global.fetch).<span class="fn">toHaveBeenCalledWith</span>(<span class="str">'/api/tasks'</span>, {
+      headers: {
+        <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+        <span class="str">'Authorization'</span>: <span class="str">'Bearer my-token'</span>
+      }
+    });
+    <span class="fn">expect</span>(tasks).<span class="fn">toHaveLength</span>(<span class="num">1</span>);
+    <span class="fn">expect</span>(tasks[<span class="num">0</span>].title).<span class="fn">toBe</span>(<span class="str">'Buy milk'</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'throws an error when response status is not ok (4xx / 5xx)'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    global.fetch <span class="op">=</span> <span class="fn">mockFetch</span>({}, <span class="kw">false</span>);
+    <span class="kw">await</span> <span class="fn">expect</span>(<span class="fn">fetchTasks</span>(<span class="str">'bad-token'</span>)).<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">'Failed to fetch tasks'</span>);
+  });
+});
+
+<span class="fn">describe</span>(<span class="str">'createTask()'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'sends POST with JSON-serialized body and auth header'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> newTask <span class="op">=</span> { title: <span class="str">'Buy milk'</span>, priority: <span class="str">'high'</span> };
+    global.fetch <span class="op">=</span> <span class="fn">mockFetch</span>({ _id: <span class="str">'abc'</span>, ...newTask });
+
+    <span class="kw">const</span> result <span class="op">=</span> <span class="kw">await</span> <span class="fn">createTask</span>(<span class="str">'my-token'</span>, newTask);
+
+    <span class="fn">expect</span>(global.fetch).<span class="fn">toHaveBeenCalledWith</span>(<span class="str">'/api/tasks'</span>, {
+      method: <span class="str">'POST'</span>,
+      headers: expect.<span class="fn">objectContaining</span>({ <span class="str">'Authorization'</span>: <span class="str">'Bearer my-token'</span> }),
+      body: JSON.<span class="fn">stringify</span>(newTask)  <span class="cm">// body must be JSON-stringified</span>
+    });
+    <span class="fn">expect</span>(result._id).<span class="fn">toBe</span>(<span class="str">'abc'</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'throws when server returns an error'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    global.fetch <span class="op">=</span> <span class="fn">mockFetch</span>({}, <span class="kw">false</span>);
+    <span class="kw">await</span> <span class="fn">expect</span>(<span class="fn">createTask</span>(<span class="str">'token'</span>, { title: <span class="str">'T'</span> }))
+      .<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="str">'Failed to create task'</span>);
+  });
+});
+
+<span class="fn">describe</span>(<span class="str">'deleteTask()'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'sends DELETE to the correct URL'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    global.fetch <span class="op">=</span> <span class="fn">mockFetch</span>({});
+    <span class="kw">await</span> <span class="fn">deleteTask</span>(<span class="str">'my-token'</span>, <span class="str">'task-id-123'</span>);
+
+    <span class="fn">expect</span>(global.fetch).<span class="fn">toHaveBeenCalledWith</span>(<span class="str">'/api/tasks/task-id-123'</span>, {
+      method: <span class="str">'DELETE'</span>,
+      headers: expect.<span class="fn">objectContaining</span>({ <span class="str">'Authorization'</span>: <span class="str">'Bearer my-token'</span> })
+    });
+  });
+});</pre>
+    </div>
+  </section>
+
+  <!-- M-7 React Components -->
+  <section class="section" id="mern-components">
+    <div class="section-header">
+      <span class="section-num" style="background:rgba(16,185,129,0.1);color:#6ee7b7;">M-7</span>
+      <h2>Testing React Components</h2>
+    </div>
+    <p class="section-intro">React component tests combine everything from Part 1: render, query by accessible role, user events, conditional display, and prop callbacks. We test TaskForm and TaskList — the two main UI pieces of the app.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>frontend/src/components/TaskForm.jsx</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { useState } <span class="imp">from</span> <span class="str">'react'</span>;
+
+<span class="kw">export function</span> <span class="fn">TaskForm</span>({ onAdd, isLoading }) {
+  <span class="kw">const</span> [title, setTitle] <span class="op">=</span> <span class="fn">useState</span>(<span class="str">''</span>);
+
+  <span class="kw">function</span> <span class="fn">handleSubmit</span>(e) {
+    e.<span class="fn">preventDefault</span>();
+    <span class="kw">if</span> (!title.<span class="fn">trim</span>()) <span class="kw">return</span>;  <span class="cm">// ignore blank/whitespace-only input</span>
+    <span class="fn">onAdd</span>(title.<span class="fn">trim</span>());
+    <span class="fn">setTitle</span>(<span class="str">''</span>);
+  }
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;form</span> <span class="attr">onSubmit</span>={handleSubmit}<span class="tag">&gt;</span>
+      <span class="tag">&lt;input</span>
+        <span class="attr">type</span>=<span class="str">"text"</span>
+        <span class="attr">value</span>={title}
+        <span class="attr">onChange</span>={e <span class="op">=></span> <span class="fn">setTitle</span>(e.target.value)}
+        <span class="attr">placeholder</span>=<span class="str">"Add a new task..."</span>
+        <span class="attr">aria-label</span>=<span class="str">"New task title"</span>
+      <span class="tag">/&gt;</span>
+      <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="str">"submit"</span> <span class="attr">disabled</span>={isLoading}<span class="tag">&gt;</span>
+        {isLoading <span class="op">?</span> <span class="str">'Adding...'</span> : <span class="str">'Add Task'</span>}
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/form&gt;</span>
+  );
+}</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>frontend/src/components/TaskList.jsx</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="kw">export function</span> <span class="fn">TaskList</span>({ tasks, onDelete, onToggle }) {
+  <span class="kw">if</span> (tasks.length <span class="op">===</span> <span class="num">0</span>) <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>No tasks yet.<span class="tag">&lt;/p&gt;</span>;
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;ul</span> <span class="attr">aria-label</span>=<span class="str">"Task list"</span><span class="tag">&gt;</span>
+      {tasks.<span class="fn">map</span>(task <span class="op">=></span> (
+        <span class="tag">&lt;li</span> <span class="attr">key</span>={task._id}<span class="tag">&gt;</span>
+          <span class="tag">&lt;input</span>
+            <span class="attr">type</span>=<span class="str">"checkbox"</span>
+            <span class="attr">checked</span>={task.completed}
+            <span class="attr">onChange</span>={() <span class="op">=></span> <span class="fn">onToggle</span>(task._id)}
+            <span class="attr">aria-label</span>={<span class="str">`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`</span>}
+          <span class="tag">/&gt;</span>
+          <span class="tag">&lt;span</span> <span class="attr">style</span>={{ textDecoration: task.completed <span class="op">?</span> <span class="str">'line-through'</span> : <span class="str">'none'</span> }}<span class="tag">&gt;</span>
+            {task.title}
+          <span class="tag">&lt;/span&gt;</span>
+          <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() <span class="op">=></span> <span class="fn">onDelete</span>(task._id)} <span class="attr">aria-label</span>={<span class="str">`Delete "${task.title}"`</span>}<span class="tag">&gt;</span>
+            Delete
+          <span class="tag">&lt;/button&gt;</span>
+        <span class="tag">&lt;/li&gt;</span>
+      ))}
+    <span class="tag">&lt;/ul&gt;</span>
+  );
+}</pre>
+    </div>
+
+    <h3>TaskForm tests</h3>
+    <div class="code-block">
+      <div class="code-label"><span>frontend/src/components/__tests__/TaskForm.test.jsx</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { render, screen } <span class="imp">from</span> <span class="str">'@testing-library/react'</span>;
+<span class="imp">import</span> userEvent <span class="imp">from</span> <span class="str">'@testing-library/user-event'</span>;
+<span class="imp">import</span> <span class="str">'@testing-library/jest-dom'</span>;
+<span class="imp">import</span> { TaskForm } <span class="imp">from</span> <span class="str">'../TaskForm'</span>;
+
+<span class="fn">describe</span>(<span class="str">'TaskForm'</span>, () <span class="op">=></span> {
+
+  <span class="fn">test</span>(<span class="str">'renders the input and submit button'</span>, () <span class="op">=></span> {
+    <span class="fn">render</span>(<span class="tag">&lt;TaskForm</span> <span class="attr">onAdd</span>={jest.<span class="fn">fn</span>()} <span class="tag">/&gt;</span>);
+    <span class="fn">expect</span>(screen.<span class="fn">getByLabelText</span>(<span class="str">/new task title/i</span>)).<span class="fn">toBeInTheDocument</span>();
+    <span class="fn">expect</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/add task/i</span> })).<span class="fn">toBeInTheDocument</span>();
+  });
+
+  <span class="fn">test</span>(<span class="str">'calls onAdd with the trimmed title when form is submitted'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> onAdd <span class="op">=</span> jest.<span class="fn">fn</span>();
+    <span class="kw">const</span> user  <span class="op">=</span> userEvent.<span class="fn">setup</span>();
+    <span class="fn">render</span>(<span class="tag">&lt;TaskForm</span> <span class="attr">onAdd</span>={onAdd} <span class="tag">/&gt;</span>);
+
+    <span class="kw">await</span> user.<span class="fn">type</span>(screen.<span class="fn">getByLabelText</span>(<span class="str">/new task title/i</span>), <span class="str">'  Buy groceries  '</span>);
+    <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/add task/i</span> }));
+
+    <span class="cm">// The component must trim whitespace before calling onAdd</span>
+    <span class="fn">expect</span>(onAdd).<span class="fn">toHaveBeenCalledWith</span>(<span class="str">'Buy groceries'</span>);
+  });
+
+  <span class="fn">test</span>(<span class="str">'clears the input after successful submission'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> user  <span class="op">=</span> userEvent.<span class="fn">setup</span>();
+    <span class="fn">render</span>(<span class="tag">&lt;TaskForm</span> <span class="attr">onAdd</span>={jest.<span class="fn">fn</span>()} <span class="tag">/&gt;</span>);
+    <span class="kw">const</span> input <span class="op">=</span> screen.<span class="fn">getByLabelText</span>(<span class="str">/new task title/i</span>);
+
+    <span class="kw">await</span> user.<span class="fn">type</span>(input, <span class="str">'Buy groceries'</span>);
+    <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/add task/i</span> }));
+
+    <span class="fn">expect</span>(input).<span class="fn">toHaveValue</span>(<span class="str">''</span>);  <span class="cm">// ready for the user to type the next task</span>
+  });
+
+  <span class="fn">test</span>(<span class="str">'does NOT call onAdd when input is blank or only whitespace'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">const</span> onAdd <span class="op">=</span> jest.<span class="fn">fn</span>();
+    <span class="kw">const</span> user  <span class="op">=</span> userEvent.<span class="fn">setup</span>();
+    <span class="fn">render</span>(<span class="tag">&lt;TaskForm</span> <span class="attr">onAdd</span>={onAdd} <span class="tag">/&gt;</span>);
+
+    <span class="kw">await</span> user.<span class="fn">type</span>(screen.<span class="fn">getByLabelText</span>(<span class="str">/new task title/i</span>), <span class="str">'   '</span>);
+    <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/add task/i</span> }));
+    <span class="fn">expect</span>(onAdd).<span class="fn">not</span>.<span class="fn">toHaveBeenCalled</span>();
+  });
+
+  <span class="fn">test</span>(<span class="str">'button is disabled and shows "Adding..." when isLoading is true'</span>, () <span class="op">=></span> {
+    <span class="fn">render</span>(<span class="tag">&lt;TaskForm</span> <span class="attr">onAdd</span>={jest.<span class="fn">fn</span>()} <span class="attr">isLoading</span>={<span class="kw">true</span>} <span class="tag">/&gt;</span>);
+    <span class="kw">const</span> btn <span class="op">=</span> screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>);
+    <span class="fn">expect</span>(btn).<span class="fn">toBeDisabled</span>();
+    <span class="fn">expect</span>(btn).<span class="fn">toHaveTextContent</span>(<span class="str">'Adding...'</span>);
+  });
+});</pre>
+    </div>
+
+    <h3>TaskList tests</h3>
+    <div class="code-block">
+      <div class="code-label"><span>frontend/src/components/__tests__/TaskList.test.jsx</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { render, screen } <span class="imp">from</span> <span class="str">'@testing-library/react'</span>;
+<span class="imp">import</span> userEvent <span class="imp">from</span> <span class="str">'@testing-library/user-event'</span>;
+<span class="imp">import</span> <span class="str">'@testing-library/jest-dom'</span>;
+<span class="imp">import</span> { TaskList } <span class="imp">from</span> <span class="str">'../TaskList'</span>;
+
+<span class="kw">const</span> tasks <span class="op">=</span> [
+  { _id: <span class="str">'1'</span>, title: <span class="str">'Buy milk'</span>,    completed: <span class="kw">false</span> },
+  { _id: <span class="str">'2'</span>, title: <span class="str">'Write tests'</span>, completed: <span class="kw">true</span>  },
+];
+
+<span class="fn">test</span>(<span class="str">'shows "No tasks yet." when the task list is empty'</span>, () <span class="op">=></span> {
+  <span class="fn">render</span>(<span class="tag">&lt;TaskList</span> <span class="attr">tasks</span>={[]} <span class="attr">onDelete</span>={jest.<span class="fn">fn</span>()} <span class="attr">onToggle</span>={jest.<span class="fn">fn</span>()} <span class="tag">/&gt;</span>);
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">'No tasks yet.'</span>)).<span class="fn">toBeInTheDocument</span>();
+});
+
+<span class="fn">test</span>(<span class="str">'renders all task titles'</span>, () <span class="op">=></span> {
+  <span class="fn">render</span>(<span class="tag">&lt;TaskList</span> <span class="attr">tasks</span>={tasks} <span class="attr">onDelete</span>={jest.<span class="fn">fn</span>()} <span class="attr">onToggle</span>={jest.<span class="fn">fn</span>()} <span class="tag">/&gt;</span>);
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">'Buy milk'</span>)).<span class="fn">toBeInTheDocument</span>();
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">'Write tests'</span>)).<span class="fn">toBeInTheDocument</span>();
+});
+
+<span class="fn">test</span>(<span class="str">'completed tasks have line-through style; incomplete tasks do not'</span>, () <span class="op">=></span> {
+  <span class="fn">render</span>(<span class="tag">&lt;TaskList</span> <span class="attr">tasks</span>={tasks} <span class="attr">onDelete</span>={jest.<span class="fn">fn</span>()} <span class="attr">onToggle</span>={jest.<span class="fn">fn</span>()} <span class="tag">/&gt;</span>);
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">'Write tests'</span>)).<span class="fn">toHaveStyle</span>({ textDecoration: <span class="str">'line-through'</span> });
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">'Buy milk'</span>)).<span class="fn">toHaveStyle</span>({ textDecoration: <span class="str">'none'</span> });
+});
+
+<span class="fn">test</span>(<span class="str">'calls onDelete with the correct task id when Delete is clicked'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> onDelete <span class="op">=</span> jest.<span class="fn">fn</span>();
+  <span class="kw">const</span> user     <span class="op">=</span> userEvent.<span class="fn">setup</span>();
+  <span class="fn">render</span>(<span class="tag">&lt;TaskList</span> <span class="attr">tasks</span>={tasks} <span class="attr">onDelete</span>={onDelete} <span class="attr">onToggle</span>={jest.<span class="fn">fn</span>()} <span class="tag">/&gt;</span>);
+
+  <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/delete "Buy milk"/i</span> }));
+
+  <span class="fn">expect</span>(onDelete).<span class="fn">toHaveBeenCalledWith</span>(<span class="str">'1'</span>);
+  <span class="fn">expect</span>(onDelete).<span class="fn">not</span>.<span class="fn">toHaveBeenCalledWith</span>(<span class="str">'2'</span>);  <span class="cm">// only the clicked task</span>
+});
+
+<span class="fn">test</span>(<span class="str">'calls onToggle with the correct task id when checkbox is clicked'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  <span class="kw">const</span> onToggle <span class="op">=</span> jest.<span class="fn">fn</span>();
+  <span class="kw">const</span> user     <span class="op">=</span> userEvent.<span class="fn">setup</span>();
+  <span class="fn">render</span>(<span class="tag">&lt;TaskList</span> <span class="attr">tasks</span>={tasks} <span class="attr">onDelete</span>={jest.<span class="fn">fn</span>()} <span class="attr">onToggle</span>={onToggle} <span class="tag">/&gt;</span>);
+
+  <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'checkbox'</span>, { name: <span class="str">/mark "Buy milk"/i</span> }));
+  <span class="fn">expect</span>(onToggle).<span class="fn">toHaveBeenCalledWith</span>(<span class="str">'1'</span>);
+});</pre>
+    </div>
+  </section>
+
+
+  <!-- M-8 Custom Hook -->
+  <section class="section" id="mern-hook">
+    <div class="section-header">
+      <span class="section-num" style="background:rgba(16,185,129,0.1);color:#6ee7b7;">M-8</span>
+      <h2>Testing the useTasks Hook</h2>
+    </div>
+    <p class="section-intro">The <code>useTasks</code> hook is the brain of the frontend — it loads tasks on mount, manages loading and error states, and exposes <code>addTask</code> and <code>removeTask</code>. We use <code>renderHook</code> to test state transitions directly, mocking the API module so no network calls happen.</p>
+
+    <div class="code-block">
+      <div class="code-label"><span>frontend/src/hooks/useTasks.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { useState, useEffect, useCallback } <span class="imp">from</span> <span class="str">'react'</span>;
+<span class="imp">import</span> { fetchTasks, createTask, deleteTask } <span class="imp">from</span> <span class="str">'../api/taskApi'</span>;
+
+<span class="kw">export function</span> <span class="fn">useTasks</span>(token) {
+  <span class="kw">const</span> [tasks,   setTasks]   <span class="op">=</span> <span class="fn">useState</span>([]);
+  <span class="kw">const</span> [loading, setLoading] <span class="op">=</span> <span class="fn">useState</span>(<span class="kw">false</span>);
+  <span class="kw">const</span> [error,   setError]   <span class="op">=</span> <span class="fn">useState</span>(<span class="kw">null</span>);
+
+  <span class="fn">useEffect</span>(() <span class="op">=></span> {
+    <span class="kw">if</span> (!token) <span class="kw">return</span>;
+    <span class="fn">setLoading</span>(<span class="kw">true</span>);
+    <span class="fn">fetchTasks</span>(token)
+      .<span class="fn">then</span>(setTasks)
+      .<span class="fn">catch</span>(() <span class="op">=></span> <span class="fn">setError</span>(<span class="str">'Failed to load tasks'</span>))
+      .<span class="fn">finally</span>(() <span class="op">=></span> <span class="fn">setLoading</span>(<span class="kw">false</span>));
+  }, [token]);
+
+  <span class="kw">const</span> addTask <span class="op">=</span> <span class="fn">useCallback</span>(<span class="kw">async</span> (title) <span class="op">=></span> {
+    <span class="fn">setLoading</span>(<span class="kw">true</span>);
+    <span class="kw">try</span> {
+      <span class="kw">const</span> newTask <span class="op">=</span> <span class="kw">await</span> <span class="fn">createTask</span>(token, { title });
+      <span class="fn">setTasks</span>(prev <span class="op">=></span> [...prev, newTask]);
+    } <span class="kw">catch</span> {
+      <span class="fn">setError</span>(<span class="str">'Failed to add task'</span>);
+    } <span class="kw">finally</span> {
+      <span class="fn">setLoading</span>(<span class="kw">false</span>);
+    }
+  }, [token]);
+
+  <span class="kw">const</span> removeTask <span class="op">=</span> <span class="fn">useCallback</span>(<span class="kw">async</span> (id) <span class="op">=></span> {
+    <span class="kw">try</span> {
+      <span class="kw">await</span> <span class="fn">deleteTask</span>(token, id);
+      <span class="fn">setTasks</span>(prev <span class="op">=></span> prev.<span class="fn">filter</span>(t <span class="op">=></span> t._id <span class="op">!==</span> id));
+    } <span class="kw">catch</span> {
+      <span class="fn">setError</span>(<span class="str">'Failed to delete task'</span>);
+    }
+  }, [token]);
+
+  <span class="kw">return</span> { tasks, loading, error, addTask, removeTask };
+}</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label"><span>frontend/src/hooks/__tests__/useTasks.test.js</span><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div></div>
+      <pre><span class="imp">import</span> { renderHook, act, waitFor } <span class="imp">from</span> <span class="str">'@testing-library/react'</span>;
+<span class="imp">import</span> { useTasks } <span class="imp">from</span> <span class="str">'../useTasks'</span>;
+
+<span class="cm">// Replace the entire API module with jest.fn() mocks.
+// The hook's job is to manage STATE — not to make real HTTP requests.
+// Mocking the API boundary means we test the hook logic in isolation.</span>
+jest.<span class="fn">mock</span>(<span class="str">'../../api/taskApi'</span>);
+<span class="imp">import</span> { fetchTasks, createTask, deleteTask } <span class="imp">from</span> <span class="str">'../../api/taskApi'</span>;
+
+<span class="kw">const</span> TOKEN <span class="op">=</span> <span class="str">'test-token'</span>;
+<span class="kw">const</span> MOCK_TASKS <span class="op">=</span> [
+  { _id: <span class="str">'1'</span>, title: <span class="str">'Buy milk'</span>,    completed: <span class="kw">false</span> },
+  { _id: <span class="str">'2'</span>, title: <span class="str">'Write tests'</span>, completed: <span class="kw">true</span>  },
+];
+
+<span class="fn">beforeEach</span>(() <span class="op">=></span> jest.<span class="fn">clearAllMocks</span>());
+
+<span class="fn">test</span>(<span class="str">'starts loading, then populates tasks on success'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  fetchTasks.<span class="fn">mockResolvedValue</span>(MOCK_TASKS);
+  <span class="kw">const</span> { result } <span class="op">=</span> <span class="fn">renderHook</span>(() <span class="op">=></span> <span class="fn">useTasks</span>(TOKEN));
+
+  <span class="cm">// Immediately after mount: loading is true, tasks is empty</span>
+  <span class="fn">expect</span>(result.current.loading).<span class="fn">toBe</span>(<span class="kw">true</span>);
+  <span class="fn">expect</span>(result.current.tasks).<span class="fn">toHaveLength</span>(<span class="num">0</span>);
+
+  <span class="cm">// Wait until the async fetchTasks resolves</span>
+  <span class="kw">await</span> <span class="fn">waitFor</span>(() <span class="op">=></span> <span class="fn">expect</span>(result.current.loading).<span class="fn">toBe</span>(<span class="kw">false</span>));
+
+  <span class="fn">expect</span>(result.current.tasks).<span class="fn">toHaveLength</span>(<span class="num">2</span>);
+  <span class="fn">expect</span>(result.current.error).<span class="fn">toBeNull</span>();
+});
+
+<span class="fn">test</span>(<span class="str">'sets error state when fetchTasks rejects'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  fetchTasks.<span class="fn">mockRejectedValue</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">'Network error'</span>));
+  <span class="kw">const</span> { result } <span class="op">=</span> <span class="fn">renderHook</span>(() <span class="op">=></span> <span class="fn">useTasks</span>(TOKEN));
+
+  <span class="kw">await</span> <span class="fn">waitFor</span>(() <span class="op">=></span> <span class="fn">expect</span>(result.current.loading).<span class="fn">toBe</span>(<span class="kw">false</span>));
+
+  <span class="fn">expect</span>(result.current.error).<span class="fn">toBe</span>(<span class="str">'Failed to load tasks'</span>);
+  <span class="fn">expect</span>(result.current.tasks).<span class="fn">toHaveLength</span>(<span class="num">0</span>);
+});
+
+<span class="fn">test</span>(<span class="str">'addTask() appends the returned task to the list'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  fetchTasks.<span class="fn">mockResolvedValue</span>(MOCK_TASKS);
+  <span class="kw">const</span> newTask <span class="op">=</span> { _id: <span class="str">'3'</span>, title: <span class="str">'Call dentist'</span>, completed: <span class="kw">false</span> };
+  createTask.<span class="fn">mockResolvedValue</span>(newTask);
+
+  <span class="kw">const</span> { result } <span class="op">=</span> <span class="fn">renderHook</span>(() <span class="op">=></span> <span class="fn">useTasks</span>(TOKEN));
+  <span class="kw">await</span> <span class="fn">waitFor</span>(() <span class="op">=></span> <span class="fn">expect</span>(result.current.tasks).<span class="fn">toHaveLength</span>(<span class="num">2</span>));
+
+  <span class="cm">// act() wraps state-changing calls outside of user events</span>
+  <span class="kw">await</span> <span class="fn">act</span>(<span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> result.current.<span class="fn">addTask</span>(<span class="str">'Call dentist'</span>);
+  });
+
+  <span class="fn">expect</span>(result.current.tasks).<span class="fn">toHaveLength</span>(<span class="num">3</span>);
+  <span class="fn">expect</span>(result.current.tasks[<span class="num">2</span>].title).<span class="fn">toBe</span>(<span class="str">'Call dentist'</span>);
+  <span class="fn">expect</span>(createTask).<span class="fn">toHaveBeenCalledWith</span>(TOKEN, { title: <span class="str">'Call dentist'</span> });
+});
+
+<span class="fn">test</span>(<span class="str">'removeTask() removes the correct task from state'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  fetchTasks.<span class="fn">mockResolvedValue</span>(MOCK_TASKS);
+  deleteTask.<span class="fn">mockResolvedValue</span>();
+
+  <span class="kw">const</span> { result } <span class="op">=</span> <span class="fn">renderHook</span>(() <span class="op">=></span> <span class="fn">useTasks</span>(TOKEN));
+  <span class="kw">await</span> <span class="fn">waitFor</span>(() <span class="op">=></span> <span class="fn">expect</span>(result.current.tasks).<span class="fn">toHaveLength</span>(<span class="num">2</span>));
+
+  <span class="kw">await</span> <span class="fn">act</span>(<span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> result.current.<span class="fn">removeTask</span>(<span class="str">'1'</span>);  <span class="cm">// remove "Buy milk"</span>
+  });
+
+  <span class="fn">expect</span>(result.current.tasks).<span class="fn">toHaveLength</span>(<span class="num">1</span>);
+  <span class="cm">// "Buy milk" gone; "Write tests" remains</span>
+  <span class="fn">expect</span>(result.current.tasks[<span class="num">0</span>].title).<span class="fn">toBe</span>(<span class="str">'Write tests'</span>);
+});
+
+<span class="fn">test</span>(<span class="str">'addTask() sets error state when createTask rejects'</span>, <span class="kw">async</span> () <span class="op">=></span> {
+  fetchTasks.<span class="fn">mockResolvedValue</span>([]);
+  createTask.<span class="fn">mockRejectedValue</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">'Server down'</span>));
+
+  <span class="kw">const</span> { result } <span class="op">=</span> <span class="fn">renderHook</span>(() <span class="op">=></span> <span class="fn">useTasks</span>(TOKEN));
+  <span class="kw">await</span> <span class="fn">waitFor</span>(() <span class="op">=></span> <span class="fn">expect</span>(result.current.loading).<span class="fn">toBe</span>(<span class="kw">false</span>));
+
+  <span class="kw">await</span> <span class="fn">act</span>(<span class="kw">async</span> () <span class="op">=></span> {
+    <span class="kw">await</span> result.current.<span class="fn">addTask</span>(<span class="str">'New task'</span>);
+  });
+
+  <span class="fn">expect</span>(result.current.error).<span class="fn">toBe</span>(<span class="str">'Failed to add task'</span>);
+  <span class="fn">expect</span>(result.current.tasks).<span class="fn">toHaveLength</span>(<span class="num">0</span>);  <span class="cm">// list unchanged on failure</span>
+});</pre>
+    </div>
+
+    <div class="box tip">
+      <strong>Why mock the API module in hook tests?</strong>
+      The hook's job is to manage state — not to make HTTP requests. By mocking <code>taskApi.js</code> we test exactly that: if <code>fetchTasks</code> resolves, does <code>loading</code> go false and <code>tasks</code> fill in? If it rejects, does <code>error</code> get set? We're testing the hook's brain, not the network.
+    </div>
+  </section>
+
+  <!-- M-9 Summary Table -->
+  <section class="section" id="mern-summary">
+    <div class="section-header">
+      <span class="section-num" style="background:rgba(16,185,129,0.1);color:#6ee7b7;">M-9</span>
+      <h2>Layer-by-Layer Summary</h2>
+    </div>
+    <p class="section-intro">Here's a map of everything we tested and the core insight at each layer. When a test fails, this map tells you immediately where to look.</p>
+
+    <table>
+      <thead>
+        <tr><th>Layer</th><th>Tool</th><th>What you're verifying</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Utils</strong> (password, token)</td>
+          <td>Jest only</td>
+          <td>Pure function contract: correct output, input validation, edge cases (empty/tampered values)</td>
+        </tr>
+        <tr>
+          <td><strong>Mongoose models</strong></td>
+          <td>Jest + mongodb-memory-server</td>
+          <td>Schema validation, default values, lowercase transforms, unique indexes, virtuals, instance methods</td>
+        </tr>
+        <tr>
+          <td><strong>Middleware</strong></td>
+          <td>Jest (no HTTP)</td>
+          <td>next() called vs. 401 returned; req.user set correctly; all header format cases covered</td>
+        </tr>
+        <tr>
+          <td><strong>API routes</strong></td>
+          <td>Jest + Supertest + mongodb-memory-server</td>
+          <td>HTTP status codes, response shapes, auth guards, error messages, data isolation per user</td>
+        </tr>
+        <tr>
+          <td><strong>Frontend API layer</strong></td>
+          <td>Jest (mock global.fetch)</td>
+          <td>Correct URL, HTTP method, headers, JSON body; error thrown when response is not ok</td>
+        </tr>
+        <tr>
+          <td><strong>React components</strong></td>
+          <td>RTL + userEvent</td>
+          <td>Renders correctly, user interactions trigger right callbacks, loading/empty states display</td>
+        </tr>
+        <tr>
+          <td><strong>Custom hooks</strong></td>
+          <td>RTL renderHook + jest.mock()</td>
+          <td>loading/error/data state after mount; state after addTask/removeTask; error recovery</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box rule" style="margin-top:32px;">
+      <strong>The single most important idea</strong>
+      Each layer only tests its own responsibility. Utility tests don't care about HTTP. Route tests don't care about React. Component tests don't care about the database. When a test fails, you know <em>exactly which layer broke</em> — and that cuts debugging time from hours to minutes.
+    </div>
+
+    <div class="box tip">
+      <strong>Packages to install for the full MERN test suite</strong>
+      <code style="display:block;margin-top:8px;padding:12px;background:var(--code-bg);border-radius:6px;font-size:13px;">
+        # Backend<br>
+        npm install --save-dev jest supertest mongodb-memory-server @types/jest<br><br>
+        # Frontend<br>
+        npm install --save-dev jest @testing-library/react @testing-library/user-event @testing-library/jest-dom jest-environment-jsdom babel-jest
+      </code>
+    </div>
+  </section>
+
+  <footer>
+    <p>Jest 29+ · React Testing Library 14+ · Supertest · mongodb-memory-server · @testing-library/user-event v14 · <strong>You've got this.</strong></p>
+  </footer>
+
+</div>
+</body>
+</html>
