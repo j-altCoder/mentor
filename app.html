@@ -79,25 +79,24 @@
 
   /* ── Z-INDEX SCALE ──
      100  sticky desktop sidebar / header elements
-     200  sticky progress bar (always visible, above sidebar on scroll)
-     210  storage warning banner (above progress bar)
-     300  desktop bookmark panel
+     200  sticky progress bar
+     210  storage warning banner
      400  mobile overlay dim
-     410  mobile sidebar slide-in
-     420  mobile bookmark sheet
-     430  mobile bottom nav (above panels it controls)
+     430  mobile bottom nav
+     450  mobile sidebar slide-in  (above bottom nav — covers it when open)
+     460  mobile bookmark sheet    (above bottom nav — covers it when open)
      500  search overlay
      600  all-notes overlay
      700  keyboard shortcuts modal
-     9000 selection toolbar (must float above everything)
+     9000 selection toolbar
   */
   --z-sticky:      100;
   --z-progress:    200;
   --z-warning:     210;
   --z-overlay:     400;
-  --z-sidebar-mob: 410;
-  --z-bookmark-mob:420;
   --z-bottomnav:   430;
+  --z-sidebar-mob: 450;
+  --z-bookmark-mob:460;
   --z-search:      500;
   --z-notes-modal: 600;
   --z-kb-modal:    700;
@@ -1088,6 +1087,16 @@ html[data-theme="light"] .summary-card {
   overflow: hidden; min-width: 0;
 }
 
+/* bookmarkBody must fill remaining space after header and be a flex column
+   so bookmark-items (flex:1) can scroll within it */
+#bookmarkBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
 .bookmark-mobile-handle {
   display: none; width: 36px; height: 4px;
   background: var(--border); border-radius: 99px;
@@ -1116,7 +1125,7 @@ html[data-theme="light"] .summary-card {
 }
 .bookmark-hint strong { font-style: normal; color: var(--coral); font-weight: 500; }
 
-.bookmark-items { flex: 1; overflow-y: auto; overflow-x: hidden; }
+.bookmark-items { flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; }
 
 .bookmark-group { border-bottom: 1px solid var(--border-subtle); }
 .bookmark-group:last-child { border-bottom: none; }
@@ -1506,7 +1515,8 @@ kbd {
     border-radius: 99px; min-width: 14px; text-align: center; line-height: 1.5;
   }
 
-  .progress-read-time { display: none !important; }
+  /* On mobile the progress bar must sit above the dim overlay */
+  .progress-wrap { z-index: var(--z-sidebar-mob); }
 
   .search-overlay { padding-top: 1rem; align-items: flex-start; }
   .search-box { max-height: calc(100svh - 2rem); margin-top: env(safe-area-inset-top, 0px); border-radius: 10px; }
@@ -2389,7 +2399,7 @@ function openAllNotes() {
         const sceneLabel = note.sceneIdx === 'lesson' ? 'lesson note' : note.sceneIdx >= 0 ? 'scene ' + (note.sceneIdx + 1) : '';
         const date       = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
         const meta       = [sceneLabel, date].filter(Boolean).join(' · ');
-        return `<div class="all-notes-item" onclick="closeAllNotes();selectLesson(${li},true);requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToNoteScene(${JSON.stringify(note.sceneIdx === 'lesson' ? 'lesson' : note.sceneIdx)})))">
+        return `<div class="all-notes-item" onclick="closeAllNotes();selectLesson(${li},true);requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToNoteScene(${JSON.stringify(note.sceneIdx === 'lesson' ? 'lesson' : note.sceneIdx)},${li})))">
           <div class="all-notes-item-meta">${_esc(meta)}</div>
           <div class="all-notes-item-text">${_esc(note.text)}</div>
         </div>`;
@@ -3089,7 +3099,7 @@ function renderNotesPanel() {
         const sceneLabel   = isLessonNote ? 'lesson'
           : scene ? (scene.speaker ? (scene.speaker === 'raj' ? 'Raj' : 'You') : (scene.type || 'scene'))
           : `#${n.sceneIdx}`;
-        return `<div class="notes-panel-item" onclick="scrollToNoteScene(${JSON.stringify(isLessonNote ? 'lesson' : n.sceneIdx)})">
+        return `<div class="notes-panel-item" onclick="scrollToNoteScene(${JSON.stringify(isLessonNote ? 'lesson' : n.sceneIdx)},${s.currentIdx})">
           <span class="notes-panel-scene-label">${_esc(sceneLabel)}</span>
           <span class="notes-panel-note-text">${_esc(n.text)}</span>
         </div>`;
@@ -3112,9 +3122,21 @@ function renderNotesPanel() {
   else view.querySelector('.lesson').appendChild(panel);
 }
 
-function scrollToNoteScene(sceneIdx) {
-  // 'lesson' is the lesson-level note — scroll to top
-  if (sceneIdx === 'lesson') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+function scrollToNoteScene(sceneIdx, lessonIdx) {
+  if (sceneIdx === 'lesson') {
+    // For lesson-level notes, scroll the note wrap into view
+    requestAnimationFrame(() => {
+      const idx     = lessonIdx !== undefined ? lessonIdx : State.get().currentIdx;
+      const noteWrap = document.getElementById('lesson-note-ta-' + idx);
+      if (noteWrap) {
+        noteWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        noteWrap.focus();
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+    return;
+  }
   // sceneIdx 0 is the first real scene — scroll to it, not to top
   const wrap = document.querySelector(`[data-scene-idx="${sceneIdx}"]`);
   if (wrap) {
