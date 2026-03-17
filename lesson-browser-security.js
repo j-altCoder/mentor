@@ -312,8 +312,8 @@ app.use((req, res, next) => {
 });
 
 // In your template — legitimate inline script gets the nonce:
-// <script nonce="<%= nonce %>">initApp();</script>
-// Any injected <script> without the nonce → browser silently blocks it
+// &lt;script nonce="&lt;%= nonce %&gt;"&gt;initApp();&lt;/script&gt;
+// Any injected &lt;script&gt; without the nonce → browser silently blocks it
 
 // ── Start with Report-Only to avoid breaking your app ──
 res.setHeader(
@@ -321,7 +321,7 @@ res.setHeader(
   "default-src 'self'; report-uri /csp-violations"
 );
 
-app.post('/csp-violations', express.json({ type: 'application/csp-report' }), (req, res) => {
+app.post('/csp-violations', express.json({ type: 'application/csp-report' }), (req, res) =&gt; {
   logger.warn({ event: 'csp_violation', report: req.body['csp-report'] });
   res.status(204).end();
 });
