@@ -3425,6 +3425,7 @@ function toggleReviewPanel() {
   const panel = document.getElementById('reviewPanel');
   if (panel) panel.classList.toggle('collapsed');
 }
+function jumpToFlag(key) {
   const [li, si] = key.split('-').map(Number);
   const s = State.get();
   if (s.currentIdx !== li) {
