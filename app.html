@@ -831,7 +831,139 @@ html[data-theme="light"] .summary-card {
   font-size: 0.8rem;
 }
 
-/* ── SCENE NOTE BUTTON ── */
+/* ── NOTE DOT — always-visible indicator when a scene has a note ── */
+.scene-wrap .note-dot {
+  position: absolute;
+  top: 0.55rem; right: 2.4rem;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 0 2px var(--card);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+.scene-wrap .note-dot.visible { opacity: 1; }
+
+/* ── FLAG BUTTON ── */
+.scene-wrap .flag-btn {
+  position: absolute;
+  top: 0.6rem; left: 0.6rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.26rem 0.38rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--t-fast), border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  z-index: 2;
+}
+.scene-wrap:hover .flag-btn,
+.scene-wrap .flag-btn.flagged { opacity: 1; }
+.scene-wrap .flag-btn.flagged {
+  color: var(--coral);
+  border-color: rgba(240,112,96,0.3);
+  background: var(--coral-dim);
+}
+.scene-wrap .flag-btn:hover {
+  color: var(--coral);
+  border-color: rgba(240,112,96,0.35);
+  background: var(--coral-dim);
+}
+
+/* ── ANALOGY CARD — prominent variant for long analogies ── */
+.analogy-card.analogy-prominent {
+  border-left-width: 4px;
+  background: rgba(240,164,66,0.08);
+  padding: 1.5rem 1.5rem 1.5rem 1.75rem;
+}
+html[data-theme="light"] .analogy-card.analogy-prominent {
+  background: rgba(184,120,32,0.09);
+}
+.analogy-card.analogy-prominent .analogy-text {
+  font-size: 1rem;
+}
+.analogy-card.analogy-prominent .analogy-text::before {
+  content: '\201C';
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 0;
+  vertical-align: -0.5rem;
+  margin-right: 0.2rem;
+  color: var(--amber);
+  opacity: 0.5;
+}
+
+/* ── REVIEW LATER PANEL ── */
+.review-panel {
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+.review-panel-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1rem 0.6rem;
+  font-family: var(--font-mono); font-size: 0.6rem;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted); cursor: pointer;
+  user-select: none;
+  transition: background var(--t-fast);
+}
+.review-panel-header:hover { background: var(--hover); }
+.review-badge {
+  background: var(--coral); color: #fff;
+  font-size: 0.52rem; padding: 0.08rem 0.42rem;
+  border-radius: 99px; font-weight: 600;
+  min-width: 16px; text-align: center;
+}
+.review-chevron {
+  margin-left: auto;
+  transition: transform var(--t-base);
+  color: var(--text-muted);
+}
+.review-panel.collapsed .review-chevron { transform: rotate(-90deg); }
+.review-panel-body { display: block; max-height: 220px; overflow-y: auto; }
+.review-panel.collapsed .review-panel-body { display: none; }
+.review-empty {
+  padding: 0.85rem 1rem;
+  font-size: 0.78rem; font-style: italic;
+  color: var(--text-muted); font-family: var(--font-body);
+}
+.review-group-name {
+  padding: 0.4rem 1rem 0.15rem;
+  font-family: var(--font-mono); font-size: 0.58rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted); opacity: 0.7;
+}
+.review-entry {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.42rem 1rem 0.42rem 1.1rem;
+  cursor: pointer; font-size: 0.8rem;
+  font-family: var(--font-body); color: var(--text-primary);
+  border-left: 2px solid transparent;
+  transition: background var(--t-fast), border-color var(--t-fast);
+  line-height: 1.4;
+}
+.review-entry:hover { background: var(--hover); border-left-color: var(--coral); }
+.review-entry-label {
+  flex: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.review-entry-del {
+  flex-shrink: 0; background: none; border: none;
+  color: var(--text-muted); cursor: pointer;
+  font-size: 0.65rem; padding: 2px 3px;
+  border-radius: 4px; opacity: 0;
+  transition: color var(--t-fast), opacity var(--t-fast);
+  display: flex; align-items: center;
+}
+.review-entry:hover .review-entry-del { opacity: 1; }
+.review-entry-del:hover { color: var(--coral); }
 .scene-wrap .note-btn {
   position: absolute;
   top: 0.6rem; right: 0.6rem;
@@ -1546,6 +1678,7 @@ kbd {
   <symbol id="icon-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
   <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
   <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="icon-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
 </svg>
 
 <header>
@@ -1630,6 +1763,16 @@ kbd {
     </div>
     <div id="bookmarkBody">
       <p class="bookmark-hint">Select any text in a lesson, then tap <strong>Bookmark</strong> to save it here.</p>
+    </div>
+    <!-- Review Later section — hidden when empty -->
+    <div class="review-panel collapsed" id="reviewPanel" style="display:none">
+      <div class="review-panel-header" onclick="toggleReviewPanel()">
+        <svg class="icon icon-sm" style="color:var(--coral)"><use href="#icon-flag"/></svg>
+        Review Later
+        <span class="review-badge" id="reviewBadge">0</span>
+        <svg class="icon review-chevron" style="width:0.75rem;height:0.75rem"><use href="#icon-chevron-down"/></svg>
+      </div>
+      <div class="review-panel-body" id="reviewPanelBody"></div>
     </div>
   </aside>
 </div>
@@ -1775,6 +1918,7 @@ const Storage = (() => {
     bookmarks:  'coderoom-v2-bookmarks',
     notes:      'coderoom-v2-notes',
     completed:  'coderoom-v2-completed',
+    flags:      'coderoom-v2-flags',
     theme:      'coderoom-theme',
     lastLesson: 'coderoom-v2-last-lesson',
     schema:     'coderoom-schema-version',
@@ -1835,6 +1979,9 @@ const Storage = (() => {
 
     loadCompleted:  ()      => new Set(_read(KEYS.completed, [])),
     saveCompleted:  (set)   => _write(KEYS.completed, [...set]),
+
+    loadFlags:      ()      => new Set(_read(KEYS.flags, [])),
+    saveFlags:      (set)   => _write(KEYS.flags, [...set]),
 
     loadTheme:      ()      => _read(KEYS.theme, null),
     saveTheme:      (theme) => _write(KEYS.theme, theme),
@@ -1964,6 +2111,7 @@ const State = (() => {
     bookmarks:        [],     // loaded from Storage
     notesStore:       {},     // loaded from Storage
     completedLessons: null,   // Set, loaded from Storage
+    flags:            null,   // Set of "lessonIdx-sceneIdx" strings, loaded from Storage
     notesPanelOpen:   false,
     bookmarkGroupCollapsed: {},
     autoSaveTimers:   {},
@@ -2191,15 +2339,28 @@ function _renderLesson(idx, view) {
 }
 
 function renderScene(s, catMeta, si) {
-  const sceneIdx = si !== undefined ? si : -1;
-  const idxAttr  = sceneIdx >= 0 ? ` data-scene-idx="${sceneIdx}"` : '';
-  const state    = State.get();
-  const noteKey  = `note-${state.currentIdx}-${sceneIdx}`;
-  const hasNote  = !!(state.notesStore[noteKey]);
+  const sceneIdx  = si !== undefined ? si : -1;
+  const idxAttr   = sceneIdx >= 0 ? ` data-scene-idx="${sceneIdx}"` : '';
+  const state     = State.get();
+  const noteKey   = `note-${state.currentIdx}-${sceneIdx}`;
+  const hasNote   = !!(state.notesStore[noteKey]);
+  const flagKey   = `${state.currentIdx}-${sceneIdx}`;
+  const isFlagged = sceneIdx >= 0 && state.flags && state.flags.has(flagKey);
+
+  // Note dot — always visible when a note exists, no hover needed
+  const noteDot = (sceneIdx >= 0 && hasNote)
+    ? `<span class="note-dot visible" title="This scene has a note"></span>`
+    : `<span class="note-dot"></span>`;
 
   const noteBtn = sceneIdx >= 0
-    ? `<button class="note-btn${hasNote ? ' has-note' : ''}" title="Add note" onclick="openNoteDialog(${sceneIdx})">
+    ? `<button class="note-btn${hasNote ? ' has-note' : ''}" title="${hasNote ? 'Edit note' : 'Add note'}" onclick="openNoteDialog(${sceneIdx})">
          <svg class="icon icon-sm"><use href="#icon-edit"/></svg>
+       </button>`
+    : '';
+
+  const flagBtn = sceneIdx >= 0
+    ? `<button class="flag-btn${isFlagged ? ' flagged' : ''}" title="${isFlagged ? 'Remove from review later' : 'Review later'}" onclick="toggleFlag(${sceneIdx})">
+         <svg class="icon icon-sm"><use href="#icon-flag"/></svg>
        </button>`
     : '';
 
@@ -2215,17 +2376,22 @@ function renderScene(s, catMeta, si) {
       </div>
     </div>` : '';
 
-  if (s.type === 'analogy') return `
+  if (s.type === 'analogy') {
+    // Prominent treatment for long analogies (>150 chars stripped)
+    const plainText = _stripHtml(s.text || '');
+    const isProminent = plainText.length > 150;
+    return `
     <div class="scene-wrap"${idxAttr}>
-      ${noteBtn}
-      <div class="analogy-card">
+      ${noteDot}${flagBtn}${noteBtn}
+      <div class="analogy-card${isProminent ? ' analogy-prominent' : ''}">
         <div class="analogy-text">${s.text || ''}</div>
       </div>
     </div>${inlineNote}`;
+  }
 
   if (s.type === 'code') return `
     <div class="scene-wrap"${idxAttr}>
-      ${noteBtn}
+      ${noteDot}${flagBtn}${noteBtn}
       <div class="code-card">
         <div class="code-topbar">
           <div class="code-topbar-dots">
@@ -2241,21 +2407,21 @@ function renderScene(s, catMeta, si) {
 
   if (s.type === 'summary') return `
     <div class="scene-wrap"${idxAttr}>
-      ${noteBtn}
+      ${noteDot}${flagBtn}${noteBtn}
       <div class="summary-card">
         <ul class="summary-list">${(s.points || []).map(p => `<li>${p}</li>`).join('')}</ul>
       </div>
     </div>${inlineNote}`;
 
   // Dialogue scene
-  const isRaj  = s.speaker === 'raj';
-  const color  = isRaj ? 'var(--raj)' : 'var(--you)';
-  const label  = isRaj ? 'Raj' : 'You';
+  const isRaj     = s.speaker === 'raj';
+  const color     = isRaj ? 'var(--raj)' : 'var(--you)';
+  const label     = isRaj ? 'Raj' : 'You';
   const toneClass = isRaj ? 'scene-raj' : 'scene-you';
 
   return `
     <div class="scene-wrap"${idxAttr}>
-      ${noteBtn}
+      ${noteDot}${flagBtn}${noteBtn}
       <div class="scene ${toneClass}">
         <div class="scene-accent" style="background:${color}"></div>
         <div class="speaker-label" style="color:${color}">
@@ -3035,6 +3201,9 @@ function _refreshNoteBtn(sceneIdx, hasNote) {
   if (!wrap) return;
   const btn = wrap.querySelector('.note-btn');
   if (btn) btn.classList.toggle('has-note', hasNote);
+  // Also toggle the always-visible note dot
+  const dot = wrap.querySelector('.note-dot');
+  if (dot) dot.classList.toggle('visible', hasNote);
 }
 
 function deleteInlineNote(sceneIdx) {
@@ -3171,7 +3340,124 @@ function toggleDone(idx) {
 
 
 // ═══════════════════════════════════════════════════════════════
-//  SECTION 16 — INIT
+//  SECTION 15b — REVIEW LATER FLAGS
+// ═══════════════════════════════════════════════════════════════
+function toggleFlag(sceneIdx) {
+  const s      = State.get();
+  const key    = `${s.currentIdx}-${sceneIdx}`;
+  const flags  = new Set(s.flags);
+  if (flags.has(key)) flags.delete(key);
+  else                flags.add(key);
+  State.set({ flags });
+  Storage.saveFlags(flags);
+
+  // Update flag button in DOM without full re-render
+  const wrap = document.querySelector(`[data-scene-idx="${sceneIdx}"]`);
+  if (wrap) {
+    const btn = wrap.querySelector('.flag-btn');
+    if (btn) {
+      btn.classList.toggle('flagged', flags.has(key));
+      btn.title = flags.has(key) ? 'Remove from review later' : 'Review later';
+    }
+  }
+  renderReviewPanel();
+}
+
+function renderReviewPanel() {
+  const panel = document.getElementById('reviewPanel');
+  if (!panel) return;
+
+  const s      = State.get();
+  const flags  = s.flags || new Set();
+  const badge  = panel.querySelector('.review-badge');
+  const body   = panel.querySelector('.review-panel-body');
+  if (!body) return;
+
+  if (badge) badge.textContent = flags.size;
+  panel.style.display = flags.size === 0 ? 'none' : '';
+
+  if (flags.size === 0) { body.innerHTML = ''; return; }
+
+  // Group flags by lesson
+  const grouped = {};
+  flags.forEach(key => {
+    const [li, si] = key.split('-').map(Number);
+    if (!grouped[li]) grouped[li] = [];
+    grouped[li].push(si);
+  });
+
+  // Sort lessons by flatLessons order
+  const sortedLessons = Object.keys(grouped).map(Number).sort((a, b) => {
+    const ia = s.flatLessons.indexOf(a), ib = s.flatLessons.indexOf(b);
+    return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+  });
+
+  body.innerHTML = sortedLessons.map(li => {
+    const lesson  = LESSONS[li];
+    const name    = lesson ? _esc(lesson.tag) : 'Lesson ' + li;
+    const scenes  = grouped[li].sort((a, b) => a - b);
+
+    const entries = scenes.map(si => {
+      const scene = lesson && lesson.scenes[si];
+      let label   = `Scene ${si + 1}`;
+      if (scene) {
+        if (scene.type === 'analogy')  label = 'Analogy';
+        else if (scene.type === 'code')     label = 'Code block';
+        else if (scene.type === 'summary')  label = 'Summary';
+        else if (scene.speaker === 'raj')   label = `Raj — scene ${si + 1}`;
+        else if (scene.speaker)             label = `You — scene ${si + 1}`;
+      }
+      const key = `${li}-${si}`;
+      return `<div class="review-entry" onclick="jumpToFlag('${key}')">
+        <svg class="icon icon-sm" style="flex-shrink:0;color:var(--coral)"><use href="#icon-flag"/></svg>
+        <span class="review-entry-label">${_esc(label)}</span>
+        <button class="review-entry-del" onclick="removeFlag(event,'${key}')" title="Remove">
+          <svg class="icon icon-sm"><use href="#icon-x"/></svg>
+        </button>
+      </div>`;
+    }).join('');
+
+    return `<div class="review-group-name">${name}</div>${entries}`;
+  }).join('');
+}
+
+function toggleReviewPanel() {
+  const panel = document.getElementById('reviewPanel');
+  if (panel) panel.classList.toggle('collapsed');
+}
+  const [li, si] = key.split('-').map(Number);
+  const s = State.get();
+  if (s.currentIdx !== li) {
+    selectLesson(li, true);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const wrap = document.querySelector(`[data-scene-idx="${si}"]`);
+      if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }));
+  } else {
+    const wrap = document.querySelector(`[data-scene-idx="${si}"]`);
+    if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function removeFlag(e, key) {
+  e.stopPropagation();
+  const s     = State.get();
+  const flags = new Set(s.flags);
+  flags.delete(key);
+  State.set({ flags });
+  Storage.saveFlags(flags);
+
+  // Refresh flag button if scene is currently visible
+  const [li, si] = key.split('-').map(Number);
+  if (s.currentIdx === li) {
+    const wrap = document.querySelector(`[data-scene-idx="${si}"]`);
+    if (wrap) {
+      const btn = wrap.querySelector('.flag-btn');
+      if (btn) { btn.classList.remove('flagged'); btn.title = 'Review later'; }
+    }
+  }
+  renderReviewPanel();
+}
 //  Runs once. Loads all persisted state, builds UI,
 //  resolves starting lesson from URL → lastLesson → first.
 // ═══════════════════════════════════════════════════════════════
@@ -3183,6 +3469,7 @@ function toggleDone(idx) {
     bookmarks:        Storage.loadBookmarks(),
     notesStore:       Storage.loadNotes(),
     completedLessons: Storage.loadCompleted(),
+    flags:            Storage.loadFlags(),
   });
 
   // Global error boundary — surfaces uncaught errors to the user
@@ -3200,6 +3487,7 @@ function toggleDone(idx) {
   Router.init();
   buildSidebar();
   renderBookmarkPanel();
+  renderReviewPanel();
 
   if (LESSONS.length === 0) {
     document.getElementById('emptyState').classList.add('visible');
