@@ -834,7 +834,7 @@ html[data-theme="light"] .summary-card {
 /* ── NOTE DOT — always-visible indicator when a scene has a note ── */
 .scene-wrap .note-dot {
   position: absolute;
-  top: 0.55rem; right: 2.4rem;
+  top: 0.55rem; right: 4.2rem;
   width: 7px; height: 7px;
   border-radius: 50%;
   background: var(--amber);
@@ -846,10 +846,10 @@ html[data-theme="light"] .summary-card {
 }
 .scene-wrap .note-dot.visible { opacity: 1; }
 
-/* ── FLAG BUTTON ── */
+/* ── FLAG BUTTON — grouped with note button, top-right ── */
 .scene-wrap .flag-btn {
   position: absolute;
-  top: 0.6rem; left: 0.6rem;
+  top: 0.6rem; right: 2.4rem;
   background: none;
   border: 1px solid transparent;
   border-radius: 6px;
@@ -900,35 +900,8 @@ html[data-theme="light"] .analogy-card.analogy-prominent {
   opacity: 0.5;
 }
 
-/* ── REVIEW LATER PANEL ── */
-.review-panel {
-  border-top: 1px solid var(--border-subtle);
-  flex-shrink: 0;
-}
-.review-panel-header {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.75rem 1rem 0.6rem;
-  font-family: var(--font-mono); font-size: 0.6rem;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--text-muted); cursor: pointer;
-  user-select: none;
-  transition: background var(--t-fast);
-}
-.review-panel-header:hover { background: var(--hover); }
-.review-badge {
-  background: var(--coral); color: #fff;
-  font-size: 0.52rem; padding: 0.08rem 0.42rem;
-  border-radius: 99px; font-weight: 600;
-  min-width: 16px; text-align: center;
-}
-.review-chevron {
-  margin-left: auto;
-  transition: transform var(--t-base);
-  color: var(--text-muted);
-}
-.review-panel.collapsed .review-chevron { transform: rotate(-90deg); }
-.review-panel-body { display: block; max-height: 220px; overflow-y: auto; }
-.review-panel.collapsed .review-panel-body { display: none; }
+/* ── REVIEW LATER PANE ── */
+.review-panel-body { flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; }
 .review-empty {
   padding: 0.85rem 1rem;
   font-size: 0.78rem; font-style: italic;
@@ -1235,20 +1208,44 @@ html[data-theme="light"] .analogy-card.analogy-prominent {
   margin: 0.75rem auto 0; flex-shrink: 0;
 }
 
-.bookmark-header {
-  padding: 1.1rem 1rem 0.85rem;
-  font-family: var(--font-mono); font-size: 0.6rem;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--text-muted); border-bottom: 1px solid var(--border-subtle);
-  display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;
+/* ── BOOKMARK PANEL TAB BAR ── */
+.bookmark-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 
-.bookmark-badge {
-  background: var(--coral); color: #fff;
-  font-size: 0.52rem; padding: 0.08rem 0.42rem;
-  border-radius: 99px; font-weight: 600;
-  min-width: 16px; text-align: center;
+.bookmark-tab {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  padding: 0.75rem 0.5rem;
+  font-family: var(--font-mono); font-size: 0.58rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted);
+  background: none; border: none; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--t-fast), border-color var(--t-fast);
+  white-space: nowrap;
 }
+.bookmark-tab:hover { color: var(--text-primary); }
+.bookmark-tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--amber);
+}
+.bookmark-tab.active.review-tab { border-bottom-color: var(--coral); }
+
+.bookmark-tab-badge {
+  font-size: 0.5rem; padding: 0.06rem 0.36rem;
+  border-radius: 99px; font-weight: 600;
+  min-width: 14px; text-align: center; color: #fff;
+  background: var(--coral);
+}
+.bookmark-tab.active .bookmark-tab-badge { opacity: 1; }
+
+/* Tab panes — only the active one is shown */
+.bookmark-pane { display: none; flex: 1; flex-direction: column; overflow: hidden; min-height: 0; }
+.bookmark-pane.active { display: flex; }
 
 .bookmark-hint {
   padding: 1.4rem 1rem; color: var(--text-muted);
@@ -1756,23 +1753,33 @@ kbd {
 
   <aside class="bookmark-panel" id="bookmarkPanel">
     <div class="bookmark-mobile-handle"></div>
-    <div class="bookmark-header">
-      <svg class="icon icon-sm"><use href="#icon-bookmark"/></svg>
-      Bookmarks
-      <span class="bookmark-badge" id="bookmarkBadge">0</span>
-    </div>
-    <div id="bookmarkBody">
-      <p class="bookmark-hint">Select any text in a lesson, then tap <strong>Bookmark</strong> to save it here.</p>
-    </div>
-    <!-- Review Later section — hidden when empty -->
-    <div class="review-panel collapsed" id="reviewPanel" style="display:none">
-      <div class="review-panel-header" onclick="toggleReviewPanel()">
+
+    <!-- Tab bar -->
+    <div class="bookmark-tabs">
+      <button class="bookmark-tab active" id="bpTabBookmarks" onclick="switchBookmarkTab('bookmarks')">
+        <svg class="icon icon-sm"><use href="#icon-bookmark"/></svg>
+        Bookmarks
+        <span class="bookmark-tab-badge" id="bookmarkBadge" style="display:none"></span>
+      </button>
+      <button class="bookmark-tab review-tab" id="bpTabReview" onclick="switchBookmarkTab('review')">
         <svg class="icon icon-sm" style="color:var(--coral)"><use href="#icon-flag"/></svg>
         Review Later
-        <span class="review-badge" id="reviewBadge">0</span>
-        <svg class="icon review-chevron" style="width:0.75rem;height:0.75rem"><use href="#icon-chevron-down"/></svg>
+        <span class="bookmark-tab-badge" id="reviewBadge" style="background:var(--coral);display:none"></span>
+      </button>
+    </div>
+
+    <!-- Bookmarks pane -->
+    <div class="bookmark-pane active" id="bookmarkPane">
+      <div id="bookmarkBody" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0">
+        <p class="bookmark-hint">Select any text in a lesson, then tap <strong>Bookmark</strong> to save it here.</p>
       </div>
-      <div class="review-panel-body" id="reviewPanelBody"></div>
+    </div>
+
+    <!-- Review Later pane -->
+    <div class="bookmark-pane" id="reviewPane">
+      <div class="review-panel-body" id="reviewPanelBody">
+        <p class="review-empty">No scenes flagged yet.<br>Click the flag icon on any scene to review it later.</p>
+      </div>
     </div>
   </aside>
 </div>
@@ -2606,7 +2613,10 @@ function renderBookmarkPanel() {
   const body  = document.getElementById('bookmarkBody');
   if (!body) return;
 
-  badge.textContent = s.bookmarks.length;
+  if (badge) {
+    badge.textContent    = s.bookmarks.length;
+    badge.style.display  = s.bookmarks.length > 0 ? 'inline' : 'none';
+  }
   updateMobileBookmarkBadge();
 
   if (s.bookmarks.length === 0) {
@@ -3364,24 +3374,29 @@ function toggleFlag(sceneIdx) {
 }
 
 function renderReviewPanel() {
-  const panel = document.getElementById('reviewPanel');
-  if (!panel) return;
-
-  const s      = State.get();
-  const flags  = s.flags || new Set();
-  const badge  = panel.querySelector('.review-badge');
-  const body   = panel.querySelector('.review-panel-body');
+  const body  = document.getElementById('reviewPanelBody');
+  const badge = document.getElementById('reviewBadge');
   if (!body) return;
 
-  if (badge) badge.textContent = flags.size;
-  panel.style.display = flags.size === 0 ? 'none' : '';
+  const s     = State.get();
+  const flags = s.flags || new Set();
 
-  if (flags.size === 0) { body.innerHTML = ''; return; }
+  // Update tab badge
+  if (badge) {
+    badge.textContent   = flags.size;
+    badge.style.display = flags.size > 0 ? 'inline' : 'none';
+  }
+
+  if (flags.size === 0) {
+    body.innerHTML = '<p class="review-empty">No scenes flagged yet.<br>Click the flag icon on any scene to review it later.</p>';
+    return;
+  }
 
   // Group flags by lesson
   const grouped = {};
   flags.forEach(key => {
-    const [li, si] = key.split('-').map(Number);
+    const parts = key.split('-');
+    const li = Number(parts[0]), si = Number(parts[1]);
     if (!grouped[li]) grouped[li] = [];
     grouped[li].push(si);
   });
@@ -3401,7 +3416,7 @@ function renderReviewPanel() {
       const scene = lesson && lesson.scenes[si];
       let label   = `Scene ${si + 1}`;
       if (scene) {
-        if (scene.type === 'analogy')  label = 'Analogy';
+        if (scene.type === 'analogy')       label = 'Analogy';
         else if (scene.type === 'code')     label = 'Code block';
         else if (scene.type === 'summary')  label = 'Summary';
         else if (scene.speaker === 'raj')   label = `Raj — scene ${si + 1}`;
@@ -3419,12 +3434,15 @@ function renderReviewPanel() {
 
     return `<div class="review-group-name">${name}</div>${entries}`;
   }).join('');
+
+function switchBookmarkTab(tab) {
+  const isBookmarks = tab === 'bookmarks';
+  document.getElementById('bpTabBookmarks').classList.toggle('active',  isBookmarks);
+  document.getElementById('bpTabReview').classList.toggle('active',    !isBookmarks);
+  document.getElementById('bookmarkPane').classList.toggle('active',    isBookmarks);
+  document.getElementById('reviewPane').classList.toggle('active',     !isBookmarks);
 }
 
-function toggleReviewPanel() {
-  const panel = document.getElementById('reviewPanel');
-  if (panel) panel.classList.toggle('collapsed');
-}
 function jumpToFlag(key) {
   const [li, si] = key.split('-').map(Number);
   const s = State.get();
@@ -3459,6 +3477,9 @@ function removeFlag(e, key) {
   }
   renderReviewPanel();
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 16 — INIT
 //  Runs once. Loads all persisted state, builds UI,
 //  resolves starting lesson from URL → lastLesson → first.
 // ═══════════════════════════════════════════════════════════════
