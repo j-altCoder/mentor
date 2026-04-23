@@ -1,7 +1,7 @@
 // ─── MODULE 3: mongodb + mongoose connection — file snapshots ─────────────────
 
 // Helper: full server state carried forward from end of mod2
-const _mod2ServerBase = {
+var _mod2ServerBase = {
   'server/package.json':
 `{
   "name": "mern-tasks-server",
@@ -126,7 +126,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));`,
 };
 
 // Helper: root files carried forward from mod1
-const _rootBase = {
+var _mod3RootBase = {
   '.gitignore':
 `# dependencies
 node_modules/
@@ -319,7 +319,7 @@ Object.assign(FILE_SNAPSHOTS, {
 
   // step 71 — server/.env updated with real Atlas URI
   71: {
-    ..._rootBase,
+    ..._mod3RootBase,
     ..._mod2ServerBase,
     'server/.env':
 `NODE_ENV=development
@@ -331,7 +331,7 @@ JWT_EXPIRES_IN=7d`,
 
   // step 73 — server/config/db.js created
   73: {
-    ..._rootBase,
+    ..._mod3RootBase,
     ..._mod2ServerBase,
     'server/.env':
 `NODE_ENV=development
@@ -449,7 +449,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));`,
 
   // step 74 — db.js with connection events
   74: {
-    ..._rootBase,
+    ..._mod3RootBase,
     ..._mod2ServerBase,
     'server/.env':
 `NODE_ENV=development
@@ -572,7 +572,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));`,
 
   // step 75 — server/index.js updated: connectDB + startServer + mongoose shutdown
   75: {
-    ..._rootBase,
+    ..._mod3RootBase,
     'server/.env':
 `NODE_ENV=development
 PORT=5000
