@@ -7,5 +7,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const MANIFEST = {
-  moduleCount: 5,   // ← change this when you add a module
+  moduleCount: 5,   // ← change this when you add a module.
 };
