@@ -1,7 +1,7 @@
 // ─── MODULE 2: express server setup — file snapshots ─────────────────────────
 
 // Helper: full file tree carried forward from end of mod1
-const _mod1Base = {
+var _mod1Base = {
   '.gitignore':
 `# dependencies
 node_modules/
