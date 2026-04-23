@@ -1,7 +1,7 @@
 // ─── MODULE 4: user model — file snapshots ───────────────────────────────────
 
 // Helper: complete server state from end of mod3
-const _mod3ServerState = {
+var _mod3ServerState = {
   'server/package.json':
 `{
   "name": "mern-tasks-server",
@@ -126,7 +126,7 @@ const startServer = async () => {
 startServer();`,
 };
 
-const _rootBase = {
+var _mod4RootBase = {
   '.gitignore':
 `# dependencies
 node_modules/
@@ -248,7 +248,7 @@ Object.assign(FILE_SNAPSHOTS, {
 
   // step 84 — User.js scaffold: name + email fields
   84: {
-    ..._rootBase,
+    ..._mod4RootBase,
     ..._mod3ServerState,
     'server/package.json':
 `{
@@ -306,7 +306,7 @@ const userSchema = new mongoose.Schema(
 
   // step 86 — User.js with all fields: password, role, avatar
   86: {
-    ..._rootBase,
+    ..._mod4RootBase,
     ..._mod3ServerState,
     'server/package.json':
 `{
@@ -379,7 +379,7 @@ const userSchema = new mongoose.Schema(
 
   // step 88 — User.js with pre-save hook
   88: {
-    ..._rootBase,
+    ..._mod4RootBase,
     ..._mod3ServerState,
     'server/package.json':
 `{
@@ -460,7 +460,7 @@ userSchema.pre('save', async function (next) {
 
   // step 92 — complete User.js: all fields + hooks + methods + toJSON + export
   92: {
-    ..._rootBase,
+    ..._mod4RootBase,
     ..._mod3ServerState,
     'server/package.json':
 `{
