@@ -1726,3 +1726,20 @@ window.addEventListener('DOMContentLoaded', () => {
     startModule(0);
   }
 });
+
+(function bootApp() {
+  initLevels();
+  renderMods();
+  renderSaved();
+  updateStats();
+  renderXP();
+
+  const saved = loadSaved();
+
+  if (saved?.name && saved?.progress) {
+    S.name = saved.name;
+    showResumeBar(saved.name, saved.progress);
+  } else {
+    showNamePrompt();
+  }
+})();
