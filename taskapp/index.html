@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MERN Mentor</title>
+
+<!-- CodeMirror -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/shell/shell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/properties/properties.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/selection/active-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/addon/comment/comment.min.js"></script>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- App styles -->
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── TOP BAR ──────────────────────────────────────────────────────────── -->
+<div id="topbar">
+  <div class="tls">
+    <div class="tl r"></div>
+    <div class="tl y"></div>
+    <div class="tl g"></div>
+  </div>
+  <div id="tb-title">mern-mentor — /workspace/taskapp</div>
+
+  <div class="tb-stats">
+
+    <!-- XP ring + level -->
+    <div class="tb-stat-pill" id="tb-xp-pill" title="XP progress to next level">
+      <div class="tb-ring-wrap">
+        <svg class="tb-ring-svg" viewBox="0 0 36 36">
+          <circle class="tb-ring-bg" cx="18" cy="18" r="14"/>
+          <circle class="tb-ring-fill" id="tb-xp-ring" cx="18" cy="18" r="14"
+            style="stroke:var(--blue2);stroke-dasharray:87.96;stroke-dashoffset:87.96"/>
+        </svg>
+        <span class="xp-flash" id="xp-flash"></span>
+      </div>
+      <div class="tb-pill-text">
+        <span class="tb-pill-val" id="tb-xp-title">Junior Dev</span>
+        <span class="tb-pill-sub" id="tb-xp-total">0 XP</span>
+      </div>
+    </div>
+
+    <!-- Confidence ring -->
+    <div class="tb-stat-pill" id="tb-conf-pill" title="Confidence for current module">
+      <div class="tb-ring-wrap">
+        <svg class="tb-ring-svg" viewBox="0 0 36 36">
+          <circle class="tb-ring-bg" cx="18" cy="18" r="14"/>
+          <circle class="tb-ring-fill" id="tb-conf-ring" cx="18" cy="18" r="14"
+            style="stroke:var(--green);stroke-dasharray:87.96;stroke-dashoffset:0"/>
+        </svg>
+      </div>
+      <div class="tb-pill-text">
+        <span class="tb-pill-val" id="tb-conf-pct">—</span>
+        <span class="tb-pill-sub">confidence</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tb-right">
+    <span id="tb-mod"></span>
+    <!-- Restart module button — shown only when viewing a past module -->
+    <button class="tb-icon-btn" id="tb-restart-btn" onclick="restartModuleFromTopbar()" title="Restart this module" style="display:none">
+      <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
+        <path d="M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z"/>
+      </svg>
+      Restart module
+    </button>
+    <!-- File tree toggle -->
+    <button class="tb-icon-btn" id="ft-toggle-btn" onclick="toggleFileTree()" title="Toggle project files">
+      <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor">
+        <path d="M1.75 2.5A.75.75 0 0 0 1 3.25v9.5c0 .414.336.75.75.75h12.5a.75.75 0 0 0 .75-.75v-7a.75.75 0 0 0-.75-.75H7.56L6.03 3.22A1.75 1.75 0 0 0 4.78 2.5H1.75Z"/>
+      </svg>
+      Files
+    </button>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+      <svg id="theme-icon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+        <path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13zM2.343 2.343a.75.75 0 0 1 1.061 0l1.06 1.061a.75.75 0 0 1-1.06 1.06l-1.061-1.06a.75.75 0 0 1 0-1.061zm9.193 9.193a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.061-1.06a.75.75 0 0 1 0-1.061zM0 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8zm13 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 13 8zM2.343 13.657a.75.75 0 0 1 0-1.06l1.061-1.061a.75.75 0 0 1 1.06 1.06l-1.06 1.061a.75.75 0 0 1-1.061 0zm9.193-9.193a.75.75 0 0 1 0-1.06l1.06-1.061a.75.75 0 0 1 1.061 1.06l-1.06 1.061a.75.75 0 0 1-1.061 0z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── PROGRESS BAR ─────────────────────────────────────────────────────── -->
+<div id="prog-wrap"><div id="prog-fill"></div></div>
+
+<!-- ── LEVEL UP BANNER ──────────────────────────────────────────────────── -->
+<div id="levelup-banner">
+  <svg viewBox="0 0 16 16" width="16" height="16" fill="var(--blue)"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z"/></svg>
+  <div>
+    <span class="lu-label">level up</span>
+    <span class="lu-title" id="lu-title"></span>
+  </div>
+</div>
+
+<!-- ── LAYOUT ───────────────────────────────────────────────────────────── -->
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-sect">modules</div>
+    <div id="mod-list"></div>
+
+    <div id="saved-panel">
+      <div class="saved-head" onclick="toggleSaved()">
+        <span>saved</span>
+        <span class="saved-badge" id="saved-count">0</span>
+      </div>
+      <div id="saved-list">
+        <div class="saved-empty">Click
+          <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:-1px;color:var(--text2)"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25z"/></svg>
+          or
+          <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor" style="vertical-align:-1px;color:var(--text2)"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0Z"/></svg>
+          on any message to save it here.</div>
+      </div>
+    </div>
+
+    <div class="sb-stats">
+      <div class="stat"><span>steps done</span><span id="st-done">0</span></div>
+      <div class="stat"><span>attempts</span> <span id="st-att">0</span></div>
+      <div class="stat"><span>hints used</span><span id="st-hints">0</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="chat"></div>
+    <button id="scroll-btn" onclick="scrollToBottom()" title="Scroll to bottom" aria-label="Scroll to bottom">
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4.427 7.427l3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427z"/></svg>
+    </button>
+
+    <!-- Typing indicator -->
+    <div id="typing">
+      <span style="color:var(--blue);font-size:12px;font-weight:600">alex</span>
+      <div class="td"></div><div class="td"></div><div class="td"></div>
+    </div>
+
+    <!-- Input area -->
+    <div id="input-area">
+      <!-- Error bar -->
+      <div id="error-bar">
+        <div id="error-label">Not quite</div>
+        <div id="error-msg"></div>
+      </div>
+
+      <!-- Status bar: correct / skipped feedback -->
+      <div id="status-bar">
+        <div id="status-label"><svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="vertical-align:-1px"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg> Correct</div>
+        <div id="status-msg"></div>
+      </div>
+
+      <!-- Resume bar (returning users) -->
+      <div id="resume-bar">
+        <div id="resume-msg"></div>
+        <div class="resume-btns">
+          <button class="btn pr" onclick="resumeSession()">Resume</button>
+          <button class="btn sk" onclick="restartSession()">Restart</button>
+        </div>
+      </div>
+
+      <!-- Terminal tabs -->
+      <div id="terminal-tabs">
+        <button class="term-tab active" id="tab-command"  onclick="setTermTab('command')">Command</button>
+        <button class="term-tab"        id="tab-hint"     onclick="setTermTab('hint')">Hint</button>
+        <button class="term-tab"        id="tab-solution" onclick="setTermTab('solution')">Solution</button>
+        <span id="mode-hint">Press Enter to send</span>
+        <div class="btns">
+          <button class="btn sk" id="skip-btn" onclick="skipStep()">Skip</button>
+          <button class="btn pr" id="run-btn"  onclick="submit()">Submit</button>
+        </div>
+      </div>
+
+      <div id="terminal-panel"></div>
+
+      <!-- Command row -->
+      <div id="cmd-row">
+        <span class="cprompt">~/taskapp $</span>
+        <input id="cmd-in" placeholder="type a command or reply…" autocomplete="off" spellcheck="false"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILE TREE PANEL -->
+  <div id="ft-panel">
+    <div id="ft-header">
+      <div class="ft-title">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="var(--text3)">
+          <path d="M1.75 2.5A.75.75 0 0 0 1 3.25v9.5c0 .414.336.75.75.75h12.5a.75.75 0 0 0 .75-.75v-7a.75.75 0 0 0-.75-.75H7.56L6.03 3.22A1.75 1.75 0 0 0 4.78 2.5H1.75Z"/>
+        </svg>
+        <span>project files</span>
+      </div>
+      <button class="ft-open-tab-btn" id="ft-open-tab-btn"
+        onclick="FT.selectedFile && openFileInNewTab(FT.selectedFile)"
+        title="Open current file in new tab">
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+          <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"/>
+        </svg>
+        open tab
+      </button>
+    </div>
+
+    <!-- File tree list -->
+    <div id="ft-list">
+      <div class="ft-empty">complete a code step<br>to see files appear here</div>
+    </div>
+
+    <!-- Divider -->
+    <div id="ft-divider"></div>
+
+    <!-- File viewer -->
+    <div id="ft-viewer">
+      <div class="ft-viewer-empty">select a file to view its contents</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- data.js and filetree.js must come before app.js -->
+<script src="data.js"></script>
+<script src="filetree.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
