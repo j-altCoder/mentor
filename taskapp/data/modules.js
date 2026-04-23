@@ -2,7 +2,7 @@
 // One entry per module. Label is shown in the sidebar and chat dividers.
 // Add a new entry here when you add a new mod{N}.js file.
 // ─────────────────────────────────────────────────────────────────────────────
-const MODULES = [
+var MODULES = [
   { label: 'project foundation'         },  // mod 0
   { label: 'code quality & git hygiene' },  // mod 1
   { label: 'express server setup'       },  // mod 2
@@ -15,4 +15,4 @@ const MODULES = [
 // Declared here as an empty array. Each mod{N}.js file pushes its steps in.
 // app.js reads this as a single flat array — order of <script> tags matters.
 // ─────────────────────────────────────────────────────────────────────────────
-const STEPS = [];
+var STEPS = [];
