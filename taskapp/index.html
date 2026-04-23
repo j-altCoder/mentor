@@ -231,9 +231,22 @@
 
 </div>
 
-<!-- data.js and filetree.js must come before app.js -->
-<script src="data.js"></script>
-<script src="filetree.js"></script>
+<!-- ── DATA: modules registry + per-module step files ───────────────────── -->
+<!-- modules.js must come first — declares MODULES[] and STEPS[] globals     -->
+<!-- Each mod{N}.js pushes its steps into STEPS[] in order                   -->
+<script src="data/modules.js"></script>
+<script src="data/mod0.js"></script>
+<script src="data/mod1.js"></script>
+<!-- add future modules here: <script src="data/mod2.js"></script>           -->
+
+<!-- ── FILE TREE: order config + per-module snapshot files ─────────────── -->
+<!-- order.js must come first — declares FILE_SNAPSHOTS{} and FILE_TREE_ORDER[] -->
+<!-- Each mod{N}.js merges its snapshots into FILE_SNAPSHOTS via Object.assign  -->
+<script src="filetree/order.js"></script>
+<script src="filetree/mod0.js"></script>
+<script src="filetree/mod1.js"></script>
+<!-- add future modules here: <script src="filetree/mod2.js"></script>       -->
+
 <script src="app.js"></script>
 </body>
 </html>
