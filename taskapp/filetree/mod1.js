@@ -1,7 +1,7 @@
 // ─── MODULE 1: code quality & git hygiene — file snapshots ───────────────────
 
 // Helper: full file tree state carried forward from end of mod0
-const _mod0Base = {
+var _mod0Base = {
   '.gitignore':
 `# dependencies
 node_modules/
