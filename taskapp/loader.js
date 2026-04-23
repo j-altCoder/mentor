@@ -12,39 +12,49 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 (function () {
-  const n = MANIFEST.moduleCount;
+  var n = MANIFEST.moduleCount;
+
+  // Cache-bust string — bumped every time you deploy new module content.
+  // Change this string whenever you add or update module files.
+  var bust = '?v=' + MANIFEST.moduleCount + '_' + (MANIFEST.bust || '1');
 
   // Build the ordered file list from the manifest
-  const files = [
+  var files = [
     'data/modules.js',
-    ...Array.from({ length: n }, (_, i) => `data/mod${i}.js`),
-    'filetree/order.js',
-    ...Array.from({ length: n }, (_, i) => `filetree/mod${i}.js`),
-    'app.js',
   ];
+
+  for (var i = 0; i < n; i++) {
+    files.push('data/mod' + i + '.js');
+  }
+
+  files.push('filetree/order.js');
+
+  for (var j = 0; j < n; j++) {
+    files.push('filetree/mod' + j + '.js');
+  }
+
+  files.push('app.js');
 
   // Inject scripts one at a time. Each script's onload triggers the next.
   // This guarantees execution order regardless of browser parallelism.
   function loadNext(index) {
     if (index >= files.length) return;
 
-    const script  = document.createElement('script');
-    script.src    = files[index];
-    script.async  = false;
+    var script  = document.createElement('script');
+    script.src  = files[index] + bust;
+    script.async = false;
 
-    script.onload = () => loadNext(index + 1);
+    script.onload = function() { loadNext(index + 1); };
 
-    script.onerror = () => {
-      console.error(`[loader] failed to load: ${files[index]}`);
-      // Surface a visible error so the blank screen isn't silent
-      document.body.innerHTML = `
-        <div style="font-family:monospace;padding:40px;color:#f85149;background:#0d1117;height:100vh;box-sizing:border-box">
-          <div style="font-size:14px;font-weight:700;margin-bottom:8px">failed to load module file</div>
-          <div style="font-size:12px;color:#8b949e">${files[index]}</div>
-          <div style="font-size:11px;color:#484f58;margin-top:16px">
-            check that the file exists and that MANIFEST.moduleCount matches the number of mod files.
-          </div>
-        </div>`;
+    script.onerror = function() {
+      console.error('[loader] failed to load: ' + files[index]);
+      document.body.innerHTML =
+        '<div style="font-family:monospace;padding:40px;color:#f85149;background:#0d1117;height:100vh;box-sizing:border-box">' +
+        '<div style="font-size:14px;font-weight:700;margin-bottom:8px">failed to load module file</div>' +
+        '<div style="font-size:12px;color:#8b949e">' + files[index] + '</div>' +
+        '<div style="font-size:11px;color:#484f58;margin-top:16px">' +
+        'check that the file exists and that MANIFEST.moduleCount matches the number of mod files.' +
+        '</div></div>';
     };
 
     document.head.appendChild(script);
