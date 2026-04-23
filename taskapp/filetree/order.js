@@ -6,9 +6,9 @@
 //   Files not listed here appear at the bottom, alphabetically.
 //   Add new paths here as you build out modules.
 // ─────────────────────────────────────────────────────────────────────────────
-const FILE_SNAPSHOTS = {};
+var FILE_SNAPSHOTS = {};
 
-const FILE_TREE_ORDER = [
+var FILE_TREE_ORDER = [
   // ── root config ─────────────────────────────────────────────────────────────
   'package.json',
   '.env.example',
