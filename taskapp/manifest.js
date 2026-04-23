@@ -6,6 +6,6 @@
 // That's it. loader.js handles the rest.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const MANIFEST = {
+var MANIFEST = {
   moduleCount: 5,   // ← change this when you add a module.
 };
