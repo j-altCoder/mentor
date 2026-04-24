@@ -646,3 +646,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
   font-family: 'JetBrains Mono', monospace;
   letter-spacing: .04em;
 }
+
+/* ─── FILE TREE — TEMPORARILY HIDDEN ────────────────────────────────────── */
+/* Hide the Files toggle button in the topbar.                                */
+/* Re-enable by removing these two rules when file tree is reintroduced.      */
+#ft-toggle-btn { display: none !important; }
+#ft-panel { display: none !important; }
+#main.ft-open { margin-right: 0 !important; }
+#main.ft-open #scroll-btn { right: 16px !important; }
