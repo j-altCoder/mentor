@@ -105,9 +105,7 @@ function injectName(str) {
 function toggleTheme() {
   const html   = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
-  const next   = isDark ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  try { localStorage.setItem('mm_theme', next); } catch (e) {}
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
   const icon = document.getElementById('theme-icon');
   if (icon) {
     icon.innerHTML = isDark
@@ -711,8 +709,8 @@ function alexHead(id, stepIdx) {
     ? `<span class="step-check" id="step-check-${stepIdx}" aria-hidden="true"></span>`
     : `<span class="step-check" id="step-check-mc-${id}" aria-hidden="true"></span>`;
   return `<div class="mhead">
-    <div class="av alex">a</div>
-    <span class="mname alex">alex</span>
+    <div class="av alex">A</div>
+    <span class="mname alex">Alex</span>
     <span class="mts" id="mts-${id}">${ts()}</span>
     ${statusSpan}
     <div class="save-btns">
@@ -723,10 +721,11 @@ function alexHead(id, stepIdx) {
 
 function userHead() {
   const displayName = S.name || 'you';
-  const initial     = displayName.charAt(0).toUpperCase();
+  const capitalized = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+  const initial     = capitalized.charAt(0);
   return `<div class="user-input-head">
     <div class="av user">${initial}</div>
-    <span class="mname user">${esc(displayName)}</span>
+    <span class="mname user">${esc(capitalized)}</span>
     <span class="mts">${ts()}</span>
   </div>`;
 }
@@ -868,10 +867,14 @@ function setTermTab(name) {
     panel.classList.toggle('open', !!content);
     if (name === 'hint') {
       if (!S.hintUsedThisStep) {
-        S.hints++;
-        S.hintUsedThisStep = true;
-        drainConfidence('hint');
-        updateStats();
+        const taskType = STEPS[S.idx]?.task?.type;
+        const isAnswerable = taskType === 'cmd' || taskType === 'code' || taskType === 'quiz';
+        if (isAnswerable) {
+          S.hints++;
+          S.hintUsedThisStep = true;
+          drainConfidence('hint');
+          updateStats();
+        }
       }
     }
   }
@@ -1702,18 +1705,6 @@ function initScrollBtn() {
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // Restore theme before anything renders to avoid flash
-  try {
-    const saved = localStorage.getItem('mm_theme');
-    if (saved === 'light' || saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', saved);
-      const icon = document.getElementById('theme-icon');
-      if (icon && saved === 'light') {
-        icon.innerHTML = '<path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7 7 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786zm1.616 1.945a7 7 0 0 1-7.678 7.678 5.499 5.499 0 1 0 7.678-7.678z"/>';
-      }
-    }
-  } catch (e) {}
-
   initLevels();   // must run first — derives XP thresholds from STEPS.length
   _prevLevel = currentLevel(S.xp).title; // seed before any renderXP call
   renderMods();
