@@ -646,7 +646,7 @@ function initCodeMirror(task, stepIdx) {
   cm.setCursor({ line: 0, ch: 0 });
   const lastLine = cm.lastLine();
   cm.setSelection({ line: 0, ch: 0 }, { line: lastLine, ch: cm.getLine(lastLine).length });
-  cm.on('change', () => clearErrorBar());
+  cm.on('change', () => { clearErrorBar(); clearStatusBar(); });
 
   setTimeout(() => {
     cm.refresh();
@@ -806,7 +806,7 @@ function addUserInputBubble(step, stepIdx) {
   if (step.task.type === 'quiz') {
     setTimeout(() => {
       document.querySelectorAll(`input[name="quiz-${stepIdx}"]`).forEach(input => {
-        input.addEventListener('change', () => { clearStatus(stepIdx); clearErrorBar(); });
+        input.addEventListener('change', () => { clearStatus(stepIdx); });
       });
     }, 60);
   }
@@ -921,7 +921,6 @@ function runStep(idx) {
     addAlexMsg(step, idx);
     addUserInputBubble(step, idx);
     clearErrorBar();
-    clearStatusBar();
     const isBlocking = task?.type === 'code' || task?.type === 'quiz';
     const cmdIn      = document.getElementById('cmd-in');
     const cmdRow     = document.getElementById('cmd-row');
@@ -945,7 +944,16 @@ function runStep(idx) {
       modeHint.textContent  = 'Press Enter to send';
     }
 
-    if (!isBlocking) setTimeout(() => cmdIn.focus(), 60);
+    if (task?.type === 'code') {
+      // CM focus is handled inside initCodeMirror on first mount.
+      // For subsequent visits (CM already exists), focus it directly.
+      setTimeout(() => cmInstances[S.idx]?.cm?.focus(), 150);
+    } else if (task?.type === 'quiz') {
+      // Quiz is mouse-driven — no focus needed
+    } else {
+      // cmd, nextOn, info — focus the command input
+      setTimeout(() => cmdIn.focus(), 60);
+    }
 
     const hintContent = task?.hint   ? `<pre>${esc(task.hint)}</pre>`   : '';
     const solContent  = task?.answer ? `<pre>${esc(task.answer)}</pre>` : '';
@@ -1145,6 +1153,7 @@ function clearErrorBar() {
 
 function clearStatus(stepIdx) {
   clearErrorBar();
+  clearStatusBar();
   const fe  = document.getElementById('fe-status-'  + stepIdx);
   if (fe  && fe.classList.contains('err'))  fe.className  = 'fe-status';
   const cmd = document.getElementById('cmd-status-' + stepIdx);
