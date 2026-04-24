@@ -921,6 +921,7 @@ function runStep(idx) {
     addAlexMsg(step, idx);
     addUserInputBubble(step, idx);
     clearErrorBar();
+    const task       = step.task;
     const isBlocking = task?.type === 'code' || task?.type === 'quiz';
     const cmdIn      = document.getElementById('cmd-in');
     const cmdRow     = document.getElementById('cmd-row');
