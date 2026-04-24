@@ -102,18 +102,21 @@ function injectName(str) {
 }
 
 // ─── THEME ───────────────────────────────────────────────────────────────────
-function toggleTheme() {
-  const html   = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+const SVG_MOON = '<path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7 7 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786zm1.616 1.945a7 7 0 0 1-7.678 7.678 5.499 5.499 0 1 0 7.678-7.678z"/>';
+const SVG_SUN  = '<path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13zM2.343 2.343a.75.75 0 0 1 1.061 0l1.06 1.061a.75.75 0 0 1-1.06 1.06l-1.061-1.06a.75.75 0 0 1 0-1.061zm9.193 9.193a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.061-1.06a.75.75 0 0 1 0-1.061zM0 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8zm13 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 13 8zM2.343 13.657a.75.75 0 0 1 0-1.06l1.061-1.061a.75.75 0 0 1 1.06 1.06l-1.06 1.061a.75.75 0 0 1-1.061 0zm9.193-9.193a.75.75 0 0 1 0-1.06l1.06-1.061a.75.75 0 0 1 1.061 1.06l-1.06 1.061a.75.75 0 0 1-1.061 0z"/>';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
   const icon = document.getElementById('theme-icon');
-  if (icon) {
-    icon.innerHTML = isDark
-      ? /* moon SVG */
-        '<path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7 7 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786zm1.616 1.945a7 7 0 0 1-7.678 7.678 5.499 5.499 0 1 0 7.678-7.678z"/>'
-      : /* sun SVG */
-        '<path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13zM2.343 2.343a.75.75 0 0 1 1.061 0l1.06 1.061a.75.75 0 0 1-1.06 1.06l-1.061-1.06a.75.75 0 0 1 0-1.061zm9.193 9.193a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.061-1.06a.75.75 0 0 1 0-1.061zM0 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8zm13 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 13 8zM2.343 13.657a.75.75 0 0 1 0-1.06l1.061-1.061a.75.75 0 0 1 1.06 1.06l-1.06 1.061a.75.75 0 0 1-1.061 0zm9.193-9.193a.75.75 0 0 1 0-1.06l1.06-1.061a.75.75 0 0 1 1.061 1.06l-1.06 1.061a.75.75 0 0 1-1.061 0z"/>';
-  }
+  // dark mode shows sun icon (click to go light), light mode shows moon icon (click to go dark)
+  if (icon) icon.innerHTML = theme === 'dark' ? SVG_SUN : SVG_MOON;
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next   = isDark ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('mm_theme', next); } catch (e) {}
 }
 
 // ─── NAME PROMPT ─────────────────────────────────────────────────────────────
@@ -811,29 +814,22 @@ function addUserInputBubble(step, stepIdx) {
   sc();
 }
 
-let _statusTimer = null;
+function clearStatusBar() {
+  const bar = document.getElementById('status-bar');
+  if (bar) bar.classList.remove('vis');
+}
 
 function showStatusBar(msg, type = 'ok') {
   const bar   = document.getElementById('status-bar');
   const label = document.getElementById('status-label');
   const text  = document.getElementById('status-msg');
   if (!bar) return;
-  const SVG_CHECK  = `<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="vertical-align:-1px"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg>`;
-  const SVG_SKIP   = `<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="vertical-align:-1px"><path d="M2.75 3a.75.75 0 0 1 .75.75v3.546l9.38-4.502a.75.75 0 0 1 1.07.68v9.052a.75.75 0 0 1-1.07.681L3.5 8.704v3.546a.75.75 0 0 1-1.5 0v-8.5A.75.75 0 0 1 2.75 3z"/></svg>`;
+  const SVG_CHECK = `<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="vertical-align:-1px"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg>`;
+  const SVG_SKIP  = `<svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" style="vertical-align:-1px"><path d="M2.75 3a.75.75 0 0 1 .75.75v3.546l9.38-4.502a.75.75 0 0 1 1.07.68v9.052a.75.75 0 0 1-1.07.681L3.5 8.704v3.546a.75.75 0 0 1-1.5 0v-8.5A.75.75 0 0 1 2.75 3z"/></svg>`;
   const labels = { ok: `${SVG_CHECK} Correct`, skip: `${SVG_SKIP} Skipped` };
-  label.innerHTML   = labels[type] || `${SVG_CHECK} Correct`;
-  text.innerHTML    = injectName(msg);
-  bar.className     = 'status-bar vis ' + type;
-
-  // Auto-dismiss after 4s
-  clearTimeout(_statusTimer);
-  _statusTimer = setTimeout(() => clearStatusBar(), 4000);
-}
-
-function clearStatusBar() {
-  clearTimeout(_statusTimer);
-  const bar = document.getElementById('status-bar');
-  if (bar) bar.classList.remove('vis');
+  label.innerHTML = labels[type] || `${SVG_CHECK} Correct`;
+  text.innerHTML  = injectName(msg);
+  bar.className   = 'status-bar vis ' + type;
 }
 
 function addAlexCorrectBubble(msg) { showStatusBar(msg, 'ok'); }
@@ -925,8 +921,7 @@ function runStep(idx) {
     addAlexMsg(step, idx);
     addUserInputBubble(step, idx);
     clearErrorBar();
-
-    const task       = step.task;
+    clearStatusBar();
     const isBlocking = task?.type === 'code' || task?.type === 'quiz';
     const cmdIn      = document.getElementById('cmd-in');
     const cmdRow     = document.getElementById('cmd-row');
@@ -1139,6 +1134,7 @@ function submit() {
 }
 
 function showErrorBar(msg) {
+  clearStatusBar();
   document.getElementById('error-msg').innerHTML = injectName(msg);
   document.getElementById('error-bar').classList.add('vis');
 }
@@ -1705,6 +1701,12 @@ function initScrollBtn() {
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  // Restore saved theme before anything renders — prevents flash
+  try {
+    const saved = localStorage.getItem('mm_theme');
+    if (saved === 'light' || saved === 'dark') applyTheme(saved);
+  } catch (e) {}
+
   initLevels();   // must run first — derives XP thresholds from STEPS.length
   _prevLevel = currentLevel(S.xp).title; // seed before any renderXP call
   renderMods();
