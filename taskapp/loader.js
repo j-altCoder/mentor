@@ -1,19 +1,21 @@
 // ─── LOADER ───────────────────────────────────────────────────────────────────
-// Reads MANIFEST.moduleCount and loads all data + filetree files in the correct
-// order before starting app.js. Each script is injected only after the previous
-// one has fully executed — preserving the synchronous global dependency chain.
+// Reads MANIFEST.moduleCount and loads all data files in the correct order
+// before starting app.js. Each script is injected only after the previous one
+// has fully executed — preserving the synchronous global dependency chain.
 //
 // Load order:
-//   1. data/modules.js          — declares MODULES[] and STEPS[]
-//   2. data/mod0..modN.js       — each pushes its steps into STEPS[]
-//   3. filetree/order.js        — declares FILE_SNAPSHOTS{} and FILE_TREE_ORDER[]
-//   4. filetree/mod0..modN.js   — each merges snapshots via Object.assign()
-//   5. app.js                   — reads all globals and starts the app
+//   1. data/modules.js      — declares MODULES[] and STEPS[] as var globals
+//   2. data/mod0..modN.js   — each pushes its steps into STEPS[]
+//   3. app.js               — reads all globals and starts the app
 //
-// IMPORTANT: app.js wraps its entire init in DOMContentLoaded. Because this
-// loader injects app.js dynamically via createElement('script'), that event
-// has already fired by the time app.js executes — so the listener never runs.
-// After all files load we dispatch a synthetic DOMContentLoaded to trigger it.
+// IMPORTANT: app.js wraps its entire init in a DOMContentLoaded listener.
+// Because this loader injects app.js dynamically via createElement('script'),
+// that event has already fired by the time app.js executes — so the listener
+// would never run. After all files load we dispatch a synthetic
+// DOMContentLoaded event to trigger app.js init correctly.
+//
+// FILE TREE: filetree files are not loaded. The file tree panel is hidden via
+// CSS. To reintroduce, add filetree loading back here and unhide in styles.css.
 // ─────────────────────────────────────────────────────────────────────────────
 
 (function () {
@@ -26,19 +28,13 @@
     files.push('data/mod' + i + '.js');
   }
 
-  files.push('filetree/order.js');
-
-  for (var j = 0; j < n; j++) {
-    files.push('filetree/mod' + j + '.js');
-  }
-
   files.push('app.js');
 
   function loadNext(index) {
     if (index >= files.length) {
-      // All files are loaded. app.js registered a DOMContentLoaded listener
-      // but that event already fired before this loader ran. Dispatch a
-      // synthetic one now so app.js init actually executes.
+      // All files loaded. app.js registered a DOMContentLoaded listener but
+      // that event already fired before this loader ran. Dispatch a synthetic
+      // one now so app.js init executes with all globals already populated.
       var evt = new Event('DOMContentLoaded', { bubbles: true, cancelable: false });
       document.dispatchEvent(evt);
       return;
