@@ -203,17 +203,20 @@
 
     <!-- ── RIGHT: persistent editor pane ── -->
     <div id="editor-pane">
-      <div id="ep-header">
-        <div id="ep-filename">
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="var(--text3)" style="flex-shrink:0"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/></svg>
-          <span id="ep-filename-text">no file</span>
+      <!-- Tab bar — VSCode style -->
+      <div id="ep-tab-bar">
+        <div id="ep-tabs"></div>
+        <!-- The "editing" live tab lives here while a code step is active -->
+        <div id="ep-live-tab" style="display:none">
+          <span class="ep-live-dot"></span>
+          <span class="ep-tab-icon"></span>
+          <span class="ep-live-filename"></span>
         </div>
-        <span id="ep-mode-badge" class="ep-badge ep-badge-readonly">read-only</span>
       </div>
       <div id="ep-cm-host"></div>
       <div id="ep-placeholder">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--border2)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
-        <span>editor</span>
+        <span>no file open</span>
       </div>
       <div id="ep-footer">
         <span id="ep-footer-left"></span>
