@@ -138,62 +138,92 @@
     </div>
   </div>
 
-  <!-- MAIN -->
+  <!-- MAIN: two-column split -->
   <div id="main">
-    <div id="chat"></div>
-    <button id="scroll-btn" onclick="scrollToBottom()" title="Scroll to bottom" aria-label="Scroll to bottom">
-      <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4.427 7.427l3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427z"/></svg>
-    </button>
 
-    <!-- Typing indicator -->
-    <div id="typing">
-      <span style="color:var(--blue);font-size:12px;font-weight:600">alex</span>
-      <div class="td"></div><div class="td"></div><div class="td"></div>
-    </div>
+    <!-- ── LEFT: chat + terminal input ── -->
+    <div id="chat-pane">
+      <div id="chat"></div>
+      <button id="scroll-btn" onclick="scrollToBottom()" title="Scroll to bottom" aria-label="Scroll to bottom">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M4.427 7.427l3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427z"/></svg>
+      </button>
 
-    <!-- Input area -->
-    <div id="input-area">
-      <!-- Error bar -->
-      <div id="error-bar">
-        <div id="error-label">Not quite</div>
-        <div id="error-msg"></div>
+      <!-- Typing indicator -->
+      <div id="typing">
+        <span style="color:var(--blue);font-size:12px;font-weight:600">alex</span>
+        <div class="td"></div><div class="td"></div><div class="td"></div>
       </div>
 
-      <!-- Status bar: correct / skipped feedback -->
-      <div id="status-bar" class="status-bar">
-        <div id="status-label"></div>
-        <div id="status-msg"></div>
-      </div>
+      <!-- Input area -->
+      <div id="input-area">
+        <!-- Error bar -->
+        <div id="error-bar">
+          <div id="error-label">Not quite</div>
+          <div id="error-msg"></div>
+        </div>
 
-      <!-- Resume bar (returning users) -->
-      <div id="resume-bar">
-        <div id="resume-msg"></div>
-        <div class="resume-btns">
-          <button class="btn pr" onclick="resumeSession()">Resume</button>
-          <button class="btn sk" onclick="restartSession()">Restart</button>
+        <!-- Status bar: correct / skipped feedback -->
+        <div id="status-bar" class="status-bar">
+          <div id="status-label"></div>
+          <div id="status-msg"></div>
+        </div>
+
+        <!-- Resume bar (returning users) -->
+        <div id="resume-bar">
+          <div id="resume-msg"></div>
+          <div class="resume-btns">
+            <button class="btn pr" onclick="resumeSession()">Resume</button>
+            <button class="btn sk" onclick="restartSession()">Restart</button>
+          </div>
+        </div>
+
+        <!-- Terminal tabs -->
+        <div id="terminal-tabs">
+          <button class="term-tab active" id="tab-command"  onclick="setTermTab('command')">Command</button>
+          <button class="term-tab"        id="tab-hint"     onclick="setTermTab('hint')">Hint <span class="tab-dot"></span></button>
+          <button class="term-tab"        id="tab-solution" onclick="setTermTab('solution')">Solution <span class="tab-dot"></span></button>
+          <span id="mode-hint">Press Enter to send</span>
+          <div class="btns">
+            <button class="btn sk" id="skip-btn" onclick="skipStep()">Skip</button>
+            <button class="btn pr" id="run-btn"  onclick="submit()">Submit</button>
+          </div>
+        </div>
+
+        <div id="terminal-panel"></div>
+
+        <!-- Command row -->
+        <div id="cmd-row">
+          <div class="cmd-inner">
+            <span class="cprompt">~/taskapp $</span>
+            <input id="cmd-in" placeholder="type a command or reply…" autocomplete="off" spellcheck="false"/>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Terminal tabs -->
-      <div id="terminal-tabs">
-        <button class="term-tab active" id="tab-command"  onclick="setTermTab('command')">Command</button>
-        <button class="term-tab"        id="tab-hint"     onclick="setTermTab('hint')">Hint</button>
-        <button class="term-tab"        id="tab-solution" onclick="setTermTab('solution')">Solution</button>
-        <span id="mode-hint">Press Enter to send</span>
-        <div class="btns">
-          <button class="btn sk" id="skip-btn" onclick="skipStep()">Skip</button>
-          <button class="btn pr" id="run-btn"  onclick="submit()">Submit</button>
+    <!-- ── RIGHT: persistent editor pane ── -->
+    <div id="editor-pane">
+      <div id="ep-header">
+        <div id="ep-filename">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="var(--text3)" style="flex-shrink:0"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/></svg>
+          <span id="ep-filename-text">no file</span>
+        </div>
+        <span id="ep-mode-badge" class="ep-badge ep-badge-readonly">read-only</span>
+      </div>
+      <div id="ep-cm-host"></div>
+      <div id="ep-placeholder">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--border2)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+        <span>editor</span>
+      </div>
+      <div id="ep-footer">
+        <span id="ep-footer-left"></span>
+        <div id="ep-footer-btns" style="display:none">
+          <span class="fe-shortcut"><kbd>⌘</kbd><kbd>↵</kbd> submit</span>
+          <button class="fe-submit" id="ep-submit-btn" onclick="submit()">Submit</button>
         </div>
       </div>
-
-      <div id="terminal-panel"></div>
-
-      <!-- Command row -->
-      <div id="cmd-row">
-        <span class="cprompt">~/taskapp $</span>
-        <input id="cmd-in" placeholder="type a command or reply…" autocomplete="off" spellcheck="false"/>
-      </div>
     </div>
+
   </div>
 
   <!-- FILE TREE PANEL -->
