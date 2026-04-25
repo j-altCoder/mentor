@@ -474,6 +474,18 @@ function viewModule(modIdx) {
 
   // Clear the live step's CM instance — it will be re-created on returnToLive
   delete cmInstances[S.idx];
+  if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; epStepIdx = null; }
+  // Show placeholder in editor pane while viewing past module
+  const epHost = document.getElementById('ep-cm-host');
+  if (epHost) { epHost.innerHTML = ''; epHost.classList.remove('has-editor'); }
+  const epPlaceholder = document.getElementById('ep-placeholder');
+  if (epPlaceholder) epPlaceholder.style.display = '';
+  const epFilename = document.getElementById('ep-filename-text');
+  if (epFilename) epFilename.textContent = 'no file';
+  const epBadge = document.getElementById('ep-mode-badge');
+  if (epBadge) { epBadge.textContent = 'read-only'; epBadge.className = 'ep-badge ep-badge-readonly'; }
+  const epFooterBtns = document.getElementById('ep-footer-btns');
+  if (epFooterBtns) epFooterBtns.style.display = 'none';
 
   const modLabel     = MODULES[modIdx]?.label ?? '';
   const firstStepIdx = STEPS.findIndex(s => s.mod === modIdx);
@@ -555,8 +567,9 @@ function restartModule(modIdx) {
   // Clear only this module's answers
   for (let i = firstStepIdx; i <= lastStepIdx; i++) {
     delete S.answers[i];
-    delete cmInstances[i];   // stale CM instances for this module's steps
+    delete cmInstances[i];
   }
+  if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; epStepIdx = null; }
 
   // Reset this module's confidence only
   CONF[modIdx] = 100;
@@ -657,6 +670,11 @@ function initCodeMirror(task, stepIdx) {
 }
 
 function getCmUserValue(stepIdx) {
+  // Prefer the pane CM for the active step
+  if (epCm && epStepIdx === stepIdx) {
+    const lastLine = epCm.lastLine();
+    return epCm.getRange({ line: 0, ch: 0 }, { line: lastLine, ch: epCm.getLine(lastLine).length }).trim();
+  }
   const inst = cmInstances[stepIdx];
   if (!inst) return '';
   const { cm } = inst;
@@ -687,18 +705,8 @@ function buildTaskBlock(task, stepIdx) {
   }
 
   if (task.type === 'code') {
-    return `<div class="task-block"><div class="file-editor-inner">
-      <div class="fe-bar">
-        <svg viewBox="0 0 16 16" width="12" height="12" fill="var(--text3)" style="flex-shrink:0"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/></svg>
-        <div class="fe-path">${task.file || 'untitled'}</div>
-      </div>
-      <div class="cm-host" id="cm-host-${stepIdx}"></div>
-      <div class="fe-footer">
-        <span class="fe-shortcut"><kbd>⌘</kbd><kbd>↵</kbd> submit</span>
-        <button class="fe-submit" id="fe-submit-${stepIdx}" onclick="submit()">Submit</button>
-      </div>
-      <div class="fe-status" id="fe-status-${stepIdx}"><div class="fs-label"></div><div class="fs-msg"></div></div>
-    </div></div>`;
+    // Editor lives in #editor-pane — nothing to render inline in chat
+    return '';
   }
 
   // cmd / ask / default
@@ -788,17 +796,132 @@ function initContextMirror(stepIdx, task) {
     readOnly:       true,
     lineWrapping:   false,
     viewportMargin: Infinity,
-    cursorBlinkRate: -1,   // hide cursor entirely
+    cursorBlinkRate: -1,
   });
   host._cmInstance = cm;
   setTimeout(() => cm.refresh(), 60);
 }
 
+// ─── EDITOR PANE ─────────────────────────────────────────────────────────────
+
+/** Global CM instance for the right-side editor pane. */
+let epCm = null;
+let epStepIdx = null;
+
+/**
+ * Called from runStep and returnToLive.
+ * - code step  → editable CM with the step's placeholder/lang
+ * - other step → read-only CM showing task.context if present, else placeholder UI
+ */
+function updateEditorPane(step, stepIdx) {
+  const host      = document.getElementById('ep-cm-host');
+  const fileText  = document.getElementById('ep-filename-text');
+  const badge     = document.getElementById('ep-mode-badge');
+  const footerBtns = document.getElementById('ep-footer-btns');
+  const footerLeft = document.getElementById('ep-footer-left');
+  const placeholder = document.getElementById('ep-placeholder');
+  if (!host) return;
+
+  // Destroy previous instance
+  if (epCm) { try { epCm.toTextArea(); } catch (e) {} epCm = null; }
+  host.innerHTML = '';
+  host.classList.remove('has-editor');
+  epStepIdx = stepIdx;
+
+  const task = step?.task;
+
+  if (task?.type === 'code') {
+    // ── Editable editor ──
+    const filename = task.file || 'untitled';
+    fileText.textContent = filename;
+    badge.textContent    = 'editing';
+    badge.className      = 'ep-badge ep-badge-edit';
+    footerLeft.textContent = '';
+    footerBtns.style.display = 'flex';
+    if (placeholder) placeholder.style.display = 'none';
+
+    const ta = document.createElement('textarea');
+    host.appendChild(ta);
+    epCm = CodeMirror.fromTextArea(ta, {
+      value:             task.placeholder || '',
+      mode:              cmMode(task.lang || 'javascript'),
+      theme:             'default',
+      lineNumbers:       true,
+      matchBrackets:     true,
+      autoCloseBrackets: true,
+      autoCloseTags:     true,
+      styleActiveLine:   true,
+      gutters:           ['CodeMirror-linenumbers'],
+      viewportMargin:    Infinity,
+      indentUnit:        2,
+      tabSize:           2,
+      indentWithTabs:    false,
+      lineWrapping:      false,
+      extraKeys: {
+        'Ctrl-Enter': () => submit(),
+        'Cmd-Enter':  () => submit(),
+        'Ctrl-/':     c  => c.execCommand('toggleComment'),
+        'Tab':        c  => { if (c.somethingSelected()) c.indentSelection('add'); else c.replaceSelection('  ', 'end'); },
+        'Shift-Tab':  c  => c.indentSelection('subtract'),
+      },
+    });
+    if (task.placeholder) epCm.setValue(task.placeholder);
+    host.classList.add('has-editor');
+
+    // Keep cmInstances in sync so getCmUserValue still works
+    cmInstances[stepIdx] = { cm: epCm };
+
+    epCm.on('change', () => { clearErrorBar(); clearStatusBar(); });
+    setTimeout(() => {
+      epCm.refresh();
+      epCm.focus();
+      const lastLine = epCm.lastLine();
+      epCm.setSelection({ line: 0, ch: 0 }, { line: lastLine, ch: epCm.getLine(lastLine).length });
+    }, 120);
+
+  } else if (task?.context) {
+    // ── Read-only context view ──
+    const filename = task.file || 'context';
+    fileText.textContent = filename;
+    badge.textContent    = 'read-only';
+    badge.className      = 'ep-badge ep-badge-readonly';
+    footerBtns.style.display = 'none';
+    footerLeft.textContent   = 'context file';
+    if (placeholder) placeholder.style.display = 'none';
+
+    const ta = document.createElement('textarea');
+    host.appendChild(ta);
+    epCm = CodeMirror.fromTextArea(ta, {
+      value:           task.context,
+      mode:            cmMode(task.lang || 'javascript'),
+      theme:           'default',
+      lineNumbers:     true,
+      readOnly:        true,
+      lineWrapping:    false,
+      viewportMargin:  Infinity,
+      cursorBlinkRate: -1,
+    });
+    epCm.setValue(task.context);
+    host.classList.add('has-editor');
+    setTimeout(() => epCm.refresh(), 80);
+
+  } else {
+    // ── No editor for this step — show placeholder ──
+    fileText.textContent = 'no file';
+    badge.textContent    = 'read-only';
+    badge.className      = 'ep-badge ep-badge-readonly';
+    footerBtns.style.display = 'none';
+    footerLeft.textContent   = '';
+    if (placeholder) placeholder.style.display = '';
+  }
+}
+
 function addUserInputBubble(step, stepIdx) {
   if (!step.task || step.task.type === 'cmd' || step.task.type === 'ask') return;
-  const isCode   = step.task.type === 'code';
+  if (step.task.type === 'code') return; // editor lives in #editor-pane
+  const isCode   = false;
   const wrap     = document.createElement('div');
-  wrap.className = 'msg user-input' + (isCode ? ' code-task-bubble' : '');
+  wrap.className = 'msg user-input';
   wrap.id        = 'user-input-' + stepIdx;
   wrap.innerHTML = userHead() + buildTaskBlock(step.task, stepIdx);
   chat().appendChild(wrap);
@@ -810,7 +933,6 @@ function addUserInputBubble(step, stepIdx) {
       });
     }, 60);
   }
-  if (isCode) setTimeout(() => initCodeMirror(step.task, stepIdx), 80);
   sc();
 }
 
@@ -920,6 +1042,7 @@ function runStep(idx) {
     const step = STEPS[idx];
     addAlexMsg(step, idx);
     addUserInputBubble(step, idx);
+    updateEditorPane(step, idx);
     clearErrorBar();
     const task       = step.task;
     const isBlocking = task?.type === 'code' || task?.type === 'quiz';
@@ -946,9 +1069,9 @@ function runStep(idx) {
     }
 
     if (task?.type === 'code') {
-      // CM focus is handled inside initCodeMirror on first mount.
-      // For subsequent visits (CM already exists), focus it directly.
-      setTimeout(() => cmInstances[S.idx]?.cm?.focus(), 150);
+      // focus handled by updateEditorPane on first mount;
+      // for subsequent visits (pane CM already exists), focus directly
+      setTimeout(() => epCm?.focus(), 150);
     } else if (task?.type === 'quiz') {
       // Quiz is mouse-driven — no focus needed
     } else {
@@ -1022,8 +1145,10 @@ document.getElementById('cmd-in').addEventListener('keydown', e => {
 function setLocked(locked) {
   S.locked = locked;
   document.getElementById('run-btn').disabled = locked;
-  const feBtn = document.getElementById('fe-submit-' + S.idx);
+  const feBtn   = document.getElementById('fe-submit-' + S.idx);
   if (feBtn) feBtn.disabled = locked;
+  const epBtn   = document.getElementById('ep-submit-btn');
+  if (epBtn) epBtn.disabled = locked;
 }
 
 function submitQuiz(stepIdx) {
@@ -1123,7 +1248,7 @@ function submit() {
       } else {
         showErrorBar(r.msg);
         setLocked(false);
-        cmInstances[S.idx]?.cm.focus();
+        epCm?.focus();
       }
     } else {
       if (r.ok) {
