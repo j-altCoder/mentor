@@ -946,40 +946,74 @@ html,body {
   position:relative;
 }
 
-/* header bar — filename + mode badge */
-#ep-header {
-  height:36px;display:flex;align-items:center;
-  padding:0 12px;gap:8px;
+/* header / tab bar */
+#ep-tab-bar {
+  height:36px;display:flex;align-items:stretch;
   background:var(--bg2);
   border-bottom:1px solid var(--border);
-  flex-shrink:0;
+  flex-shrink:0;overflow-x:auto;overflow-y:hidden;
 }
-#ep-filename {
+#ep-tab-bar::-webkit-scrollbar { display:none }
+#ep-tabs { display:flex;align-items:stretch }
+
+/* individual closed tab (past submissions) */
+.ep-tab {
+  position:relative;
+  display:flex;align-items:center;gap:5px;
+  padding:0 8px 0 12px;
+  font-size:var(--fs-sm);font-family:'Inter',sans-serif;font-weight:500;
+  color:var(--text3);background:transparent;
+  border-right:1px solid var(--border);
+  cursor:pointer;white-space:nowrap;
+  transition:color var(--t),background var(--t);
+  min-width:0;
+}
+.ep-tab::after {
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:2px;border-radius:2px 2px 0 0;
+  background:transparent;
+}
+.ep-tab:hover { color:var(--text2);background:var(--bg3) }
+.ep-tab.active {
+  color:var(--text);background:var(--bg1);
+}
+.ep-tab.active::after { background:var(--green) }
+.ep-tab-name {
+  max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-family:'JetBrains Mono',monospace;font-size:var(--fs-sm);
+}
+.ep-tab-close {
+  width:16px;height:16px;border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;line-height:1;color:var(--text3);
+  flex-shrink:0;cursor:pointer;margin-left:1px;
+  transition:background var(--t),color var(--t);
+}
+.ep-tab-close:hover { background:var(--bg4);color:var(--text) }
+
+/* live editing tab — always rightmost, shown while a code step is active */
+#ep-live-tab {
   display:flex;align-items:center;gap:6px;
-  flex:1;min-width:0;overflow:hidden;
-}
-#ep-filename-text {
-  font-size:var(--fs-sm);color:var(--text2);
+  padding:0 14px;
+  border-left:1px solid var(--border);
+  border-bottom:2px solid var(--blue);
+  background:var(--bg1);
+  color:var(--text);font-size:var(--fs-sm);
   font-family:'JetBrains Mono',monospace;
-  letter-spacing:.02em;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;cursor:pointer;
+  transition:background var(--t);
 }
-.ep-badge {
-  font-size:var(--fs-xs);font-weight:600;
-  font-family:'JetBrains Mono',monospace;
-  letter-spacing:.05em;text-transform:uppercase;
-  padding:2px 7px;border-radius:3px;flex-shrink:0;
+#ep-live-tab:hover { background:var(--bg2) }
+.ep-live-dot {
+  width:7px;height:7px;border-radius:50%;
+  background:var(--blue);flex-shrink:0;
+  animation:epLivePulse 2s ease-in-out infinite;
 }
-.ep-badge-readonly {
-  color:var(--text3);
-  background:var(--bg3);
-  border:1px solid var(--border2);
+@keyframes epLivePulse {
+  0%,100% { opacity:1;transform:scale(1) }
+  50%      { opacity:.4;transform:scale(.75) }
 }
-.ep-badge-edit {
-  color:var(--blue);
-  background:var(--blue-bg);
-  border:1px solid rgba(88,166,255,.25);
-}
+.ep-live-filename { color:var(--text);font-size:var(--fs-sm) }
 
 /* CodeMirror host — fills all remaining vertical space */
 #ep-cm-host {
@@ -1019,6 +1053,57 @@ html,body {
 #ep-footer-btns {
   display:flex;align-items:center;gap:8px;
 }
+/* ─── CODE STEP EDIT CHIP (user bubble for code tasks) ───────────────────── */
+.edit-chip-bubble {
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 10px 6px 8px;
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:6px;
+  cursor:pointer;
+  transition:background var(--t),border-color var(--t),box-shadow var(--t);
+  user-select:none;
+  margin-top:4px;
+  max-width:260px;
+}
+.edit-chip-bubble:hover {
+  background:var(--bg3);border-color:rgba(88,166,255,.4);
+  box-shadow:0 0 0 3px rgba(88,166,255,.06);
+}
+.edit-chip-bubble.chip-live {
+  border-color:rgba(88,166,255,.35);
+  background:var(--blue-bg);
+}
+.edit-chip-bubble.chip-done {
+  border-color:rgba(63,185,80,.3);
+  background:var(--green-bg);
+  cursor:pointer;
+}
+.edit-chip-bubble.chip-done:hover {
+  border-color:rgba(63,185,80,.55);
+  box-shadow:0 0 0 3px rgba(63,185,80,.06);
+}
+.chip-dot {
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+  background:var(--blue);
+  animation:epLivePulse 2s ease-in-out infinite;
+}
+.chip-done .chip-dot { background:var(--green);animation:none }
+.chip-icon { flex-shrink:0;display:flex;align-items:center;color:var(--text3) }
+.chip-label {
+  font-size:var(--fs-xs);color:var(--text3);
+  font-family:'Inter',sans-serif;letter-spacing:.02em;
+  white-space:nowrap;flex-shrink:0;
+}
+.chip-filename {
+  font-size:var(--fs-sm);color:var(--text2);
+  font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.chip-done .chip-filename { color:var(--green) }
+.chip-arrow { margin-left:2px;color:var(--text3);flex-shrink:0;font-size:10px;transition:color var(--t) }
+.edit-chip-bubble:hover .chip-arrow { color:var(--text2) }
+
 .msg-replayed { opacity:.6 }
 .msg-replayed:hover { opacity:1;transition:opacity var(--t) }
 .replay-code-answer {
