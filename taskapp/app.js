@@ -474,18 +474,17 @@ function viewModule(modIdx) {
 
   // Clear the live step's CM instance — it will be re-created on returnToLive
   delete cmInstances[S.idx];
-  if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; epStepIdx = null; }
-  // Show placeholder in editor pane while viewing past module
+  if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; }
+  _destroyTabCm();
+  epStepIdx   = null;
+  epActiveTab = null;
   const epHost = document.getElementById('ep-cm-host');
   if (epHost) { epHost.innerHTML = ''; epHost.classList.remove('has-editor'); }
   const epPlaceholder = document.getElementById('ep-placeholder');
   if (epPlaceholder) epPlaceholder.style.display = '';
-  const epFilename = document.getElementById('ep-filename-text');
-  if (epFilename) epFilename.textContent = 'no file';
-  const epBadge = document.getElementById('ep-mode-badge');
-  if (epBadge) { epBadge.textContent = 'read-only'; epBadge.className = 'ep-badge ep-badge-readonly'; }
   const epFooterBtns = document.getElementById('ep-footer-btns');
   if (epFooterBtns) epFooterBtns.style.display = 'none';
+  renderEpTabs();
 
   const modLabel     = MODULES[modIdx]?.label ?? '';
   const firstStepIdx = STEPS.findIndex(s => s.mod === modIdx);
@@ -570,6 +569,7 @@ function restartModule(modIdx) {
     delete cmInstances[i];
   }
   if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; epStepIdx = null; }
+  _destroyTabCm();
   // Remove any tabs from this module's steps
   for (let i = firstStepIdx; i <= lastStepIdx; i++) {
     const ti = epTabs.findIndex(t => t.stepIdx === i);
@@ -812,10 +812,13 @@ function initContextMirror(stepIdx, task) {
 
 /**
  * epTabs: array of { stepIdx, filename, content, lang }
- * epActiveTab: stepIdx of the currently displayed closed tab, or null (live editing)
+ * epActiveTab: stepIdx of the currently displayed tab, or null (live editing / placeholder)
+ * epCm:    the LIVE editable CodeMirror (only set when a code step is active)
+ * epTabCm: the READ-ONLY CodeMirror shown when a closed tab is open
  */
 const epTabs = [];
-let epActiveTab = null;  // null = live editing tab is shown
+let epActiveTab = null;
+let epTabCm = null;   // separate from epCm — never confused with the live editor
 
 const FILE_ICON_SVG = `<svg viewBox="0 0 16 16" width="11" height="11" fill="var(--text3)"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/></svg>`;
 
@@ -832,37 +835,51 @@ function renderEpTabs() {
       <span class="ep-tab-close" onclick="event.stopPropagation();closeEpTab(${t.stepIdx})" title="Close tab">×</span>
     </div>`).join('');
 
-  // Live tab visibility
   if (liveTab) {
-    const isLive = epStepIdx !== null && STEPS[epStepIdx]?.task?.type === 'code' && S.answers[epStepIdx] === undefined;
+    // Show live tab only when current step is an unanswered code step
+    const isLive = epStepIdx !== null
+      && STEPS[epStepIdx]?.task?.type === 'code'
+      && !S.answers[epStepIdx];
     liveTab.style.display = isLive ? 'flex' : 'none';
     if (isLive) {
-      const fn = STEPS[epStepIdx]?.task?.file || 'untitled';
-      liveTab.querySelector('.ep-live-filename').textContent = fn;
-      liveTab.onclick = () => focusLiveTab();
+      liveTab.querySelector('.ep-live-filename').textContent =
+        STEPS[epStepIdx]?.task?.file || 'untitled';
+      liveTab.onclick = () => showLiveEditor();
     }
+  }
+}
+
+/** Destroy the currently open tab's read-only CM and clear the host. */
+function _destroyTabCm() {
+  if (epTabCm) {
+    try { epTabCm.toTextArea(); } catch(e) {}
+    epTabCm = null;
   }
 }
 
 function openEpTab(stepIdx) {
   const tab = epTabs.find(t => t.stepIdx === stepIdx);
   if (!tab) return;
+
   epActiveTab = stepIdx;
 
-  // Mount read-only CM with the submitted code
-  const host = document.getElementById('ep-cm-host');
-  const footerBtns = document.getElementById('ep-footer-btns');
-  const footerLeft = document.getElementById('ep-footer-left');
+  const host        = document.getElementById('ep-cm-host');
+  const footerBtns  = document.getElementById('ep-footer-btns');
+  const footerLeft  = document.getElementById('ep-footer-left');
   const placeholder = document.getElementById('ep-placeholder');
   if (!host) return;
 
-  if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; }
+  // Hide live CM while viewing a tab (don't destroy it — just hide)
+  if (epCm) epCm.getWrapperElement().style.display = 'none';
+
+  // Destroy previous tab CM
+  _destroyTabCm();
   host.innerHTML = '';
   host.classList.remove('has-editor');
 
   const ta = document.createElement('textarea');
   host.appendChild(ta);
-  epCm = CodeMirror.fromTextArea(ta, {
+  epTabCm = CodeMirror.fromTextArea(ta, {
     value:           tab.content,
     mode:            cmMode(tab.lang || 'javascript'),
     theme:           'default',
@@ -872,12 +889,12 @@ function openEpTab(stepIdx) {
     viewportMargin:  Infinity,
     cursorBlinkRate: -1,
   });
-  epCm.setValue(tab.content);
+  epTabCm.setValue(tab.content);
   host.classList.add('has-editor');
   if (placeholder) placeholder.style.display = 'none';
-  if (footerBtns) footerBtns.style.display = 'none';
-  if (footerLeft) footerLeft.textContent = 'submitted code · read-only';
-  setTimeout(() => epCm.refresh(), 60);
+  if (footerBtns)  footerBtns.style.display = 'none';
+  if (footerLeft)  footerLeft.textContent = 'submitted code · read-only';
+  setTimeout(() => epTabCm?.refresh(), 60);
 
   renderEpTabs();
 }
@@ -887,121 +904,143 @@ function closeEpTab(stepIdx) {
   if (idx === -1) return;
   epTabs.splice(idx, 1);
 
-  // If closed tab was active, switch to nearest tab or back to live
   if (epActiveTab === stepIdx) {
-    epActiveTab = null;
+    // Closed tab was active — move to nearest remaining tab
     const next = epTabs[idx] || epTabs[idx - 1] || null;
     if (next) {
       openEpTab(next.stepIdx);
       return;
     }
-    // No tabs left — restore live view or placeholder
-    focusLiveTab();
+    // No tabs left — show live editor if available, else true placeholder
+    epActiveTab = null;
+    _destroyTabCm();
+    showLiveEditor();   // handles both "live code step" and "no editor" cases
+    return;
   }
-  renderEpTabs();
-}
-
-/** Switch to the live editing view (current code step). */
-function focusLiveTab() {
-  epActiveTab = null;
-  // Restore the live CM if the current step is still a code step
-  const step = STEPS[epStepIdx];
-  if (step?.task?.type === 'code' && S.answers[epStepIdx] === undefined) {
-    const host = document.getElementById('ep-cm-host');
-    const footerBtns = document.getElementById('ep-footer-btns');
-    const footerLeft = document.getElementById('ep-footer-left');
-    const placeholder = document.getElementById('ep-placeholder');
-
-    if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; }
-    host.innerHTML = '';
-    host.classList.remove('has-editor');
-
-    // Re-init the live editable CM
-    const task = step.task;
-    const ta = document.createElement('textarea');
-    host.appendChild(ta);
-    epCm = CodeMirror.fromTextArea(ta, {
-      value:             task.placeholder || '',
-      mode:              cmMode(task.lang || 'javascript'),
-      theme:             'default',
-      lineNumbers:       true,
-      matchBrackets:     true,
-      autoCloseBrackets: true,
-      autoCloseTags:     true,
-      styleActiveLine:   true,
-      gutters:           ['CodeMirror-linenumbers'],
-      viewportMargin:    Infinity,
-      indentUnit: 2, tabSize: 2, indentWithTabs: false, lineWrapping: false,
-      extraKeys: {
-        'Ctrl-Enter': () => submit(), 'Cmd-Enter': () => submit(),
-        'Ctrl-/': c => c.execCommand('toggleComment'),
-        'Tab': c => { if (c.somethingSelected()) c.indentSelection('add'); else c.replaceSelection('  ', 'end'); },
-        'Shift-Tab': c => c.indentSelection('subtract'),
-      },
-    });
-    if (task.placeholder) epCm.setValue(task.placeholder);
-    cmInstances[epStepIdx] = { cm: epCm };
-    epCm.on('change', () => { clearErrorBar(); clearStatusBar(); });
-    host.classList.add('has-editor');
-    if (placeholder) placeholder.style.display = 'none';
-    if (footerBtns) footerBtns.style.display = 'flex';
-    if (footerLeft) footerLeft.textContent = '';
-    setTimeout(() => { epCm.refresh(); epCm.focus(); }, 80);
-  }
+  // Closed tab was not active — just remove from list and re-render
   renderEpTabs();
 }
 
 /**
- * Called from advance() after a code step is submitted.
- * Registers the answer as a closeable tab and updates the chat chip.
+ * Show the live editable editor (current code step).
+ * If not on a code step, shows the placeholder.
+ * Does NOT re-create epCm — just makes the existing one visible.
  */
-function registerSubmittedCodeTab(stepIdx, content, filename, lang) {
-  // Don't add duplicate
-  if (!epTabs.find(t => t.stepIdx === stepIdx)) {
-    epTabs.push({ stepIdx, filename, content, lang });
+function showLiveEditor() {
+  epActiveTab = null;
+  _destroyTabCm();
+
+  const host        = document.getElementById('ep-cm-host');
+  const footerBtns  = document.getElementById('ep-footer-btns');
+  const footerLeft  = document.getElementById('ep-footer-left');
+  const placeholder = document.getElementById('ep-placeholder');
+  if (!host) return;
+
+  const step = epStepIdx !== null ? STEPS[epStepIdx] : null;
+  const isActiveCode = step?.task?.type === 'code' && !S.answers[epStepIdx];
+
+  if (isActiveCode && epCm) {
+    // Live CM already exists — just show it
+    host.innerHTML = '';
+    host.classList.add('has-editor');
+    host.appendChild(epCm.getWrapperElement());
+    epCm.getWrapperElement().style.display = '';
+    if (placeholder) placeholder.style.display = 'none';
+    if (footerBtns)  footerBtns.style.display = 'flex';
+    if (footerLeft)  footerLeft.textContent = '';
+    setTimeout(() => { epCm.refresh(); epCm.focus(); }, 60);
+  } else {
+    // No live code step — show empty placeholder
+    host.innerHTML = '';
+    host.classList.remove('has-editor');
+    if (placeholder) placeholder.style.display = '';
+    if (footerBtns)  footerBtns.style.display = 'none';
+    if (footerLeft)  footerLeft.textContent = '';
   }
-  // Update the chat chip to "done" state
+
+  renderEpTabs();
+}
+
+// Alias for onclick handlers in the live tab element
+function focusLiveTab() { showLiveEditor(); }
+
+/**
+ * Called after a code step is submitted (or skipped).
+ * For submit: registers a closeable tab, flips chip to done state.
+ * For skip:   just flips chip to skipped state (no tab opened).
+ */
+function finalizeCodeChip(stepIdx, submitted, content, filename, lang) {
+  if (submitted) {
+    if (!epTabs.find(t => t.stepIdx === stepIdx)) {
+      epTabs.push({ stepIdx, filename, content, lang });
+    }
+  }
+
   const chip = document.getElementById('edit-chip-' + stepIdx);
   if (chip) {
-    chip.className = 'edit-chip-bubble chip-done';
-    chip.title     = 'Click to view submitted code';
-    chip.onclick   = () => openEpTab(stepIdx);
-    const dot   = chip.querySelector('.chip-dot');
-    const label = chip.querySelector('.chip-label');
-    const arrow = chip.querySelector('.chip-arrow');
-    if (dot)   dot.style.background = 'var(--green)';
-    if (label) label.textContent = 'submitted ·';
-    if (arrow) arrow.textContent = '↗';
+    if (submitted) {
+      chip.className = 'edit-chip-bubble chip-done';
+      chip.title     = 'Click to view submitted code';
+      chip.onclick   = () => openEpTab(stepIdx);
+      const dot   = chip.querySelector('.chip-dot');
+      const label = chip.querySelector('.chip-label');
+      const arrow = chip.querySelector('.chip-arrow');
+      if (dot)   { dot.style.background = 'var(--green)'; dot.style.animation = 'none'; }
+      if (label) label.textContent = 'submitted ·';
+      if (arrow) arrow.textContent = '↗';
+    } else {
+      // Skipped — grey out the chip, no tab
+      chip.className = 'edit-chip-bubble chip-skipped';
+      chip.title     = 'Skipped';
+      chip.onclick   = null;
+      const dot   = chip.querySelector('.chip-dot');
+      const label = chip.querySelector('.chip-label');
+      const arrow = chip.querySelector('.chip-arrow');
+      if (dot)   { dot.style.background = 'var(--text3)'; dot.style.animation = 'none'; }
+      if (label) label.textContent = 'skipped ·';
+      if (arrow) arrow.textContent = '';
+    }
   }
+
   renderEpTabs();
+}
+
+// Keep old name working (called from submit())
+function registerSubmittedCodeTab(stepIdx, content, filename, lang) {
+  finalizeCodeChip(stepIdx, true, content, filename, lang);
 }
 
 // ─── EDITOR PANE ─────────────────────────────────────────────────────────────
 
-/** Global CM instance for the right-side editor pane. */
 let epCm = null;
 let epStepIdx = null;
 
 function updateEditorPane(step, stepIdx) {
-  const host       = document.getElementById('ep-cm-host');
-  const footerBtns = document.getElementById('ep-footer-btns');
-  const footerLeft = document.getElementById('ep-footer-left');
+  const host        = document.getElementById('ep-cm-host');
+  const footerBtns  = document.getElementById('ep-footer-btns');
+  const footerLeft  = document.getElementById('ep-footer-left');
   const placeholder = document.getElementById('ep-placeholder');
   if (!host) return;
 
-  // Destroy previous live CM
-  if (epCm) { try { epCm.toTextArea(); } catch (e) {} epCm = null; }
+  // Destroy the previous LIVE CM only (never epTabCm here)
+  if (epCm) {
+    try { epCm.toTextArea(); } catch(e) {}
+    epCm = null;
+  }
+
+  epStepIdx   = stepIdx;
+  epActiveTab = null;   // new step always starts on the live view
+
+  // Also destroy any open tab CM since we're starting a fresh step
+  _destroyTabCm();
   host.innerHTML = '';
   host.classList.remove('has-editor');
-  epStepIdx  = stepIdx;
-  epActiveTab = null;   // switch away from any open tab — live step takes priority
 
   const task = step?.task;
 
   if (task?.type === 'code') {
-    const filename = task.file || 'untitled';
-    if (footerLeft) footerLeft.textContent = '';
-    if (footerBtns) footerBtns.style.display = 'flex';
+    if (footerLeft)  footerLeft.textContent = '';
+    if (footerBtns)  footerBtns.style.display = 'flex';
     if (placeholder) placeholder.style.display = 'none';
 
     const ta = document.createElement('textarea');
@@ -1036,8 +1075,8 @@ function updateEditorPane(step, stepIdx) {
     }, 120);
 
   } else if (task?.context) {
-    if (footerBtns) footerBtns.style.display = 'none';
-    if (footerLeft) footerLeft.textContent = 'context file';
+    if (footerBtns)  footerBtns.style.display = 'none';
+    if (footerLeft)  footerLeft.textContent = 'context file';
     if (placeholder) placeholder.style.display = 'none';
 
     const ta = document.createElement('textarea');
@@ -1049,11 +1088,11 @@ function updateEditorPane(step, stepIdx) {
     });
     epCm.setValue(task.context);
     host.classList.add('has-editor');
-    setTimeout(() => epCm.refresh(), 80);
+    setTimeout(() => epCm?.refresh(), 80);
 
   } else {
-    if (footerBtns) footerBtns.style.display = 'none';
-    if (footerLeft) footerLeft.textContent = '';
+    if (footerBtns)  footerBtns.style.display = 'none';
+    if (footerLeft)  footerLeft.textContent = '';
     if (placeholder) placeholder.style.display = '';
   }
 
@@ -1587,6 +1626,10 @@ function skipStep() {
 
   S.hints++;
   S.answers[S.idx] = { type: 'skipped', text: 'skipped' };
+  // If this was a code step, flip the chip to skipped state
+  if (step.task?.type === 'code') {
+    finalizeCodeChip(S.idx, false, '', step.task.file || 'untitled', step.task.lang || 'javascript');
+  }
   // recalcConfidence runs inside advance() after the answer is written — no need to drain here
   updateStats();
   setLocked(true);
