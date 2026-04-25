@@ -570,6 +570,12 @@ function restartModule(modIdx) {
     delete cmInstances[i];
   }
   if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; epStepIdx = null; }
+  // Remove any tabs from this module's steps
+  for (let i = firstStepIdx; i <= lastStepIdx; i++) {
+    const ti = epTabs.findIndex(t => t.stepIdx === i);
+    if (ti !== -1) epTabs.splice(ti, 1);
+  }
+  epActiveTab = null;
 
   // Reset this module's confidence only
   CONF[modIdx] = 100;
@@ -789,17 +795,185 @@ function initContextMirror(stepIdx, task) {
   const host = document.getElementById('ctx-cm-' + stepIdx);
   if (!host || host._cmInstance) return;
   const cm = CodeMirror(host, {
-    value:          task.context,
-    mode:           cmMode(task.lang || 'javascript'),
-    theme:          'default',
-    lineNumbers:    true,
-    readOnly:       true,
-    lineWrapping:   false,
-    viewportMargin: Infinity,
+    value:           task.context,
+    mode:            cmMode(task.lang || 'javascript'),
+    theme:           'default',
+    lineNumbers:     true,
+    readOnly:        true,
+    lineWrapping:    false,
+    viewportMargin:  Infinity,
     cursorBlinkRate: -1,
   });
   host._cmInstance = cm;
   setTimeout(() => cm.refresh(), 60);
+}
+
+// ─── EDITOR PANE TABS ────────────────────────────────────────────────────────
+
+/**
+ * epTabs: array of { stepIdx, filename, content, lang }
+ * epActiveTab: stepIdx of the currently displayed closed tab, or null (live editing)
+ */
+const epTabs = [];
+let epActiveTab = null;  // null = live editing tab is shown
+
+const FILE_ICON_SVG = `<svg viewBox="0 0 16 16" width="11" height="11" fill="var(--text3)"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/></svg>`;
+
+function renderEpTabs() {
+  const tabsEl  = document.getElementById('ep-tabs');
+  const liveTab = document.getElementById('ep-live-tab');
+  if (!tabsEl) return;
+
+  tabsEl.innerHTML = epTabs.map(t => `
+    <div class="ep-tab${epActiveTab === t.stepIdx ? ' active' : ''}"
+         onclick="openEpTab(${t.stepIdx})"
+         title="${esc(t.filename)}">
+      <span class="ep-tab-name">${esc(t.filename)}</span>
+      <span class="ep-tab-close" onclick="event.stopPropagation();closeEpTab(${t.stepIdx})" title="Close tab">×</span>
+    </div>`).join('');
+
+  // Live tab visibility
+  if (liveTab) {
+    const isLive = epStepIdx !== null && STEPS[epStepIdx]?.task?.type === 'code' && S.answers[epStepIdx] === undefined;
+    liveTab.style.display = isLive ? 'flex' : 'none';
+    if (isLive) {
+      const fn = STEPS[epStepIdx]?.task?.file || 'untitled';
+      liveTab.querySelector('.ep-live-filename').textContent = fn;
+      liveTab.onclick = () => focusLiveTab();
+    }
+  }
+}
+
+function openEpTab(stepIdx) {
+  const tab = epTabs.find(t => t.stepIdx === stepIdx);
+  if (!tab) return;
+  epActiveTab = stepIdx;
+
+  // Mount read-only CM with the submitted code
+  const host = document.getElementById('ep-cm-host');
+  const footerBtns = document.getElementById('ep-footer-btns');
+  const footerLeft = document.getElementById('ep-footer-left');
+  const placeholder = document.getElementById('ep-placeholder');
+  if (!host) return;
+
+  if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; }
+  host.innerHTML = '';
+  host.classList.remove('has-editor');
+
+  const ta = document.createElement('textarea');
+  host.appendChild(ta);
+  epCm = CodeMirror.fromTextArea(ta, {
+    value:           tab.content,
+    mode:            cmMode(tab.lang || 'javascript'),
+    theme:           'default',
+    lineNumbers:     true,
+    readOnly:        true,
+    lineWrapping:    false,
+    viewportMargin:  Infinity,
+    cursorBlinkRate: -1,
+  });
+  epCm.setValue(tab.content);
+  host.classList.add('has-editor');
+  if (placeholder) placeholder.style.display = 'none';
+  if (footerBtns) footerBtns.style.display = 'none';
+  if (footerLeft) footerLeft.textContent = 'submitted code · read-only';
+  setTimeout(() => epCm.refresh(), 60);
+
+  renderEpTabs();
+}
+
+function closeEpTab(stepIdx) {
+  const idx = epTabs.findIndex(t => t.stepIdx === stepIdx);
+  if (idx === -1) return;
+  epTabs.splice(idx, 1);
+
+  // If closed tab was active, switch to nearest tab or back to live
+  if (epActiveTab === stepIdx) {
+    epActiveTab = null;
+    const next = epTabs[idx] || epTabs[idx - 1] || null;
+    if (next) {
+      openEpTab(next.stepIdx);
+      return;
+    }
+    // No tabs left — restore live view or placeholder
+    focusLiveTab();
+  }
+  renderEpTabs();
+}
+
+/** Switch to the live editing view (current code step). */
+function focusLiveTab() {
+  epActiveTab = null;
+  // Restore the live CM if the current step is still a code step
+  const step = STEPS[epStepIdx];
+  if (step?.task?.type === 'code' && S.answers[epStepIdx] === undefined) {
+    const host = document.getElementById('ep-cm-host');
+    const footerBtns = document.getElementById('ep-footer-btns');
+    const footerLeft = document.getElementById('ep-footer-left');
+    const placeholder = document.getElementById('ep-placeholder');
+
+    if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; }
+    host.innerHTML = '';
+    host.classList.remove('has-editor');
+
+    // Re-init the live editable CM
+    const task = step.task;
+    const ta = document.createElement('textarea');
+    host.appendChild(ta);
+    epCm = CodeMirror.fromTextArea(ta, {
+      value:             task.placeholder || '',
+      mode:              cmMode(task.lang || 'javascript'),
+      theme:             'default',
+      lineNumbers:       true,
+      matchBrackets:     true,
+      autoCloseBrackets: true,
+      autoCloseTags:     true,
+      styleActiveLine:   true,
+      gutters:           ['CodeMirror-linenumbers'],
+      viewportMargin:    Infinity,
+      indentUnit: 2, tabSize: 2, indentWithTabs: false, lineWrapping: false,
+      extraKeys: {
+        'Ctrl-Enter': () => submit(), 'Cmd-Enter': () => submit(),
+        'Ctrl-/': c => c.execCommand('toggleComment'),
+        'Tab': c => { if (c.somethingSelected()) c.indentSelection('add'); else c.replaceSelection('  ', 'end'); },
+        'Shift-Tab': c => c.indentSelection('subtract'),
+      },
+    });
+    if (task.placeholder) epCm.setValue(task.placeholder);
+    cmInstances[epStepIdx] = { cm: epCm };
+    epCm.on('change', () => { clearErrorBar(); clearStatusBar(); });
+    host.classList.add('has-editor');
+    if (placeholder) placeholder.style.display = 'none';
+    if (footerBtns) footerBtns.style.display = 'flex';
+    if (footerLeft) footerLeft.textContent = '';
+    setTimeout(() => { epCm.refresh(); epCm.focus(); }, 80);
+  }
+  renderEpTabs();
+}
+
+/**
+ * Called from advance() after a code step is submitted.
+ * Registers the answer as a closeable tab and updates the chat chip.
+ */
+function registerSubmittedCodeTab(stepIdx, content, filename, lang) {
+  // Don't add duplicate
+  if (!epTabs.find(t => t.stepIdx === stepIdx)) {
+    epTabs.push({ stepIdx, filename, content, lang });
+  }
+  // Update the chat chip to "done" state
+  const chip = document.getElementById('edit-chip-' + stepIdx);
+  if (chip) {
+    chip.className = 'edit-chip-bubble chip-done';
+    chip.title     = 'Click to view submitted code';
+    chip.onclick   = () => openEpTab(stepIdx);
+    const dot   = chip.querySelector('.chip-dot');
+    const label = chip.querySelector('.chip-label');
+    const arrow = chip.querySelector('.chip-arrow');
+    if (dot)   dot.style.background = 'var(--green)';
+    if (label) label.textContent = 'submitted ·';
+    if (arrow) arrow.textContent = '↗';
+  }
+  renderEpTabs();
 }
 
 // ─── EDITOR PANE ─────────────────────────────────────────────────────────────
@@ -808,36 +982,26 @@ function initContextMirror(stepIdx, task) {
 let epCm = null;
 let epStepIdx = null;
 
-/**
- * Called from runStep and returnToLive.
- * - code step  → editable CM with the step's placeholder/lang
- * - other step → read-only CM showing task.context if present, else placeholder UI
- */
 function updateEditorPane(step, stepIdx) {
-  const host      = document.getElementById('ep-cm-host');
-  const fileText  = document.getElementById('ep-filename-text');
-  const badge     = document.getElementById('ep-mode-badge');
+  const host       = document.getElementById('ep-cm-host');
   const footerBtns = document.getElementById('ep-footer-btns');
   const footerLeft = document.getElementById('ep-footer-left');
   const placeholder = document.getElementById('ep-placeholder');
   if (!host) return;
 
-  // Destroy previous instance
+  // Destroy previous live CM
   if (epCm) { try { epCm.toTextArea(); } catch (e) {} epCm = null; }
   host.innerHTML = '';
   host.classList.remove('has-editor');
-  epStepIdx = stepIdx;
+  epStepIdx  = stepIdx;
+  epActiveTab = null;   // switch away from any open tab — live step takes priority
 
   const task = step?.task;
 
   if (task?.type === 'code') {
-    // ── Editable editor ──
     const filename = task.file || 'untitled';
-    fileText.textContent = filename;
-    badge.textContent    = 'editing';
-    badge.className      = 'ep-badge ep-badge-edit';
-    footerLeft.textContent = '';
-    footerBtns.style.display = 'flex';
+    if (footerLeft) footerLeft.textContent = '';
+    if (footerBtns) footerBtns.style.display = 'flex';
     if (placeholder) placeholder.style.display = 'none';
 
     const ta = document.createElement('textarea');
@@ -853,73 +1017,73 @@ function updateEditorPane(step, stepIdx) {
       styleActiveLine:   true,
       gutters:           ['CodeMirror-linenumbers'],
       viewportMargin:    Infinity,
-      indentUnit:        2,
-      tabSize:           2,
-      indentWithTabs:    false,
-      lineWrapping:      false,
+      indentUnit: 2, tabSize: 2, indentWithTabs: false, lineWrapping: false,
       extraKeys: {
-        'Ctrl-Enter': () => submit(),
-        'Cmd-Enter':  () => submit(),
-        'Ctrl-/':     c  => c.execCommand('toggleComment'),
-        'Tab':        c  => { if (c.somethingSelected()) c.indentSelection('add'); else c.replaceSelection('  ', 'end'); },
-        'Shift-Tab':  c  => c.indentSelection('subtract'),
+        'Ctrl-Enter': () => submit(), 'Cmd-Enter': () => submit(),
+        'Ctrl-/': c => c.execCommand('toggleComment'),
+        'Tab': c => { if (c.somethingSelected()) c.indentSelection('add'); else c.replaceSelection('  ', 'end'); },
+        'Shift-Tab': c => c.indentSelection('subtract'),
       },
     });
     if (task.placeholder) epCm.setValue(task.placeholder);
     host.classList.add('has-editor');
-
-    // Keep cmInstances in sync so getCmUserValue still works
     cmInstances[stepIdx] = { cm: epCm };
-
     epCm.on('change', () => { clearErrorBar(); clearStatusBar(); });
     setTimeout(() => {
-      epCm.refresh();
-      epCm.focus();
+      epCm.refresh(); epCm.focus();
       const lastLine = epCm.lastLine();
       epCm.setSelection({ line: 0, ch: 0 }, { line: lastLine, ch: epCm.getLine(lastLine).length });
     }, 120);
 
   } else if (task?.context) {
-    // ── Read-only context view ──
-    const filename = task.file || 'context';
-    fileText.textContent = filename;
-    badge.textContent    = 'read-only';
-    badge.className      = 'ep-badge ep-badge-readonly';
-    footerBtns.style.display = 'none';
-    footerLeft.textContent   = 'context file';
+    if (footerBtns) footerBtns.style.display = 'none';
+    if (footerLeft) footerLeft.textContent = 'context file';
     if (placeholder) placeholder.style.display = 'none';
 
     const ta = document.createElement('textarea');
     host.appendChild(ta);
     epCm = CodeMirror.fromTextArea(ta, {
-      value:           task.context,
-      mode:            cmMode(task.lang || 'javascript'),
-      theme:           'default',
-      lineNumbers:     true,
-      readOnly:        true,
-      lineWrapping:    false,
-      viewportMargin:  Infinity,
-      cursorBlinkRate: -1,
+      value: task.context, mode: cmMode(task.lang || 'javascript'),
+      theme: 'default', lineNumbers: true, readOnly: true,
+      lineWrapping: false, viewportMargin: Infinity, cursorBlinkRate: -1,
     });
     epCm.setValue(task.context);
     host.classList.add('has-editor');
     setTimeout(() => epCm.refresh(), 80);
 
   } else {
-    // ── No editor for this step — show placeholder ──
-    fileText.textContent = 'no file';
-    badge.textContent    = 'read-only';
-    badge.className      = 'ep-badge ep-badge-readonly';
-    footerBtns.style.display = 'none';
-    footerLeft.textContent   = '';
+    if (footerBtns) footerBtns.style.display = 'none';
+    if (footerLeft) footerLeft.textContent = '';
     if (placeholder) placeholder.style.display = '';
   }
+
+  renderEpTabs();
 }
 
 function addUserInputBubble(step, stepIdx) {
   if (!step.task || step.task.type === 'cmd' || step.task.type === 'ask') return;
-  if (step.task.type === 'code') return; // editor lives in #editor-pane
-  const isCode   = false;
+
+  if (step.task.type === 'code') {
+    // Show a compact chip that points the user to the right-side editor
+    const filename = step.task.file || 'untitled';
+    const wrap     = document.createElement('div');
+    wrap.className = 'msg user-input';
+    wrap.id        = 'user-input-' + stepIdx;
+    wrap.innerHTML = userHead() + `
+      <div class="edit-chip-bubble chip-live" id="edit-chip-${stepIdx}"
+           title="Click to focus the editor"
+           onclick="focusLiveTab()">
+        <span class="chip-dot"></span>
+        <span class="chip-icon">${FILE_ICON_SVG}</span>
+        <span class="chip-label">editing ·</span>
+        <span class="chip-filename">${esc(filename)}</span>
+        <span class="chip-arrow">→</span>
+      </div>`;
+    chat().appendChild(wrap);
+    sc();
+    return;
+  }
+
   const wrap     = document.createElement('div');
   wrap.className = 'msg user-input';
   wrap.id        = 'user-input-' + stepIdx;
@@ -1243,6 +1407,8 @@ function submit() {
     if (task.type === 'code') {
       if (r.ok) {
         S.answers[S.idx] = { type: 'code', text: input, hintUsed: S.hintUsedThisStep };
+        const codeTask = task;
+        registerSubmittedCodeTab(S.idx, input, codeTask.file || 'untitled', codeTask.lang || 'javascript');
         addAlexCorrectBubble(r.msg);
         setTimeout(() => advance(), 900);
       } else {
