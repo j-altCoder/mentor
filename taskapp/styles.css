@@ -1101,6 +1101,14 @@ html,body {
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .chip-done .chip-filename { color:var(--green) }
+.edit-chip-bubble.chip-skipped {
+  border-color:var(--border2);
+  background:var(--bg2);
+  cursor:default;opacity:.6;
+}
+.edit-chip-bubble.chip-skipped:hover {
+  background:var(--bg2);border-color:var(--border2);box-shadow:none;
+}
 .chip-arrow { margin-left:2px;color:var(--text3);flex-shrink:0;font-size:10px;transition:color var(--t) }
 .edit-chip-bubble:hover .chip-arrow { color:var(--text2) }
 
