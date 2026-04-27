@@ -1302,7 +1302,8 @@ function runStep(idx) {
     S.histIdx          = -1;
     S.hintUsedThisStep = false;
     setLocked(false);
-    document.getElementById('skip-btn').style.visibility = (task || step.nextOn) ? 'visible' : 'hidden';
+    const skippable = task?.type === 'code' || task?.type === 'quiz' || task?.type === 'cmd';
+    document.getElementById('skip-btn').style.visibility = skippable ? 'visible' : 'hidden';
     renderMods();
     updateStats();
     renderSaved();
