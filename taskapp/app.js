@@ -121,6 +121,12 @@ function toggleTheme() {
 
 // ─── NAME PROMPT ─────────────────────────────────────────────────────────────
 function showNamePrompt() {
+  // Hide the terminal action buttons — no step is active yet
+  const skipBtn = document.getElementById('skip-btn');
+  const runBtn  = document.getElementById('run-btn');
+  if (skipBtn) skipBtn.style.visibility = 'hidden';
+  if (runBtn)  runBtn.style.visibility  = 'hidden';
+
   const id   = ++MC;
   const wrap = document.createElement('div');
   wrap.className = 'msg';
@@ -1304,6 +1310,7 @@ function runStep(idx) {
     setLocked(false);
     const skippable = task?.type === 'code' || task?.type === 'quiz' || task?.type === 'cmd';
     document.getElementById('skip-btn').style.visibility = skippable ? 'visible' : 'hidden';
+    document.getElementById('run-btn').style.visibility  = 'visible';
     renderMods();
     updateStats();
     renderSaved();
