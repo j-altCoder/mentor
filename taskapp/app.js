@@ -570,10 +570,11 @@ function restartModule(modIdx) {
   }
   if (epCm) { try { epCm.toTextArea(); } catch(e){} epCm = null; epStepIdx = null; }
   _destroyTabCm();
-  // Remove any tabs from this module's steps
-  for (let i = firstStepIdx; i <= lastStepIdx; i++) {
-    const ti = epTabs.findIndex(t => t.stepIdx === i);
-    if (ti !== -1) epTabs.splice(ti, 1);
+  // Remove all tab entries for this module's steps entirely (code will be re-written)
+  for (let i = epTabs.length - 1; i >= 0; i--) {
+    if (epTabs[i].stepIdx >= firstStepIdx && epTabs[i].stepIdx <= lastStepIdx) {
+      epTabs.splice(i, 1);
+    }
   }
   epActiveTab = null;
 
@@ -827,7 +828,8 @@ function renderEpTabs() {
   const liveTab = document.getElementById('ep-live-tab');
   if (!tabsEl) return;
 
-  tabsEl.innerHTML = epTabs.map(t => `
+  // Only render tabs that are currently open (open:true)
+  tabsEl.innerHTML = epTabs.filter(t => t.open).map(t => `
     <div class="ep-tab${epActiveTab === t.stepIdx ? ' active' : ''}"
          onclick="openEpTab(${t.stepIdx})"
          title="${esc(t.filename)}">
@@ -836,7 +838,6 @@ function renderEpTabs() {
     </div>`).join('');
 
   if (liveTab) {
-    // Show live tab only when current step is an unanswered code step
     const isLive = epStepIdx !== null
       && STEPS[epStepIdx]?.task?.type === 'code'
       && !S.answers[epStepIdx];
@@ -858,9 +859,12 @@ function _destroyTabCm() {
 }
 
 function openEpTab(stepIdx) {
+  // Find by stepIdx regardless of open state — chip can re-open a closed tab
   const tab = epTabs.find(t => t.stepIdx === stepIdx);
   if (!tab) return;
 
+  // Mark it open so it appears in the tab bar
+  tab.open = true;
   epActiveTab = stepIdx;
 
   const host        = document.getElementById('ep-cm-host');
@@ -900,24 +904,25 @@ function openEpTab(stepIdx) {
 }
 
 function closeEpTab(stepIdx) {
-  const idx = epTabs.findIndex(t => t.stepIdx === stepIdx);
-  if (idx === -1) return;
-  epTabs.splice(idx, 1);
+  const tab = epTabs.find(t => t.stepIdx === stepIdx);
+  if (!tab) return;
+
+  // Hide from tab bar but keep data so it can be re-opened via chip
+  tab.open = false;
 
   if (epActiveTab === stepIdx) {
-    // Closed tab was active — move to nearest remaining tab
-    const next = epTabs[idx] || epTabs[idx - 1] || null;
-    if (next) {
-      openEpTab(next.stepIdx);
+    // Closed tab was active — move to nearest open tab
+    const openTabs = epTabs.filter(t => t.open);
+    if (openTabs.length > 0) {
+      openEpTab(openTabs[openTabs.length - 1].stepIdx);
       return;
     }
-    // No tabs left — show live editor if available, else true placeholder
+    // No open tabs — show live editor or placeholder
     epActiveTab = null;
     _destroyTabCm();
-    showLiveEditor();   // handles both "live code step" and "no editor" cases
+    showLiveEditor();
     return;
   }
-  // Closed tab was not active — just remove from list and re-render
   renderEpTabs();
 }
 
@@ -971,8 +976,12 @@ function focusLiveTab() { showLiveEditor(); }
  */
 function finalizeCodeChip(stepIdx, submitted, content, filename, lang) {
   if (submitted) {
-    if (!epTabs.find(t => t.stepIdx === stepIdx)) {
-      epTabs.push({ stepIdx, filename, content, lang });
+    const existing = epTabs.find(t => t.stepIdx === stepIdx);
+    if (existing) {
+      // Re-open if it was closed
+      existing.open = true;
+    } else {
+      epTabs.push({ stepIdx, filename, content, lang, open: true });
     }
   }
 
@@ -989,7 +998,6 @@ function finalizeCodeChip(stepIdx, submitted, content, filename, lang) {
       if (label) label.textContent = 'submitted ·';
       if (arrow) arrow.textContent = '↗';
     } else {
-      // Skipped — grey out the chip, no tab
       chip.className = 'edit-chip-bubble chip-skipped';
       chip.title     = 'Skipped';
       chip.onclick   = null;
