@@ -324,10 +324,8 @@ function replayStep(step, idx) {
 }
 
 function restartSession() {
-  try {
-    localStorage.removeItem(LS_NAME);
-    localStorage.removeItem(LS_PROGRESS);
-  } catch (e) {}
+  try { localStorage.removeItem(LS_NAME);     } catch (e) {}
+  try { localStorage.removeItem(LS_PROGRESS); } catch (e) {}
   window.location.reload();
 }
 
@@ -522,8 +520,12 @@ function viewModule(modIdx) {
   renderConfidence(modIdx);
 }
 
+let _returningToLive = false;
+
 /** Return from viewing a past module to the live session. */
 function returnToLive() {
+  if (_returningToLive) return;
+  _returningToLive = true;
   viewingPastMod = null;
 
   // Hide the topbar restart button
@@ -563,6 +565,7 @@ function returnToLive() {
   renderMods();
   renderConfidence(liveMod);
   runStep(S.idx);
+  _returningToLive = false;
 }
 
 function restartModule(modIdx) {
@@ -1444,7 +1447,7 @@ function submit() {
   let input = '';
   if (task.type === 'code') {
     input = getCmUserValue(S.idx);
-    if (!input || input.trim() === (task.placeholder || '').trim()) {
+    if (!input) {
       showErrorBar("You haven't written anything yet.");
       return;
     }
@@ -1563,6 +1566,7 @@ function advance(xpType = 'correct', nextDelay = 350) {
         // Some steps ahead are already answered — replay the next module's
         // existing progress and land at the frontier step
         S.idx = frontier;
+        S.locked = false;
         updateStats();
         saveProgress();
         setTimeout(() => {
