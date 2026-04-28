@@ -306,19 +306,69 @@ function replayStep(step, idx) {
     if (favBtn && savedStep.some(s => s.type === 'fav')) favBtn.classList.add('active-fav');
   }
 
-  // Render user answer bubble if answered (not skipped)
-  if (answer && !skipped && answer.type !== 'info') {
+  // Render user answer bubble
+  if (answer) {
     const userWrap     = document.createElement('div');
     userWrap.className = 'msg user-input msg-replayed';
-    if (answer.type === 'code') {
+
+    if (answer.type === 'skipped') {
+      // Skipped — show grey chip for code steps, plain badge for others
+      if (step.task?.type === 'code') {
+        const filename = step.task.file || 'untitled';
+        userWrap.innerHTML = userHead() + `
+          <div class="edit-chip-bubble chip-skipped">
+            <span class="chip-dot" style="background:var(--text3);animation:none"></span>
+            <span class="chip-icon">${FILE_ICON_SVG}</span>
+            <span class="chip-label">skipped ·</span>
+            <span class="chip-filename">${esc(filename)}</span>
+          </div>`;
+      } else {
+        userWrap.innerHTML = userHead() + `<div class="user-answer-bubble replay-skipped">skipped</div>`;
+      }
+
+    } else if (answer.type === 'code') {
+      // Code — show chip that re-opens the tab + collapsed preview
+      const filename = step.task?.file || 'untitled';
+      const tabEntry = epTabs.find(t => t.stepIdx === idx);
       userWrap.innerHTML = userHead() + `
-        <div class="replay-code-answer">
-          <div class="replay-code-label">submitted code</div>
-          <pre class="replay-code-pre">${esc(answer.text)}</pre>
+        <div class="edit-chip-bubble chip-done" id="edit-chip-${idx}"
+             title="Click to view submitted code"
+             onclick="openEpTab(${idx})">
+          <span class="chip-dot" style="background:var(--green);animation:none"></span>
+          <span class="chip-icon">${FILE_ICON_SVG}</span>
+          <span class="chip-label">submitted ·</span>
+          <span class="chip-filename">${esc(filename)}</span>
+          <span class="chip-arrow">↗</span>
         </div>`;
+      // Ensure tab entry exists so chip click works
+      if (!tabEntry) {
+        epTabs.push({ stepIdx: idx, filename, content: answer.text, lang: step.task?.lang || 'javascript', open: false });
+      }
+
+    } else if (answer.type === 'quiz') {
+      // Quiz — show answer with a quiz badge
+      userWrap.innerHTML = userHead() + `
+        <div class="user-answer-bubble replay-quiz">
+          <span class="replay-quiz-badge">quiz</span>${esc(answer.text)}
+        </div>`;
+
+    } else if (answer.type === 'cmd') {
+      // Terminal command — monospace pill
+      userWrap.innerHTML = userHead() + `
+        <div class="replay-cmd-bubble">
+          <span class="replay-cmd-prompt">$</span>
+          <span class="replay-cmd-text">${esc(answer.text)}</span>
+        </div>`;
+
+    } else if (answer.type === 'info') {
+      // Free-text reply to a non-task step
+      userWrap.innerHTML = userHead() + `<div class="user-answer-bubble">${esc(answer.text)}</div>`;
+
     } else {
+      // Fallback
       userWrap.innerHTML = userHead() + `<div class="user-answer-bubble">${esc(answer.text)}</div>`;
     }
+
     chat().appendChild(userWrap);
   }
 }
@@ -555,8 +605,7 @@ function returnToLive() {
   for (let i = modStart; i < S.idx; i++) {
     if (STEPS[i]) replayStep(STEPS[i], i);
   }
-
-  delete cmInstances[S.idx];
+  renderEpTabs();
 
   document.getElementById('cmd-in').disabled  = false;
   document.getElementById('run-btn').disabled = false;
@@ -1593,6 +1642,7 @@ function advance(xpType = 'correct', nextDelay = 350) {
           for (let i = frontierModStart; i < frontier; i++) {
             if (STEPS[i]) replayStep(STEPS[i], i);
           }
+          renderEpTabs();
           delete cmInstances[frontier];
           renderMods();
           runStep(frontier);
