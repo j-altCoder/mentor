@@ -1112,7 +1112,35 @@ html,body {
 .chip-arrow { margin-left:2px;color:var(--text3);flex-shrink:0;font-size:10px;transition:color var(--t) }
 .edit-chip-bubble:hover .chip-arrow { color:var(--text2) }
 
-.msg-replayed { opacity:.6 }
+/* replay answer variants */
+.replay-skipped {
+  opacity:.5;font-style:italic;font-size:var(--fs-sm);
+}
+.replay-quiz {
+  display:flex;align-items:center;gap:7px;
+}
+.replay-quiz-badge {
+  font-size:var(--fs-xs);font-weight:700;
+  text-transform:uppercase;letter-spacing:.07em;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--yellow);background:rgba(227,179,65,.1);
+  border:1px solid rgba(227,179,65,.2);
+  padding:1px 6px;border-radius:3px;flex-shrink:0;
+}
+.replay-cmd-bubble {
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--editor-bg);
+  border:1px solid var(--border2);
+  border-radius:6px;padding:5px 11px;
+  font-family:'JetBrains Mono',monospace;font-size:var(--fs-sm);
+  max-width:420px;
+}
+.replay-cmd-prompt {
+  color:var(--green);flex-shrink:0;opacity:.7;
+}
+.replay-cmd-text {
+  color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
 .msg-replayed:hover { opacity:1;transition:opacity var(--t) }
 .replay-code-answer {
   margin-top:6px;border:1px solid var(--border2);
