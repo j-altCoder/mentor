@@ -1863,7 +1863,7 @@ kbd {
 <script src="lesson-devops.js"        onerror="console.warn('lesson-devops.js not found')"></script>
 <script src="lesson-observability.js" onerror="console.warn('lesson-observability.js not found')"></script>
 <script src="lesson-production-debugging.js" onerror="console.warn('lesson-production-debugging.js not found')"></script>
-<script src="lesson-debugging.js" onerror="console.warn('lesson-debugging.js not found')"></script>
+<script src="lesson-debugging2.js" onerror="console.warn('lesson-debugging2.js not found')"></script>
    
 <script src="lesson-distributed.js"   onerror="console.warn('lesson-distributed.js not found')"></script>
 <script src="lesson-code-quality.js"  onerror="console.warn('lesson-code-quality.js not found')"></script>
@@ -2054,13 +2054,17 @@ const LESSON_MAP = [
   { ref: () => typeof LESSON_PACKAGES             !== 'undefined' ? LESSON_PACKAGES              : null, category: "Code Quality & Debugging",          tag: "Packages & Dependencies" },
   { ref: () => typeof LESSON_CODE_REVIEW          !== 'undefined' ? LESSON_CODE_REVIEW           : null, category: "Code Quality & Debugging",          tag: "Code Review" },
   { ref: () => typeof LESSON_DEBUGGING            !== 'undefined' ? LESSON_DEBUGGING             : null, category: "Code Quality & Debugging",          tag: "Debugging" },
+  { ref: () => typeof LESSON_DEBUGGING_2         !== 'undefined' ? LESSON_DEBUGGING_2         : null, category: Code Quality & Debugging",  tag: "Debugging 2" },
+  { ref: () => typeof LESSON_PRODUCTION_DEBUGGING        !== 'undefined' ? LESSON_PRODUCTION_DEBUGGING         : null, category: "Code Quality & Debugging",  tag: "Production Debugging" },
+   
   { ref: () => typeof LESSON_AUTH                 !== 'undefined' ? LESSON_AUTH                  : null, category: "Security & Production Operations",  tag: "Authentication" },
   { ref: () => typeof LESSON_SECURITY             !== 'undefined' ? LESSON_SECURITY              : null, category: "Security & Production Operations",  tag: "Application Security" },
   { ref: () => typeof LESSON_BROWSER_SECURITY     !== 'undefined' ? LESSON_BROWSER_SECURITY      : null, category: "Security & Production Operations",  tag: "Browser Security (XSS/CSRF)" },
   { ref: () => typeof LESSON_DEPENDENCY_SECURITY  !== 'undefined' ? LESSON_DEPENDENCY_SECURITY   : null, category: "Security & Production Operations",  tag: "Dependency Security" },
   { ref: () => typeof LESSON_OBSERVABILITY        !== 'undefined' ? LESSON_OBSERVABILITY         : null, category: "Security & Production Operations",  tag: "Observability & Monitoring" },
-  { ref: () => typeof LESSON_PRODUCTION_DEBUGGING        !== 'undefined' ? LESSON_PRODUCTION_DEBUGGING         : null, category: "Security & Production Operations",  tag: "Production Debugging" },
-  { ref: () => typeof LESSON_DEBUGGING        !== 'undefined' ? LESSON_DEBUGGING         : null, category: "Security & Production Operations",  tag: "Debugging" },
+   
+
+   
   { ref: () => typeof LESSON_INCIDENTS            !== 'undefined' ? LESSON_INCIDENTS             : null, category: "Security & Production Operations",  tag: "Production Incident Response" },
   { ref: () => typeof LESSON_HR_INTERVIEWS        !== 'undefined' ? LESSON_HR_INTERVIEWS         : null, category: "Career & Interviews",               tag: "HR & Salary Negotiation" },
 ];
