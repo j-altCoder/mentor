@@ -1862,6 +1862,9 @@ kbd {
 <script src="lesson-security.js"      onerror="console.warn('lesson-security.js not found')"></script>
 <script src="lesson-devops.js"        onerror="console.warn('lesson-devops.js not found')"></script>
 <script src="lesson-observability.js" onerror="console.warn('lesson-observability.js not found')"></script>
+<script src="lesson-production-debugging.js" onerror="console.warn('lesson-production-debugging.js not found')"></script>
+<script src="lesson-debugging.js" onerror="console.warn('lesson-debugging.js not found')"></script>
+   
 <script src="lesson-distributed.js"   onerror="console.warn('lesson-distributed.js not found')"></script>
 <script src="lesson-code-quality.js"  onerror="console.warn('lesson-code-quality.js not found')"></script>
 <script src="lesson-debugging.js"     onerror="console.warn('lesson-debugging.js not found')"></script>
@@ -2056,6 +2059,8 @@ const LESSON_MAP = [
   { ref: () => typeof LESSON_BROWSER_SECURITY     !== 'undefined' ? LESSON_BROWSER_SECURITY      : null, category: "Security & Production Operations",  tag: "Browser Security (XSS/CSRF)" },
   { ref: () => typeof LESSON_DEPENDENCY_SECURITY  !== 'undefined' ? LESSON_DEPENDENCY_SECURITY   : null, category: "Security & Production Operations",  tag: "Dependency Security" },
   { ref: () => typeof LESSON_OBSERVABILITY        !== 'undefined' ? LESSON_OBSERVABILITY         : null, category: "Security & Production Operations",  tag: "Observability & Monitoring" },
+  { ref: () => typeof LESSON_PRODUCTION_DEBUGGING        !== 'undefined' ? LESSON_PRODUCTION_DEBUGGING         : null, category: "Security & Production Operations",  tag: "Production Debugging" },
+  { ref: () => typeof LESSON_DEBUGGING        !== 'undefined' ? LESSON_DEBUGGING         : null, category: "Security & Production Operations",  tag: "Debugging" },
   { ref: () => typeof LESSON_INCIDENTS            !== 'undefined' ? LESSON_INCIDENTS             : null, category: "Security & Production Operations",  tag: "Production Incident Response" },
   { ref: () => typeof LESSON_HR_INTERVIEWS        !== 'undefined' ? LESSON_HR_INTERVIEWS         : null, category: "Career & Interviews",               tag: "HR & Salary Negotiation" },
 ];
