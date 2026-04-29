@@ -3,9 +3,9 @@
 //  Category: DevOps & Engineering Practice
 // ─────────────────────────────────────────────────────────────────
 
-const LESSON_DEBUGGING = {
-  category: "DevOps & Engineering Practice",
-  tag: "DEBUGGING",
+const LESSON_DEBUGGING_2 = {
+  category: "Code Quality & Debugging",
+  tag: "DEBUGGING 2",
   title: "It Works on My Machine",
   intro: "You've been debugging the same bug for two hours. It doesn't exist on your laptop. It definitely exists in production. Raj is refilling his coffee and he has that look — the one where he already knows what's wrong.",
   scenes: [
