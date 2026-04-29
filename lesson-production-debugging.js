@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 const LESSON_PRODUCTION_DEBUGGING = {
-  category: "Security & Production Operations",
+  category: "Code Quality & Debugging",
   tag: "Production Debugging",
   title: "The App Is Broken and You Don't Know Why",
   intro: "Everything worked on your machine. You pushed to production at 3pm on a Friday. By 3:15, Slack is lighting up. The app is slow, some requests are erroring, and you have no idea where to start. Raj opens his laptop.",
