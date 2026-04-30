@@ -466,8 +466,8 @@ JWT_SECRET=supersecretvalue
 // Step 4: Use them in your pipeline
 // In .github/workflows/ci.yml:
 // env:
-//   DATABASE_URL: ${{ secrets.DATABASE_URL }}
-//   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+//   DATABASE_URL: \${{ secrets.DATABASE_URL }}
+//   STRIPE_SECRET_KEY: \${{ secrets.STRIPE_SECRET_KEY }}
 
 // Step 5: If you've already committed .env at any point —
 //         rotate all those API keys. Today. Don't wait.`
