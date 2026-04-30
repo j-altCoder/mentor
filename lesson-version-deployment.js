@@ -713,12 +713,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build and push image
         run: |
-          docker build -t registry.myapp.com/myapp:${{ github.sha }} .
-          docker push registry.myapp.com/myapp:${{ github.sha }}
+          docker build -t registry.myapp.com/myapp:\${{ github.sha }} .
+          docker push registry.myapp.com/myapp:\${{ github.sha }}
       - name: Deploy to dev
         run: |
           kubectl set image deployment/myapp \
-            myapp=registry.myapp.com/myapp:${{ github.sha }}
+            myapp=registry.myapp.com/myapp:\${{ github.sha }}
           kubectl rollout status deployment/myapp --timeout=120s
       - name: Smoke test
         run: curl --fail https://dev.myapp.com/health
@@ -1114,8 +1114,8 @@ const show = await ldClient.variation(
 // Injected as env vars at pipeline runtime, never logged, masked in output
 //
 // env:
-//   DATABASE_URL: ${{ secrets.DATABASE_URL }}
-//   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+//   DATABASE_URL: \${{ secrets.DATABASE_URL }}
+//   STRIPE_SECRET_KEY: \${{ secrets.STRIPE_SECRET_KEY }}
 
 // ── Platform-injected secrets (recommended for production) ──
 // Stored in AWS Secrets Manager / GCP Secret Manager / Vault
