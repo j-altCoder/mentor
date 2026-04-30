@@ -271,16 +271,44 @@ header > p {
   top: 0;
   z-index: var(--z-progress);
   height: var(--nav-h);
-  padding: 0 1.4rem;
+  padding: 0 1rem 0 1.4rem;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--surface);
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   box-shadow: var(--shadow-sm);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+
+/* Action buttons living in the progress bar */
+.progress-action-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  padding: 0.22rem 0.6rem;
+  display: none;          /* hidden until a lesson is open */
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: border-color var(--t-fast), color var(--t-fast),
+              background var(--t-fast), opacity var(--t-fast);
+}
+.progress-action-btn.visible { display: flex; }
+
+.progress-action-btn.done-btn:hover        { border-color: var(--sage); color: var(--sage); }
+.progress-action-btn.done-btn.active       { border-color: var(--sage); color: var(--sage); background: var(--sage-dim); }
+
+.progress-action-btn.important-btn:hover   { border-color: #f5c842; color: #f5c842; }
+.progress-action-btn.important-btn.active  { border-color: #f5c842; color: #f5c842; background: rgba(245,200,66,0.10); }
+.progress-action-btn.important-btn.active .prog-star { fill: #f5c842; }
 
 .progress-track {
   flex: 1;
@@ -1744,6 +1772,14 @@ kbd {
     <svg class="icon icon-sm"><use href="#icon-check"/></svg>
     <span id="readTimeTxt"></span>
   </span>
+  <button class="progress-action-btn important-btn" id="progressImportantBtn" onclick="toggleImportant(State.get().currentIdx)" title="Star this lesson">
+    <svg class="icon icon-sm prog-star"><use href="#icon-star"/></svg>
+    Important
+  </button>
+  <button class="progress-action-btn done-btn" id="progressDoneBtn" onclick="toggleDone(State.get().currentIdx)" title="Mark as done (D)">
+    <svg class="icon icon-sm"><use href="#icon-check"/></svg>
+    Done
+  </button>
 </div>
 
 <div class="app">
@@ -2406,20 +2442,10 @@ function _renderLesson(idx, view) {
           ${_esc(lesson.category)}
         </span>
         <span class="lesson-sub-tag">/ ${_esc(lessonTag)}</span>
-        <div class="eyebrow-actions">
-          <button class="notes-view-btn" id="notesViewBtn" onclick="toggleNotesPanel()">
-            <svg class="icon icon-sm"><use href="#icon-notes"/></svg>
-            Notes
-          </button>
-          <button class="eyebrow-btn important-btn ${s.importantLessons && s.importantLessons.has(lessonTag) ? 'active' : ''}" id="importantBtn" onclick="toggleImportant(${idx})" title="Mark as important">
-            <svg class="icon icon-sm"><use href="#icon-star"/></svg>
-            ${s.importantLessons && s.importantLessons.has(lessonTag) ? 'Important' : 'Important'}
-          </button>
-          <button class="eyebrow-btn done-btn ${s.completedLessons.has(lessonTag) ? 'active' : ''}" id="markDoneBtn" onclick="toggleDone(${idx})" title="Mark as done (D)">
-            <svg class="icon icon-sm"><use href="#icon-check"/></svg>
-            ${s.completedLessons.has(lessonTag) ? 'Done' : 'Done'}
-          </button>
-        </div>
+        <button class="notes-view-btn" id="notesViewBtn" onclick="toggleNotesPanel()" style="margin-left:auto">
+          <svg class="icon icon-sm"><use href="#icon-notes"/></svg>
+          Notes
+        </button>
       </div>
       <h2 class="lesson-title">${_esc(lesson.title)}</h2>
       <p class="lesson-intro">${lesson.intro || ''}</p>
@@ -2589,7 +2615,29 @@ function updateProgress() {
   const pct   = total > 0 ? (done / total) * 100 : 0;
   document.getElementById('progressFill').style.width  = pct + '%';
   document.getElementById('progressLabel').textContent = done + ' / ' + total + ' done';
+  _syncProgressBtns();
   updateReadingTime();
+}
+
+function _syncProgressBtns() {
+  const s         = State.get();
+  const doneBtn   = document.getElementById('progressDoneBtn');
+  const impBtn    = document.getElementById('progressImportantBtn');
+  const hasLesson = s.currentIdx !== null && !!LESSONS[s.currentIdx];
+  if (!doneBtn || !impBtn) return;
+  if (hasLesson) {
+    const tag = LESSONS[s.currentIdx].tag;
+    doneBtn.classList.add('visible');
+    impBtn.classList.add('visible');
+    doneBtn.classList.toggle('active', s.completedLessons.has(tag));
+    const isImp = s.importantLessons && s.importantLessons.has(tag);
+    impBtn.classList.toggle('active', isImp);
+    const star = impBtn.querySelector('.prog-star');
+    if (star) star.style.fill = isImp ? '#f5c842' : 'none';
+  } else {
+    doneBtn.classList.remove('visible');
+    impBtn.classList.remove('visible');
+  }
 }
 
 
@@ -3462,13 +3510,7 @@ function toggleDone(idx) {
   State.set({ completedLessons: done });
   Storage.saveCompleted(done);
 
-  const btn = document.getElementById('markDoneBtn');
-  if (btn) {
-    const isDone = done.has(lessonTag);
-    btn.classList.toggle('active', isDone);
-    btn.innerHTML = `<svg class="icon icon-sm"><use href="#icon-check"/></svg> Done`;
-    btn.title = isDone ? 'Mark as unread (D)' : 'Mark as done (D)';
-  }
+  _syncProgressBtns();
   const sb = document.getElementById('sidebarBtn-' + idx);
   if (sb) sb.classList.toggle('completed', done.has(lessonTag));
   updateProgress();
@@ -3484,8 +3526,7 @@ function toggleImportant(idx) {
   State.set({ importantLessons: important });
   Storage.saveImportant(important);
 
-  const btn = document.getElementById('importantBtn');
-  if (btn) btn.classList.toggle('active', important.has(lessonTag));
+  _syncProgressBtns();
 
   // Refresh sidebar dot
   const sb = document.getElementById('sidebarBtn-' + idx);
