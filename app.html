@@ -634,7 +634,6 @@ header > p {
 }
 
 .notes-view-btn {
-  margin-left: auto;
   background: none;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -652,6 +651,56 @@ header > p {
 
 .notes-view-btn:hover { border-color: var(--amber); color: var(--amber); }
 .notes-view-btn.has-notes { border-color: rgba(240,164,66,0.4); color: var(--amber); background: var(--amber-dim); }
+
+/* ── EYEBROW ACTION BUTTONS (done + important) ── */
+.eyebrow-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.eyebrow-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 0.25rem 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Done button */
+.eyebrow-btn.done-btn:hover        { border-color: var(--sage); color: var(--sage); }
+.eyebrow-btn.done-btn.active       { border-color: var(--sage); color: var(--sage); background: var(--sage-dim); }
+
+/* Important button */
+.eyebrow-btn.important-btn:hover   { border-color: #f5c842; color: #f5c842; }
+.eyebrow-btn.important-btn.active  {
+  border-color: #f5c842;
+  color: #f5c842;
+  background: rgba(245,200,66,0.10);
+}
+.eyebrow-btn.important-btn.active svg { fill: #f5c842; stroke: #f5c842; }
+
+/* Sidebar important indicator dot */
+.lesson-btn .important-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #f5c842;
+  flex-shrink: 0;
+  margin-left: 0.3rem;
+  vertical-align: middle;
+}
 
 .lesson-title {
   font-family: var(--font-display);
@@ -1142,25 +1191,7 @@ html[data-theme="light"] .analogy-card.analogy-prominent {
 }
 
 /* ── MARK DONE ── */
-.mark-done-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-  width: fit-content; margin: 2rem auto 0; padding: 0.55rem 1.5rem;
-  border-radius: 99px; border: 1.5px solid var(--border);
-  background: transparent; color: var(--text-muted);
-  font-family: var(--font-mono); font-size: 0.7rem; cursor: pointer;
-  transition: border-color var(--t-base), color var(--t-base), background var(--t-base);
-  letter-spacing: 0.04em; flex-direction: column;
-}
-.mark-done-btn:hover { border-color: var(--sage); color: var(--sage); }
-.mark-done-btn.done  { border-color: var(--sage); color: var(--sage); background: var(--sage-dim); }
-
-/* When completed, show an undo hint on hover so users know it's toggleable */
-.mark-done-btn.done .btn-main  { display: flex; align-items: center; gap: 0.5rem; }
-.mark-done-btn.done .btn-hint  {
-  font-size: 0.58rem; opacity: 0; color: var(--text-muted);
-  transition: opacity var(--t-base); letter-spacing: 0.02em;
-  margin-top: 0.1rem;
-}
-.mark-done-btn.done:hover .btn-hint { opacity: 0.7; }
+/* .mark-done-btn moved to eyebrow — see .eyebrow-btn.done-btn */
 
 /* ── LESSON NAV ── */
 .lesson-nav {
@@ -1676,6 +1707,7 @@ kbd {
   <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
   <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
   <symbol id="icon-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
+  <symbol id="icon-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
 </svg>
 
 <header>
@@ -1926,15 +1958,20 @@ html.raw = (str) => ({ __raw: String(str == null ? '' : str) });
 //  schema versioning, and user-facing warnings.
 // ═══════════════════════════════════════════════════════════════
 const Storage = (() => {
-  const SCHEMA_VERSION = 2;
+  const SCHEMA_VERSION = 3;
   const KEYS = {
-    bookmarks:  'coderoom-v2-bookmarks',
-    notes:      'coderoom-v2-notes',
-    completed:  'coderoom-v2-completed',
-    flags:      'coderoom-v2-flags',
-    theme:      'coderoom-theme',
-    lastLesson: 'coderoom-v2-last-lesson',
-    schema:     'coderoom-schema-version',
+    bookmarks:   'coderoom-v3-bookmarks',
+    notes:       'coderoom-v3-notes',
+    completed:   'coderoom-v3-completed',
+    flags:       'coderoom-v3-flags',
+    important:   'coderoom-v3-important',
+    theme:       'coderoom-theme',
+    lastLesson:  'coderoom-v2-last-lesson',
+    schema:      'coderoom-schema-version',
+    v2bookmarks: 'coderoom-v2-bookmarks',
+    v2notes:     'coderoom-v2-notes',
+    v2completed: 'coderoom-v2-completed',
+    v2flags:     'coderoom-v2-flags',
   };
 
   function _read(key, fallback) {
@@ -1970,13 +2007,52 @@ const Storage = (() => {
     if (el) el.classList.remove('visible');
   }
 
-  // Run once on load — migrate old schemas if needed
-  function migrate() {
+  // Run once on load — migrates index-based v2 data to tag-based v3
+  function migrate(lessonsArray) {
     const v = _read(KEYS.schema, 1);
-    if (v < SCHEMA_VERSION) {
-      // Future: add migration transforms here
-      _write(KEYS.schema, SCHEMA_VERSION);
+    if (v >= SCHEMA_VERSION) return;
+    const lessons = lessonsArray || [];
+    const idxToTag = {};
+    lessons.forEach((l, i) => { if (l && l.tag) idxToTag[i] = l.tag; });
+
+    // completed: [0,2] → ["Auth","MongoDB"]
+    const oldC = _read(KEYS.v2completed, null);
+    if (Array.isArray(oldC)) _write(KEYS.completed, oldC.map(i => idxToTag[i]).filter(Boolean));
+
+    // flags: ["0-3"] → ["Auth-3"]
+    const oldF = _read(KEYS.v2flags, null);
+    if (Array.isArray(oldF)) {
+      _write(KEYS.flags, oldF.map(key => {
+        const d = key.indexOf('-'); if (d === -1) return null;
+        const tag = idxToTag[Number(key.slice(0,d))];
+        return tag ? tag + key.slice(d) : null;
+      }).filter(Boolean));
     }
+
+    // bookmarks: [{lessonIdx:0}] → [{lessonTag:"Auth"}]
+    const oldBM = _read(KEYS.v2bookmarks, null);
+    if (Array.isArray(oldBM)) {
+      _write(KEYS.bookmarks, oldBM.map(b => {
+        const tag = idxToTag[b.lessonIdx]; if (!tag) return null;
+        const nb = Object.assign({}, b); nb.lessonTag = tag; delete nb.lessonIdx; return nb;
+      }).filter(Boolean));
+    }
+
+    // notes: {"note-0-2":{}} → {"note-Auth-2":{}}
+    const oldN = _read(KEYS.v2notes, null);
+    if (oldN && typeof oldN === 'object') {
+      const m = {};
+      Object.entries(oldN).forEach(([k, val]) => {
+        const p = k.split('-'); if (p[0] !== 'note') return;
+        const tag = idxToTag[Number(p[1])]; if (!tag) return;
+        const nv = Object.assign({}, val); nv.lessonTag = tag; delete nv.lessonIdx;
+        m['note-' + tag + '-' + p.slice(2).join('-')] = nv;
+      });
+      _write(KEYS.notes, m);
+    }
+
+    _write(KEYS.schema, SCHEMA_VERSION);
+    console.info('[Coderoom] Storage migrated v' + v + ' → v' + SCHEMA_VERSION);
   }
 
   return {
@@ -1998,6 +2074,9 @@ const Storage = (() => {
 
     loadTheme:      ()      => _read(KEYS.theme, null),
     saveTheme:      (theme) => _write(KEYS.theme, theme),
+
+    loadImportant:  ()      => new Set(_read(KEYS.important, [])),
+    saveImportant:  (set)   => _write(KEYS.important, [...set]),
 
     loadLastLesson: ()      => _read(KEYS.lastLesson, null),
     saveLastLesson: (tag)   => _write(KEYS.lastLesson, tag),
@@ -2134,7 +2213,8 @@ const State = (() => {
     bookmarks:        [],     // loaded from Storage
     notesStore:       {},     // loaded from Storage
     completedLessons: null,   // Set, loaded from Storage
-    flags:            null,   // Set of "lessonIdx-sceneIdx" strings, loaded from Storage
+    flags:            null,   // Set of "lessonTag-sceneIdx" strings
+    importantLessons: null,   // Set<tag> of starred lessons
     notesPanelOpen:   false,
     bookmarkGroupCollapsed: {},
     autoSaveTimers:   {},
@@ -2237,10 +2317,11 @@ function buildSidebar() {
         <span>${cat}</span>
       </div>`;
     grouped[cat].forEach(({ tag, idx }) => {
-      const isDone = s.completedLessons.has(idx);
+      const isDone      = s.completedLessons.has(tag);
+      const isImportant = s.importantLessons && s.importantLessons.has(tag);
       markup += `<button class="lesson-btn${isDone ? ' completed' : ''}" id="sidebarBtn-${idx}"
         style="--active-color:${meta.color}"
-        onclick="selectLesson(${idx})">${_esc(tag)}</button>`;
+        onclick="selectLesson(${idx})">${_esc(tag)}${isImportant ? '<span class="important-dot" title="Important"></span>' : ''}</button>`;
     });
     markup += '</div>';
   });
@@ -2312,7 +2393,8 @@ function _renderLesson(idx, view) {
   const prevIdx = hasPrev ? s.flatLessons[pos - 1] : null;
   const nextIdx = hasNext ? s.flatLessons[pos + 1] : null;
 
-  const lnKey  = 'note-' + idx + '-lesson';
+  const lessonTag = lesson.tag;
+  const lnKey  = 'note-' + lessonTag + '-lesson';
   const lnNote = s.notesStore[lnKey] || null;
   const lnText = lnNote ? _esc(lnNote.text) : '';
 
@@ -2323,11 +2405,21 @@ function _renderLesson(idx, view) {
           <svg class="icon icon-sm"><use href="#${catMeta.icon}"/></svg>
           ${_esc(lesson.category)}
         </span>
-        <span class="lesson-sub-tag">/ ${_esc(lesson.tag)}</span>
-        <button class="notes-view-btn" id="notesViewBtn" onclick="toggleNotesPanel()">
-          <svg class="icon icon-sm"><use href="#icon-notes"/></svg>
-          Notes
-        </button>
+        <span class="lesson-sub-tag">/ ${_esc(lessonTag)}</span>
+        <div class="eyebrow-actions">
+          <button class="notes-view-btn" id="notesViewBtn" onclick="toggleNotesPanel()">
+            <svg class="icon icon-sm"><use href="#icon-notes"/></svg>
+            Notes
+          </button>
+          <button class="eyebrow-btn important-btn ${s.importantLessons && s.importantLessons.has(lessonTag) ? 'active' : ''}" id="importantBtn" onclick="toggleImportant(${idx})" title="Mark as important">
+            <svg class="icon icon-sm"><use href="#icon-star"/></svg>
+            ${s.importantLessons && s.importantLessons.has(lessonTag) ? 'Important' : 'Important'}
+          </button>
+          <button class="eyebrow-btn done-btn ${s.completedLessons.has(lessonTag) ? 'active' : ''}" id="markDoneBtn" onclick="toggleDone(${idx})" title="Mark as done (D)">
+            <svg class="icon icon-sm"><use href="#icon-check"/></svg>
+            ${s.completedLessons.has(lessonTag) ? 'Done' : 'Done'}
+          </button>
+        </div>
       </div>
       <h2 class="lesson-title">${_esc(lesson.title)}</h2>
       <p class="lesson-intro">${lesson.intro || ''}</p>
@@ -2340,14 +2432,7 @@ function _renderLesson(idx, view) {
         <span class="lesson-note-status" id="lesson-note-status-${idx}"></span>
       </div>
       ${scenesHTML}
-      <div style="text-align:center">
-        <button class="mark-done-btn ${s.completedLessons.has(idx) ? 'done' : ''}" id="markDoneBtn" onclick="toggleDone(${idx})">
-          ${s.completedLessons.has(idx)
-            ? `<span class="btn-main"><svg class="icon icon-sm"><use href="#icon-check"/></svg> Completed</span><span class="btn-hint">click to mark as unread</span>`
-            : `<svg class="icon icon-sm"><use href="#icon-check"/></svg> Mark as done`
-          }
-        </button>
-      </div>
+
       <div class="lesson-nav">
         <button class="nav-btn-arrow" onclick="selectLesson(${prevIdx})" ${!hasPrev ? 'disabled' : ''}>
           <svg class="icon icon-sm"><use href="#icon-arrow-left"/></svg> Prev
@@ -2365,9 +2450,10 @@ function renderScene(s, catMeta, si) {
   const sceneIdx  = si !== undefined ? si : -1;
   const idxAttr   = sceneIdx >= 0 ? ` data-scene-idx="${sceneIdx}"` : '';
   const state     = State.get();
-  const noteKey   = `note-${state.currentIdx}-${sceneIdx}`;
+  const _lessonTag = state.currentIdx !== null ? LESSONS[state.currentIdx].tag : '';
+  const noteKey   = `note-${_lessonTag}-${sceneIdx}`;
   const hasNote   = !!(state.notesStore[noteKey]);
-  const flagKey   = `${state.currentIdx}-${sceneIdx}`;
+  const flagKey   = `${_lessonTag}-${sceneIdx}`;
   const isFlagged = sceneIdx >= 0 && state.flags && state.flags.has(flagKey);
 
   // Note dot — always visible when a note exists, no hover needed
@@ -2558,10 +2644,12 @@ function openAllNotes() {
 
   Object.entries(s.notesStore).forEach(([key, note]) => {
     if (!note || !note.text) return;
-    const li = note.lessonIdx;
-    if (li === undefined || li === null) return;
-    if (!byLesson[li]) byLesson[li] = [];
-    byLesson[li].push(note);
+    const ntag = note.lessonTag;
+    if (!ntag) return;
+    const nli = LESSONS.findIndex(l => l.tag === ntag);
+    if (nli === -1) return;
+    if (!byLesson[nli]) byLesson[nli] = [];
+    byLesson[nli].push(note);
   });
 
   const lessonIdxs = Object.keys(byLesson).map(Number).sort((a, b) => {
@@ -2643,25 +2731,26 @@ function renderBookmarkPanel() {
   const groups = {};
   const groupOrder = [];
   s.bookmarks.forEach(b => {
-    const key = b.lessonIdx !== undefined ? b.lessonIdx : '__none__';
+    const key = b.lessonTag !== undefined ? b.lessonTag : '__none__';
     if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
     groups[key].push(b);
   });
 
   // Current lesson group always floats to top
-  const currentKey = s.currentIdx !== null ? String(s.currentIdx) : null;
+  const currentTag2 = s.currentIdx !== null ? LESSONS[s.currentIdx].tag : null;
   const sortedOrder = groupOrder.slice().sort((a, b) => {
-    if (String(a) === currentKey) return -1;
-    if (String(b) === currentKey) return  1;
+    if (a === currentTag2) return -1;
+    if (b === currentTag2) return  1;
     return 0;
   });
 
   const groupsHTML = sortedOrder.map(key => {
     const items     = groups[key];
-    const lesson    = key !== '__none__' && LESSONS[key] ? LESSONS[key] : null;
-    const name      = lesson ? _esc(lesson.tag) : 'Unsorted';
+    const _bli    = key !== '__none__' ? LESSONS.findIndex(l => l.tag === key) : -1;
+    const lesson    = _bli >= 0 ? LESSONS[_bli] : null;
+    const name      = lesson ? _esc(lesson.tag) : (key === '__none__' ? 'Unsorted' : _esc(key));
     const isOpen    = !s.bookmarkGroupCollapsed[key];
-    const isCurrent = String(key) === currentKey;
+    const isCurrent = key === currentTag2;
 
     const itemsHTML = items.map(b => `
       <div class="bookmark-entry" onclick="jumpToBookmark('${b.id}')">
@@ -2767,8 +2856,10 @@ function jumpToBookmark(id) {
     }
   };
 
-  if (bookmark.lessonIdx !== s.currentIdx) {
-    selectLesson(bookmark.lessonIdx, true);
+  const _bmli = LESSONS.findIndex(l => l.tag === bookmark.lessonTag);
+  if (_bmli === -1) return;
+  if (_bmli !== s.currentIdx) {
+    selectLesson(_bmli, true);
     requestAnimationFrame(() => requestAnimationFrame(() => scrollToMark(5)));
   } else {
     scrollToMark(3);
@@ -2779,8 +2870,9 @@ function reapplyBookmarkHighlights() {
   const s    = State.get();
   const view = document.getElementById('lessonView');
   if (!view) return;
+  const _curTag = s.currentIdx !== null ? LESSONS[s.currentIdx].tag : null;
   s.bookmarks
-    .filter(b => b.lessonIdx === s.currentIdx)
+    .filter(b => b.lessonTag === _curTag)
     .forEach(b => {
       if (!document.getElementById(b.id)) injectHighlight(view, b.text, b.id, b.sceneIdx);
     });
@@ -2910,7 +3002,8 @@ saveBtn.addEventListener('click', (e) => {
     catch (_) { const frag = activeRange.extractContents(); mark.appendChild(frag); activeRange.insertNode(mark); }
   } catch (err) { console.warn('Could not highlight selection:', err); }
 
-  const updated = [{ id, text, lessonIdx: s.currentIdx, sceneIdx }, ...s.bookmarks];
+  const _bmTag = s.currentIdx !== null ? LESSONS[s.currentIdx].tag : '';
+  const updated = [{ id, text, lessonTag: _bmTag, sceneIdx }, ...s.bookmarks];
   State.set({ bookmarks: updated });
   Storage.saveBookmarks(updated);
   renderBookmarkPanel();
@@ -2993,14 +3086,15 @@ function doSearch(query) {
     [{ type: 'title', text: lesson.title }, { type: 'intro', text: _stripHtml(lesson.intro) }]
       .forEach(({ type, text }) => { if (text.toLowerCase().includes(ql)) hits.push({ type, text, sceneIdx: -1 }); });
 
-    const lnData = s.notesStore['note-' + lessonIdx + '-lesson'];
+    const _searchTag = lesson.tag;
+    const lnData = s.notesStore['note-' + _searchTag + '-lesson'];
     if (lnData && lnData.text && lnData.text.toLowerCase().includes(ql))
       hits.push({ type: 'note', text: lnData.text, sceneIdx: -1 });
 
     lesson.scenes.forEach((scene, sceneIdx) => {
       const { type, text } = _sceneToText(scene);
       if (text.toLowerCase().includes(ql)) hits.push({ type, text, sceneIdx });
-      const noteData = s.notesStore['note-' + lessonIdx + '-' + sceneIdx];
+      const noteData = s.notesStore['note-' + _searchTag + '-' + sceneIdx];
       if (noteData && noteData.text && noteData.text.toLowerCase().includes(ql))
         hits.push({ type: 'note', text: noteData.text, sceneIdx });
     });
@@ -3118,14 +3212,15 @@ function getNoteByKey(key) { return State.get().notesStore[key] || null; }
 
 function openNoteDialog(sceneIdx) {
   const s      = State.get();
-  const noteEl = document.getElementById(`inline-note-${s.currentIdx}-${sceneIdx}`);
+  const _olt   = s.currentIdx !== null ? LESSONS[s.currentIdx].tag : '';
+  const noteEl = document.getElementById(`inline-note-${_olt}-${sceneIdx}`);
   if (!noteEl) return;
   const isOpen = noteEl.classList.contains('open');
   if (isOpen) {
     noteEl.classList.remove('open');
     const ta = noteEl.querySelector('.inline-note-textarea');
     if (ta && !ta.value.trim()) {
-      const key = `note-${s.currentIdx}-${sceneIdx}`;
+      const key = `note-${_olt}-${sceneIdx}`;
       const updated = Object.assign({}, s.notesStore);
       delete updated[key];
       State.set({ notesStore: updated });
@@ -3144,7 +3239,8 @@ function markNoteOpen(sceneIdx) { _refreshNoteBtn(sceneIdx, true); }
 
 function autoSaveLessonNote(lessonIdx, ta) {
   resizeTextarea(ta);
-  const key      = 'note-' + lessonIdx + '-lesson';
+  const _alt = LESSONS[lessonIdx] ? LESSONS[lessonIdx].tag : String(lessonIdx);
+  const key      = 'note-' + _alt + '-lesson';
   const statusEl = document.getElementById('lesson-note-status-' + lessonIdx);
   const delBtn   = document.getElementById('lesson-note-del-' + lessonIdx);
   if (statusEl) { statusEl.textContent = 'typing…'; statusEl.style.opacity = '0.6'; }
@@ -3155,7 +3251,7 @@ function autoSaveLessonNote(lessonIdx, ta) {
     const text    = ta.value.trim();
     const updated = Object.assign({}, State.get().notesStore);
     if (text) {
-      updated[key] = { text, lessonIdx, sceneIdx: 'lesson', updatedAt: new Date().toISOString() };
+      updated[key] = { text, lessonTag: _alt, sceneIdx: 'lesson', updatedAt: new Date().toISOString() };
       if (delBtn) delBtn.classList.add('visible');
     } else {
       delete updated[key];
@@ -3173,7 +3269,8 @@ function autoSaveLessonNote(lessonIdx, ta) {
 }
 
 function deleteLessonNote(lessonIdx) {
-  const key     = 'note-' + lessonIdx + '-lesson';
+  const _dlt = LESSONS[lessonIdx] ? LESSONS[lessonIdx].tag : String(lessonIdx);
+  const key     = 'note-' + _dlt + '-lesson';
   const ta      = document.getElementById('lesson-note-ta-' + lessonIdx);
   const delBtn  = document.getElementById('lesson-note-del-' + lessonIdx);
   const updated = Object.assign({}, State.get().notesStore);
@@ -3189,8 +3286,9 @@ function deleteLessonNote(lessonIdx) {
 function autoSaveNote(sceneIdx, ta) {
   resizeTextarea(ta);
   const s        = State.get();
-  const key      = `note-${s.currentIdx}-${sceneIdx}`;
-  const statusEl = document.getElementById(`note-status-${s.currentIdx}-${sceneIdx}`);
+  const _lt      = s.currentIdx !== null ? LESSONS[s.currentIdx].tag : '';
+  const key      = `note-${_lt}-${sceneIdx}`;
+  const statusEl = document.getElementById(`note-status-${_lt}-${sceneIdx}`);
   if (statusEl) { statusEl.textContent = 'typing…'; statusEl.style.opacity = '0.6'; }
 
   clearTimeout(s.autoSaveTimers[key]);
@@ -3199,11 +3297,12 @@ function autoSaveNote(sceneIdx, ta) {
     const cur     = State.get();
     const updated = Object.assign({}, cur.notesStore);
     if (text) {
-      updated[key] = { text, lessonIdx: cur.currentIdx, sceneIdx, updatedAt: new Date().toISOString() };
+      const _clt = cur.currentIdx !== null ? LESSONS[cur.currentIdx].tag : '';
+      updated[key] = { text, lessonTag: _clt, sceneIdx, updatedAt: new Date().toISOString() };
       _refreshNoteBtn(sceneIdx, true);
       const footer = ta.closest('.inline-note')?.querySelector('.inline-note-footer');
       if (footer && !footer.querySelector('.inline-note-del')) {
-        footer.innerHTML = `<span class="inline-note-status" id="note-status-${cur.currentIdx}-${sceneIdx}"></span>
+        footer.innerHTML = `<span class="inline-note-status" id="note-status-${_clt}-${sceneIdx}"></span>
           <button class="inline-note-del" onclick="deleteInlineNote(${sceneIdx})">delete note</button>`;
       }
     } else {
@@ -3212,7 +3311,8 @@ function autoSaveNote(sceneIdx, ta) {
     }
     State.set({ notesStore: updated });
     Storage.saveNotes(updated);
-    const st = document.getElementById(`note-status-${State.get().currentIdx}-${sceneIdx}`);
+    const _slt = State.get().currentIdx !== null ? LESSONS[State.get().currentIdx].tag : '';
+    const st = document.getElementById(`note-status-${_slt}-${sceneIdx}`);
     if (st) { st.textContent = 'saved'; setTimeout(() => { if (st) st.textContent = ''; }, 1400); }
     if (State.get().notesPanelOpen) renderNotesPanel();
     updateNotesViewBtn();
@@ -3234,8 +3334,9 @@ function _refreshNoteBtn(sceneIdx, hasNote) {
 
 function deleteInlineNote(sceneIdx) {
   const s      = State.get();
-  const key    = `note-${s.currentIdx}-${sceneIdx}`;
-  const noteEl = document.getElementById(`inline-note-${s.currentIdx}-${sceneIdx}`);
+  const _dltt  = s.currentIdx !== null ? LESSONS[s.currentIdx].tag : '';
+  const key    = `note-${_dltt}-${sceneIdx}`;
+  const noteEl = document.getElementById(`inline-note-${_dltt}-${sceneIdx}`);
   const updated = Object.assign({}, s.notesStore);
   delete updated[key];
   State.set({ notesStore: updated });
@@ -3244,7 +3345,7 @@ function deleteInlineNote(sceneIdx) {
     const ta = noteEl.querySelector('.inline-note-textarea');
     if (ta) ta.value = '';
     const footer = noteEl.querySelector('.inline-note-footer');
-    if (footer) footer.innerHTML = `<span class="inline-note-status" id="note-status-${s.currentIdx}-${sceneIdx}"></span>`;
+    if (footer) footer.innerHTML = `<span class="inline-note-status" id="note-status-${_dltt}-${sceneIdx}"></span>`;
     noteEl.classList.remove('open');
   }
   _refreshNoteBtn(sceneIdx, false);
@@ -3253,9 +3354,15 @@ function deleteInlineNote(sceneIdx) {
 }
 
 function getNotesForLesson(lessonIdx) {
+  if (lessonIdx === null || lessonIdx === undefined || !LESSONS[lessonIdx]) return [];
+  const tag    = LESSONS[lessonIdx].tag;
+  const prefix = 'note-' + tag + '-';
   return Object.entries(State.get().notesStore)
-    .filter(([k]) => { const p = k.split('-'); return p[0] === 'note' && p[1] === String(lessonIdx); })
-    .map(([k, v]) => { const p = k.split('-'); return { key: k, sceneIdx: p[2] === 'lesson' ? 'lesson' : parseInt(p[2], 10), ...v }; })
+    .filter(([k]) => k.startsWith(prefix))
+    .map(([k, v]) => {
+      const si = k.slice(prefix.length);
+      return { key: k, sceneIdx: si === 'lesson' ? 'lesson' : parseInt(si, 10), ...v };
+    })
     .sort((a, b) => { if (a.sceneIdx === 'lesson') return -1; if (b.sceneIdx === 'lesson') return 1; return a.sceneIdx - b.sceneIdx; });
 }
 
@@ -3336,7 +3443,8 @@ function scrollToNoteScene(sceneIdx, lessonIdx) {
   const wrap = document.querySelector(`[data-scene-idx="${sceneIdx}"]`);
   if (wrap) {
     wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    const noteEl = document.getElementById(`inline-note-${State.get().currentIdx}-${sceneIdx}`);
+    const _slt2 = State.get().currentIdx !== null ? LESSONS[State.get().currentIdx].tag : '';
+    const noteEl = document.getElementById(`inline-note-${_slt2}-${sceneIdx}`);
     if (noteEl && !noteEl.classList.contains('open')) noteEl.classList.add('open');
   }
 }
@@ -3346,22 +3454,54 @@ function scrollToNoteScene(sceneIdx, lessonIdx) {
 //  SECTION 15 — COMPLETED LESSONS
 // ═══════════════════════════════════════════════════════════════
 function toggleDone(idx) {
+  if (!LESSONS[idx]) return;
+  const lessonTag = LESSONS[idx].tag;
   const s    = State.get();
   const done = new Set(s.completedLessons);
-  if (done.has(idx)) done.delete(idx); else done.add(idx);
+  if (done.has(lessonTag)) done.delete(lessonTag); else done.add(lessonTag);
   State.set({ completedLessons: done });
   Storage.saveCompleted(done);
 
   const btn = document.getElementById('markDoneBtn');
   if (btn) {
-    btn.classList.toggle('done', done.has(idx));
-    btn.innerHTML = done.has(idx)
-      ? `<span class="btn-main"><svg class="icon icon-sm"><use href="#icon-check"/></svg> Completed</span><span class="btn-hint">click to mark as unread</span>`
-      : `<svg class="icon icon-sm"><use href="#icon-check"/></svg> Mark as done`;
+    const isDone = done.has(lessonTag);
+    btn.classList.toggle('active', isDone);
+    btn.innerHTML = `<svg class="icon icon-sm"><use href="#icon-check"/></svg> Done`;
+    btn.title = isDone ? 'Mark as unread (D)' : 'Mark as done (D)';
   }
   const sb = document.getElementById('sidebarBtn-' + idx);
-  if (sb) sb.classList.toggle('completed', done.has(idx));
+  if (sb) sb.classList.toggle('completed', done.has(lessonTag));
   updateProgress();
+}
+
+function toggleImportant(idx) {
+  if (!LESSONS[idx]) return;
+  const lessonTag  = LESSONS[idx].tag;
+  const s          = State.get();
+  const important  = new Set(s.importantLessons);
+  if (important.has(lessonTag)) important.delete(lessonTag);
+  else                          important.add(lessonTag);
+  State.set({ importantLessons: important });
+  Storage.saveImportant(important);
+
+  const btn = document.getElementById('importantBtn');
+  if (btn) btn.classList.toggle('active', important.has(lessonTag));
+
+  // Refresh sidebar dot
+  const sb = document.getElementById('sidebarBtn-' + idx);
+  if (sb) {
+    const existing = sb.querySelector('.important-dot');
+    if (important.has(lessonTag)) {
+      if (!existing) {
+        const dot = document.createElement('span');
+        dot.className = 'important-dot';
+        dot.title = 'Important';
+        sb.appendChild(dot);
+      }
+    } else {
+      if (existing) existing.remove();
+    }
+  }
 }
 
 
@@ -3370,7 +3510,8 @@ function toggleDone(idx) {
 // ═══════════════════════════════════════════════════════════════
 function toggleFlag(sceneIdx) {
   const s      = State.get();
-  const key    = `${s.currentIdx}-${sceneIdx}`;
+  const lessonTag = s.currentIdx !== null ? LESSONS[s.currentIdx].tag : '';
+  const key    = `${lessonTag}-${sceneIdx}`;
   const flags  = new Set(s.flags);
   if (flags.has(key)) flags.delete(key);
   else                flags.add(key);
@@ -3411,24 +3552,26 @@ function renderReviewPanel() {
   // Group flags by lesson
   const grouped = {};
   flags.forEach(key => {
-    const parts = key.split('-');
-    const li = Number(parts[0]), si = Number(parts[1]);
-    if (!grouped[li]) grouped[li] = [];
-    grouped[li].push(si);
+    const lesson = LESSONS.find(l => key.startsWith(l.tag + '-'));
+    if (!lesson) return;
+    const si = Number(key.slice(lesson.tag.length + 1));
+    if (!grouped[lesson.tag]) grouped[lesson.tag] = [];
+    grouped[lesson.tag].push({ si, key });
   });
 
-  // Sort lessons by flatLessons order
-  const sortedLessons = Object.keys(grouped).map(Number).sort((a, b) => {
-    const ia = s.flatLessons.indexOf(a), ib = s.flatLessons.indexOf(b);
+  const sortedTags = Object.keys(grouped).sort((a, b) => {
+    const ia = s.flatLessons.indexOf(LESSONS.findIndex(l => l.tag === a));
+    const ib = s.flatLessons.indexOf(LESSONS.findIndex(l => l.tag === b));
     return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
   });
 
-  body.innerHTML = sortedLessons.map(li => {
+  body.innerHTML = sortedTags.map(tag => {
+    const li      = LESSONS.findIndex(l => l.tag === tag);
     const lesson  = LESSONS[li];
-    const name    = lesson ? _esc(lesson.tag) : 'Lesson ' + li;
-    const scenes  = grouped[li].sort((a, b) => a - b);
+    const name    = _esc(tag);
+    const entries = grouped[tag].slice().sort((a, b) => a.si - b.si);
 
-    const entries = scenes.map(si => {
+    const rows = entries.map(({ si, key }) => {
       const scene = lesson && lesson.scenes[si];
       let label   = `Scene ${si + 1}`;
       if (scene) {
@@ -3438,17 +3581,16 @@ function renderReviewPanel() {
         else if (scene.speaker === 'raj')   label = `Raj — scene ${si + 1}`;
         else if (scene.speaker)             label = `You — scene ${si + 1}`;
       }
-      const key = `${li}-${si}`;
-      return `<div class="review-entry" onclick="jumpToFlag('${key}')">
+      return `<div class="review-entry" onclick="jumpToFlag('${_esc(key)}')">
         <svg class="icon icon-sm" style="flex-shrink:0;color:var(--coral)"><use href="#icon-flag"/></svg>
         <span class="review-entry-label">${_esc(label)}</span>
-        <button class="review-entry-del" onclick="removeFlag(event,'${key}')" title="Remove">
+        <button class="review-entry-del" onclick="removeFlag(event,'${_esc(key)}')" title="Remove">
           <svg class="icon icon-sm"><use href="#icon-x"/></svg>
         </button>
       </div>`;
     }).join('');
 
-    return `<div class="review-group-name">${name}</div>${entries}`;
+    return `<div class="review-group-name">${name}</div>${rows}`;
   }).join('');
 }
 
@@ -3461,8 +3603,11 @@ function switchBookmarkTab(tab) {
 }
 
 function jumpToFlag(key) {
-  const [li, si] = key.split('-').map(Number);
-  const s = State.get();
+  const lesson = LESSONS.find(l => key.startsWith(l.tag + '-'));
+  if (!lesson) return;
+  const li = LESSONS.findIndex(l => l.tag === lesson.tag);
+  const si = Number(key.slice(lesson.tag.length + 1));
+  const s  = State.get();
   if (s.currentIdx !== li) {
     selectLesson(li, true);
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -3484,12 +3629,16 @@ function removeFlag(e, key) {
   Storage.saveFlags(flags);
 
   // Refresh flag button if scene is currently visible
-  const [li, si] = key.split('-').map(Number);
-  if (s.currentIdx === li) {
-    const wrap = document.querySelector(`[data-scene-idx="${si}"]`);
-    if (wrap) {
-      const btn = wrap.querySelector('.flag-btn');
-      if (btn) { btn.classList.remove('flagged'); btn.title = 'Review later'; }
+  const _fl = LESSONS.find(l => key.startsWith(l.tag + '-'));
+  if (_fl) {
+    const li = LESSONS.findIndex(l => l.tag === _fl.tag);
+    const si = Number(key.slice(_fl.tag.length + 1));
+    if (s.currentIdx === li) {
+      const wrap = document.querySelector(`[data-scene-idx="${si}"]`);
+      if (wrap) {
+        const btn = wrap.querySelector('.flag-btn');
+        if (btn) { btn.classList.remove('flagged'); btn.title = 'Review later'; }
+      }
     }
   }
   renderReviewPanel();
@@ -3501,7 +3650,7 @@ function removeFlag(e, key) {
 //  resolves starting lesson from URL → lastLesson → first.
 // ═══════════════════════════════════════════════════════════════
 (function init() {
-  Storage.migrate();
+  Storage.migrate(LESSONS);
 
   // Load all persisted state into central store
   State.set({
@@ -3509,6 +3658,7 @@ function removeFlag(e, key) {
     notesStore:       Storage.loadNotes(),
     completedLessons: Storage.loadCompleted(),
     flags:            Storage.loadFlags(),
+    importantLessons: Storage.loadImportant(),
   });
 
   // Global error boundary — surfaces uncaught errors to the user
