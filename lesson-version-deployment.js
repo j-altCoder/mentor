@@ -732,7 +732,7 @@ jobs:
       - name: Deploy to production
         run: |
           kubectl set image deployment/myapp \
-            myapp=registry.myapp.com/myapp:${{ github.sha }}
+            myapp=registry.myapp.com/myapp:\${{ github.sha }}
           kubectl rollout status deployment/myapp --timeout=300s
       - name: Verify health
         run: curl --fail https://myapp.com/health
