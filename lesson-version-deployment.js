@@ -645,6 +645,133 @@ git rebase -i origin/main
 // .env.example with placeholder values: committed — it's the contract for what's needed`
     },
 
+    // ── Branch-to-environment mapping ──
+    {
+      speaker: "you",
+      text: `"So which branch actually deploys to which environment? Is it just main to dev and main to prod, or is there a mapping?"`
+    },
+    {
+      speaker: "raj",
+      text: `"Depends on the strategy, but most teams land on something like: every merge to main auto-deploys to dev. A release branch or a version tag promotes to staging. A manual approval on that staging deploy promotes the same build to production. The key word is <em>same build</em>."`
+    },
+    {
+      speaker: "you",
+      text: `"Same build — you mean you don't rebuild for each environment?"`
+    },
+    {
+      speaker: "raj",
+      text: `"Right. You build once, tag the image with the git SHA, and that exact image travels from dev to staging to prod. You're not running npm run build three times — you're promoting the same artifact. If you rebuild at each stage, you're not testing what you think you're testing. The staging build could be subtly different from the dev build if a dependency has a looser version pin. Promote the artifact, not the source code."`
+    },
+    {
+      speaker: "you",
+      text: `"What about feature branches — do they get their own environment? I've seen that on some teams."`
+    },
+    {
+      speaker: "raj",
+      text: `"<em>Preview environments</em>. Every open PR gets its own ephemeral deployment — its own URL, its own database, spun up automatically when the PR opens and torn down when it merges or closes. The reviewer can click a link and test the actual running change instead of pulling the branch locally. QA can sign off without touching their machine. Product can see the feature before it's merged. It sounds expensive but on modern platforms it's cheap — Vercel does it out of the box for frontend, and for backend you can script it on Kubernetes with namespaces."`
+    },
+    {
+      speaker: "you",
+      text: `"How do you make sure a preview environment doesn't accidentally touch real data?"`
+    },
+    {
+      speaker: "raj",
+      text: `"The preview gets its own throwaway database — spun up with seed data, completely isolated. It never knows production exists. You make that structural: the preview environment's config points at a different database URL, a different S3 bucket, test API keys. Same config rule as any other environment — no real credentials, ever. Tear it all down when the PR closes and nothing persists."`
+    },
+    {
+      type: "code",
+      text: `// ── Branch-to-environment mapping ──
+//
+// Branch / ref                  → Environment      → How
+// ─────────────────────────────────────────────────────────────────
+// Any PR branch (feat/*, fix/*) → Preview (per-PR) → auto on PR open, torn down on close
+// Merge to main                 → Development       → auto on every merge
+// release/* branch or tag       → Staging           → auto on branch push / tag
+// Manual approval of staging    → Production        → same artifact, promoted
+
+// ── Promote the artifact, not the source ──
+//
+// WRONG: rebuild at each stage
+//   dev:     docker build → image A (built from commit abc at 9:00am)
+//   staging: docker build → image B (built from same commit at 2:00pm, deps may differ)
+//   prod:    docker build → image C (built again — what are we even testing?)
+//
+// RIGHT: build once, promote the SHA-tagged image
+//   CI builds: registry.myapp.com/myapp:abc1234  ← one build, one artifact
+//   Dev deploys:     kubectl set image ... myapp:abc1234
+//   Staging deploys: kubectl set image ... myapp:abc1234  ← same image
+//   Prod deploys:    kubectl set image ... myapp:abc1234  ← same image
+//
+// What changes between environments: the config (DATABASE_URL, API keys)
+// What stays identical:             the code, the binary, the image
+
+// ── Preview environments: per-PR ephemeral deployments ──
+
+// GitHub Actions: create preview on PR open, destroy on PR close
+// .github/workflows/preview.yml
+\`
+name: Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+jobs:
+  deploy-preview:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy preview
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          NAMESPACE="preview-pr-${PR_NUM}"
+
+          # Create isolated namespace
+          kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+
+          # Deploy with PR-specific config
+          helm upgrade --install myapp-pr-${PR_NUM} ./helm/myapp \
+            --namespace $NAMESPACE \
+            --set image.tag=${{ github.sha }} \
+            --set ingress.host=pr-${PR_NUM}.preview.myapp.com \
+            --set database.url=${{ secrets.PREVIEW_DB_URL }}/${NAMESPACE} \
+            --set stripe.key=${{ secrets.STRIPE_TEST_KEY }}
+
+      - name: Post preview URL to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 Preview deployed: https://pr-${{ github.event.pull_request.number }}.preview.myapp.com'
+            })
+
+  destroy-preview:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tear down preview
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          kubectl delete namespace preview-pr-${PR_NUM} --ignore-not-found
+          # Preview database is dropped with the namespace — nothing persists
+\`
+
+// ── What preview environments replace ──
+// Before: "Can you pull my branch and test it locally?"
+//   → reviewer sets up local env, installs deps, seeds db, spends 20 minutes
+// After: reviewer clicks the PR link
+//   → running in 3 minutes, isolated, disposable
+//
+// Before: QA runs a test suite against dev, which has 4 other PRs merged into it
+//   → hard to know which PR caused a failure
+// After: QA tests each PR's preview in isolation
+//   → the failure belongs to exactly one change`
+    },
+
     // ── CI/CD ──
     {
       speaker: "you",
@@ -713,12 +840,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build and push image
         run: |
-          docker build -t registry.myapp.com/myapp:\${{ github.sha }} .
-          docker push registry.myapp.com/myapp:\${{ github.sha }}
+          docker build -t registry.myapp.com/myapp:${{ github.sha }} .
+          docker push registry.myapp.com/myapp:${{ github.sha }}
       - name: Deploy to dev
         run: |
           kubectl set image deployment/myapp \
-            myapp=registry.myapp.com/myapp:\${{ github.sha }}
+            myapp=registry.myapp.com/myapp:${{ github.sha }}
           kubectl rollout status deployment/myapp --timeout=120s
       - name: Smoke test
         run: curl --fail https://dev.myapp.com/health
@@ -732,7 +859,7 @@ jobs:
       - name: Deploy to production
         run: |
           kubectl set image deployment/myapp \
-            myapp=registry.myapp.com/myapp:\${{ github.sha }}
+            myapp=registry.myapp.com/myapp:${{ github.sha }}
           kubectl rollout status deployment/myapp --timeout=300s
       - name: Verify health
         run: curl --fail https://myapp.com/health
@@ -805,6 +932,89 @@ jobs:
 //
 // "I just want to quickly push this" is not an override.
 // "Payment processing is down and we have a fix" is an override.`
+    },
+
+    // ── Release branch stabilisation ──
+    {
+      speaker: "you",
+      text: `"What happens when a release is in QA on staging, but main keeps moving? New features are being merged while the release is being tested. Do you just freeze main?"`
+    },
+    {
+      speaker: "raj",
+      text: `"You don't freeze main — that would block the whole team. You cut a <em>release branch</em> at the point you want to stabilise. Main keeps moving, new features keep landing there. The release branch is frozen to everything except bug fixes that are critical for this release."`
+    },
+    {
+      speaker: "you",
+      text: `"So the fix gets committed to the release branch directly?"`
+    },
+    {
+      speaker: "raj",
+      text: `"No — fix it on main first, then cherry-pick the commit onto the release branch. That order matters. If you fix it on the release branch first and forget to bring it back to main, the next release ships with the same bug. Main is always the source of truth. The release branch only receives cherry-picks from main, never original work."`
+    },
+    {
+      speaker: "you",
+      text: `"What if QA finds something that's only in this release — something that was introduced during the stabilisation window and isn't on main yet?"`
+    },
+    {
+      speaker: "raj",
+      text: `"That shouldn't happen if you're fixing on main first. But if it does — a config change specific to this release, say — the fix still goes into a PR, still gets reviewed, and you explicitly track that it needs to be ported to main as a follow-up. You don't let anything live only on a release branch without a corresponding main ticket. Release branches are temporary. Main is permanent."`
+    },
+    {
+      type: "code",
+      text: `// ── Release branch stabilisation ──
+//
+// Timeline:
+//
+// main ──── A ── B ── C ── D ── E ── F ──────────────────► (keeps moving)
+//                └── release/v2.5.0 ──── C' ──────────────► (frozen, QA testing)
+//
+// A, B: features merged to main before release cut
+// C:    bug found in QA — fix committed to main first
+// C':   cherry-pick of C onto release branch
+// D, E, F: new features on main — NOT in this release
+
+// 1. Cut the release branch from main at the right commit
+git checkout main && git pull origin main
+git checkout -b release/v2.5.0
+git push origin release/v2.5.0
+
+// 2. Pipeline auto-deploys release/v2.5.0 to staging
+// (branch pattern: release/* → deploy to staging)
+
+// 3. QA finds a bug. Fix it on main first.
+git checkout main
+git checkout -b fix/checkout-price-rounding
+// ... fix the bug ...
+git commit -m "fix(checkout): correct rounding for tax-inclusive prices"
+// Open PR against main, get it reviewed and merged to main
+
+// 4. Cherry-pick the fix onto the release branch
+git checkout release/v2.5.0
+git cherry-pick <commit-sha-from-main>
+git push origin release/v2.5.0
+// Pipeline redeploys to staging automatically — QA retests the fix
+
+// 5. Release approved — tag from the release branch
+git tag v2.5.0
+git push origin v2.5.0
+// Pipeline deploys v2.5.0 tag to production
+
+// 6. After release: the release branch is done
+// It served its purpose. Archive or delete it.
+git push origin --delete release/v2.5.0
+
+// ── The rule ──
+// Fix on main first, cherry-pick to release.
+// Never the other way around.
+// A fix that exists only on a release branch is a bug waiting to resurface.
+
+// ── How many bugs is too many during stabilisation? ──
+// No fixed number — but each cherry-pick restarts the QA confidence clock.
+// If you're cherry-picking five fixes a day, the release isn't stable.
+// That's a signal: either the release scope was too large,
+// or the feature wasn't ready to be cut into a release branch yet.
+// The fix is earlier feature flags and smaller, more frequent releases —
+// not longer stabilisation windows.`
     },
 
     // ── Database migrations ──
@@ -1114,8 +1324,8 @@ const show = await ldClient.variation(
 // Injected as env vars at pipeline runtime, never logged, masked in output
 //
 // env:
-//   DATABASE_URL: \${{ secrets.DATABASE_URL }}
-//   STRIPE_SECRET_KEY: \${{ secrets.STRIPE_SECRET_KEY }}
+//   DATABASE_URL: ${{ secrets.DATABASE_URL }}
+//   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
 // ── Platform-injected secrets (recommended for production) ──
 // Stored in AWS Secrets Manager / GCP Secret Manager / Vault
@@ -1351,7 +1561,8 @@ git tag v2.4.1 && git push origin main --tags
         "Small PRs get real review. Above 400 lines of diff, reviewers rubber-stamp. Large features decompose into stacked PRs — migration, model, API, UI — each behind a feature flag, each under 200 lines, each independently reviewable and revertable. PR descriptions answer what changed, why, how it was tested, and what breaks if it goes wrong. Branch protection rules make the process structural: require a PR, require CI to pass, require an approver, dismiss stale approvals — and apply these to admins too.",
         "Semantic versioning is a contract. Patch: bug fixed, nothing broke. Minor: new capability added, old code still works. Major: something existing broke — consumers must act before upgrading. Breaking is any change that causes existing correct usage to fail without modification: renaming a field, changing a response shape, making a parameter required. The changelog is technical and auto-generated; the release note is human-written, one paragraph, for product and support.",
         "Environments are gates. Local catches logic errors. Development catches integration failures. Staging catches infrastructure and data-volume problems against production-shaped reality. Production is live users. Each gate stops a different class of bug, and bugs get more expensive the further right they travel. Configuration that changes between environments lives in environment variables, never in code. Credentials belong in a secrets manager — injected at runtime, rotated in two steps so there's no gap between old and new.",
-        "CI/CD pipelines make deploys non-events. The pipeline runs lint, test, build, deploy, smoke test, and rollback-on-failure in the same order every time. Manual deploys introduce variance — the step someone forgot, the install that got skipped. Deployment freeze policies make shipping decisions deliberate: no non-critical deploys on Friday afternoons, documented freeze windows around holidays and launches, a named approver with the authority to override and the obligation to stay available after.",
+        "Branch-to-environment mapping makes the pipeline explicit: feature branches deploy to per-PR preview environments, merges to main auto-deploy to dev, release branches or tags promote to staging, and a manual approval on staging promotes to production. The critical discipline is artifact promotion — build the Docker image once, tag it with the git SHA, and move that same image through every environment. Rebuilding at each stage means staging is testing a different artifact than dev, which defeats the purpose. Preview environments give every open PR its own ephemeral deployment with its own isolated database — reviewers click a link instead of pulling the branch, QA tests in isolation, product sees the feature before it's merged. They spin up on PR open and are destroyed on close, leaving nothing behind.",
+        "CI/CD pipelines make deploys non-events. The pipeline runs lint, test, build, deploy, smoke test, and rollback-on-failure in the same order every time. Manual deploys introduce variance — the step someone forgot, the install that got skipped. Deployment freeze policies make shipping decisions deliberate: no non-critical deploys on Friday afternoons, documented freeze windows around holidays and launches, a named approver with the authority to override and the obligation to stay available after. When a release needs to stabilise, cut a release branch from main at the right commit — main keeps moving, the release branch receives only cherry-picks of bug fixes from main, never original work. Fix on main first, cherry-pick to the release branch. A fix that lives only on a release branch is a bug waiting to resurface in the next release.",
         "Deployment strategies trade safety for cost. Rolling deploys replace instances one at a time — cheap, sufficient for compatible changes, risky when v1 and v2 can't coexist during the overlap. Blue-green keeps a full idle environment and cuts over instantly — right for breaking changes, costs double the infrastructure. Canary routes a small slice of real traffic to the new version, watches error rates and business metrics before expanding — right for uncertain impact and large user bases.",
         "Database migrations decouple from code deploys via expand-migrate-contract. Phase one: add the column nullable — near-instant, old code ignores it. Phase two: backfill in batches via a background job, never a table-locking single UPDATE. Phase three: deploy the code that uses the new column. Phase four: add constraints and drop the old column once stable. Never rename a column in one step. Never add an index without CONCURRENTLY on Postgres. Always test against a production-sized staging snapshot and know the estimated run time before touching production.",
         "Feature flags decouple deployment from release. Code ships continuously; features go live when ready. Flags enable percentage rollouts, per-user targeting, kill switches, and A/B experiments without a code deploy — and they're the fastest rollback for application-level problems. Their cost is accumulation: every flag at 100% for more than two weeks is dead code with extra indirection. Create the cleanup ticket at the same time as the flag. Secrets follow the same discipline — managed centrally, injected at runtime, never in files on servers or chat history, rotated without downtime by adding new credentials before revoking old ones.",
