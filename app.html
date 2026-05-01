@@ -4004,17 +4004,13 @@ function closeClearDataModal() {
   document.getElementById('clearDataOverlay').classList.remove('open');
 }
 
-// Keep "Clear Everything" checkbox in sync with individual ones
-document.addEventListener('DOMContentLoaded', () => {
-  _bindClearCheckboxes();
-});
-// Also bind after script load (DOMContentLoaded may have already fired)
-(function _bindClearCheckboxes() {
-  const allBox  = document.getElementById('clearOptAll');
+// Keep "Clear Everything" checkbox in sync with individual ones.
+// Called once from init() after the DOM is ready.
+function _bindClearCheckboxes() {
+  const allBox   = document.getElementById('clearOptAll');
   const indBoxes = ['clearOptProgress','clearOptNotes','clearOptBookmarks','clearOptFlags','clearOptImportant']
     .map(id => document.getElementById(id)).filter(Boolean);
-
-  if (!allBox) return; // DOM not ready yet; DOMContentLoaded listener above will retry
+  if (!allBox) return;
 
   allBox.addEventListener('change', () => {
     indBoxes.forEach(cb => { cb.checked = allBox.checked; });
@@ -4027,7 +4023,7 @@ document.addEventListener('DOMContentLoaded', () => {
       _updateClearConfirmBtn();
     });
   });
-})();
+}
 
 function _updateClearConfirmBtn() {
   const anyChecked = ['clearOptProgress','clearOptNotes','clearOptBookmarks','clearOptFlags','clearOptImportant','clearOptAll']
@@ -4128,6 +4124,7 @@ function executeClearData() {
   buildSidebar();
   renderBookmarkPanel();
   renderReviewPanel();
+  _bindClearCheckboxes();
 
   if (LESSONS.length === 0) {
     document.getElementById('emptyState').classList.add('visible');
