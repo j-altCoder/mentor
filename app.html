@@ -378,6 +378,213 @@ header > p {
 }
 .storage-warning-close:hover { opacity: 1; }
 
+/* ── CLEAR DATA BUTTON (in progress bar) ── */
+.clear-data-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  padding: 0.22rem 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  margin-left: auto;
+}
+.clear-data-btn:hover {
+  border-color: var(--coral);
+  color: var(--coral);
+  background: var(--coral-dim);
+}
+
+/* ── CLEAR DATA MODAL ── */
+.clear-data-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-base);
+}
+.clear-data-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.clear-data-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 420px;
+  padding: 1.5rem 1.5rem 1.3rem;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  transform: translateY(12px) scale(0.98);
+  transition: transform var(--t-base);
+}
+.clear-data-overlay.open .clear-data-modal {
+  transform: translateY(0) scale(1);
+}
+.clear-data-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.clear-data-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.clear-data-title {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.clear-data-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+  opacity: 0.6;
+  transition: opacity var(--t-fast);
+}
+.clear-data-close:hover { opacity: 1; }
+
+.clear-data-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  margin-top: -0.3rem;
+}
+
+.clear-data-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.clear-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.clear-option:hover { background: var(--hover); }
+.clear-option:has(.clear-checkbox:checked) {
+  background: var(--coral-dim);
+  border-color: rgba(240,112,96,0.25);
+}
+.clear-option-all {
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+}
+.clear-option-all:has(.clear-checkbox:checked) {
+  background: rgba(240,112,96,0.08);
+  border-color: rgba(240,112,96,0.35);
+}
+
+.clear-checkbox {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  accent-color: var(--coral);
+  cursor: pointer;
+}
+
+.clear-option-body { display: flex; flex-direction: column; gap: 0.15rem; }
+
+.clear-option-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+.clear-option-desc {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.clear-data-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0 -0.25rem;
+}
+
+.clear-data-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.1rem;
+}
+.clear-cancel-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  letter-spacing: 0.03em;
+  padding: 0.45rem 1rem;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+.clear-cancel-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+.clear-confirm-btn {
+  background: var(--coral-dim);
+  border: 1px solid rgba(240,112,96,0.4);
+  border-radius: 7px;
+  color: var(--coral);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  letter-spacing: 0.03em;
+  padding: 0.45rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background var(--t-fast), border-color var(--t-fast), opacity var(--t-fast);
+}
+.clear-confirm-btn:hover:not(:disabled) {
+  background: rgba(240,112,96,0.2);
+  border-color: var(--coral);
+}
+.clear-confirm-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 /* ── APP LAYOUT ── */
 .app {
   position: relative;
@@ -1732,6 +1939,7 @@ kbd {
   <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
   <symbol id="icon-menu" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
   <symbol id="icon-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
   <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
   <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
   <symbol id="icon-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
@@ -1779,6 +1987,10 @@ kbd {
   <button class="progress-action-btn done-btn" id="progressDoneBtn" onclick="toggleDone(State.get().currentIdx)" title="Mark as done (D)">
     <svg class="icon icon-sm"><use href="#icon-check"/></svg>
     Done
+  </button>
+  <button class="clear-data-btn" id="clearDataBtn" onclick="openClearDataModal()" title="Clear saved data">
+    <svg class="icon icon-sm" style="width:0.8em;height:0.8em"><use href="#icon-trash"/></svg>
+    Clear Data
   </button>
 </div>
 
@@ -1918,6 +2130,96 @@ kbd {
 </div>
 
 <div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- ── CLEAR DATA MODAL ── -->
+<div class="clear-data-overlay" id="clearDataOverlay" onclick="closeClearDataModal()">
+  <div class="clear-data-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="clearDataTitle">
+    <div class="clear-data-header">
+      <div class="clear-data-title-row">
+        <svg class="icon" style="color:var(--coral);width:1.1rem;height:1.1rem"><use href="#icon-trash"/></svg>
+        <span class="clear-data-title" id="clearDataTitle">Clear Saved Data</span>
+      </div>
+      <button class="clear-data-close" onclick="closeClearDataModal()" title="Close">
+        <svg class="icon"><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <p class="clear-data-subtitle">Choose what to delete. This cannot be undone.</p>
+
+    <div class="clear-data-options">
+      <label class="clear-option">
+        <input type="checkbox" id="clearOptProgress" class="clear-checkbox"/>
+        <div class="clear-option-body">
+          <div class="clear-option-label">
+            <svg class="icon icon-sm" style="color:var(--sage)"><use href="#icon-check"/></svg>
+            Progress
+          </div>
+          <div class="clear-option-desc">Which lessons you've marked as done</div>
+        </div>
+      </label>
+      <label class="clear-option">
+        <input type="checkbox" id="clearOptNotes" class="clear-checkbox"/>
+        <div class="clear-option-body">
+          <div class="clear-option-label">
+            <svg class="icon icon-sm" style="color:var(--sky)"><use href="#icon-notes"/></svg>
+            Notes
+          </div>
+          <div class="clear-option-desc">All notes written across every lesson</div>
+        </div>
+      </label>
+      <label class="clear-option">
+        <input type="checkbox" id="clearOptBookmarks" class="clear-checkbox"/>
+        <div class="clear-option-body">
+          <div class="clear-option-label">
+            <svg class="icon icon-sm" style="color:var(--amber)"><use href="#icon-bookmark"/></svg>
+            Bookmarks
+          </div>
+          <div class="clear-option-desc">All saved text selections</div>
+        </div>
+      </label>
+      <label class="clear-option">
+        <input type="checkbox" id="clearOptFlags" class="clear-checkbox"/>
+        <div class="clear-option-body">
+          <div class="clear-option-label">
+            <svg class="icon icon-sm" style="color:var(--coral)"><use href="#icon-flag"/></svg>
+            Review Later
+          </div>
+          <div class="clear-option-desc">All "review later" flags on scenes</div>
+        </div>
+      </label>
+      <label class="clear-option">
+        <input type="checkbox" id="clearOptImportant" class="clear-checkbox"/>
+        <div class="clear-option-body">
+          <div class="clear-option-label">
+            <svg class="icon icon-sm" style="color:#f5c842"><use href="#icon-star"/></svg>
+            Important
+          </div>
+          <div class="clear-option-desc">Lessons starred as important</div>
+        </div>
+      </label>
+    </div>
+
+    <div class="clear-data-divider"></div>
+
+    <label class="clear-option clear-option-all">
+      <input type="checkbox" id="clearOptAll" class="clear-checkbox"/>
+      <div class="clear-option-body">
+        <div class="clear-option-label" style="color:var(--coral)">
+          <svg class="icon icon-sm"><use href="#icon-trash"/></svg>
+          Clear Everything
+        </div>
+        <div class="clear-option-desc">Select all of the above at once</div>
+      </div>
+    </label>
+
+    <div class="clear-data-actions">
+      <button class="clear-cancel-btn" onclick="closeClearDataModal()">Cancel</button>
+      <button class="clear-confirm-btn" id="clearConfirmBtn" onclick="executeClearData()" disabled>
+        <svg class="icon icon-sm"><use href="#icon-trash"/></svg>
+        Clear Selected
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- Lesson files — loaded as globals before app script -->
 <script src="lesson-auth.js"          onerror="console.warn('lesson-auth.js not found')"></script>
@@ -3683,6 +3985,114 @@ function removeFlag(e, key) {
     }
   }
   renderReviewPanel();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SECTION 16b — CLEAR DATA MODAL
+// ═══════════════════════════════════════════════════════════════
+function openClearDataModal() {
+  // Reset all checkboxes
+  ['clearOptProgress','clearOptNotes','clearOptBookmarks','clearOptFlags','clearOptImportant','clearOptAll'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = false;
+  });
+  _updateClearConfirmBtn();
+  document.getElementById('clearDataOverlay').classList.add('open');
+}
+
+function closeClearDataModal() {
+  document.getElementById('clearDataOverlay').classList.remove('open');
+}
+
+// Keep "Clear Everything" checkbox in sync with individual ones
+document.addEventListener('DOMContentLoaded', () => {
+  _bindClearCheckboxes();
+});
+// Also bind after script load (DOMContentLoaded may have already fired)
+(function _bindClearCheckboxes() {
+  const allBox  = document.getElementById('clearOptAll');
+  const indBoxes = ['clearOptProgress','clearOptNotes','clearOptBookmarks','clearOptFlags','clearOptImportant']
+    .map(id => document.getElementById(id)).filter(Boolean);
+
+  if (!allBox) return; // DOM not ready yet; DOMContentLoaded listener above will retry
+
+  allBox.addEventListener('change', () => {
+    indBoxes.forEach(cb => { cb.checked = allBox.checked; });
+    _updateClearConfirmBtn();
+  });
+
+  indBoxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      allBox.checked = indBoxes.every(c => c.checked);
+      _updateClearConfirmBtn();
+    });
+  });
+})();
+
+function _updateClearConfirmBtn() {
+  const anyChecked = ['clearOptProgress','clearOptNotes','clearOptBookmarks','clearOptFlags','clearOptImportant','clearOptAll']
+    .some(id => { const el = document.getElementById(id); return el && el.checked; });
+  const btn = document.getElementById('clearConfirmBtn');
+  if (btn) btn.disabled = !anyChecked;
+}
+
+function executeClearData() {
+  const get = id => { const el = document.getElementById(id); return el && el.checked; };
+  const clearAll = get('clearOptAll');
+
+  let cleared = [];
+
+  if (clearAll || get('clearOptProgress')) {
+    Storage.saveCompleted(new Set());
+    State.set({ completedLessons: new Set() });
+    // Refresh sidebar + progress bar
+    document.querySelectorAll('.lesson-btn').forEach(b => b.classList.remove('completed'));
+    updateProgress();
+    _syncProgressBtns();
+    cleared.push('Progress');
+  }
+
+  if (clearAll || get('clearOptNotes')) {
+    Storage.saveNotes({});
+    State.set({ notesStore: {} });
+    cleared.push('Notes');
+  }
+
+  if (clearAll || get('clearOptBookmarks')) {
+    Storage.saveBookmarks([]);
+    State.set({ bookmarks: [] });
+    renderBookmarkPanel();
+    cleared.push('Bookmarks');
+  }
+
+  if (clearAll || get('clearOptFlags')) {
+    Storage.saveFlags(new Set());
+    State.set({ flags: new Set() });
+    renderReviewPanel();
+    // Remove flagged state from any visible flag buttons
+    document.querySelectorAll('.flag-btn.flagged').forEach(b => {
+      b.classList.remove('flagged');
+      b.title = 'Review later';
+    });
+    cleared.push('Review Later');
+  }
+
+  if (clearAll || get('clearOptImportant')) {
+    Storage.saveImportant(new Set());
+    State.set({ importantLessons: new Set() });
+    // Remove important dots from sidebar
+    document.querySelectorAll('.important-dot').forEach(d => d.remove());
+    _syncProgressBtns();
+    cleared.push('Important');
+  }
+
+  closeClearDataModal();
+
+  if (cleared.length) {
+    Storage._showWarningPublic(`Cleared: ${cleared.join(', ')}.`);
+    // Auto-dismiss after 3s
+    setTimeout(() => Storage.dismissWarning(), 3000);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
