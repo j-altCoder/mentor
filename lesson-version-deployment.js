@@ -724,7 +724,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Deploy preview
         run: |
-          PR_NUM=${{ github.event.pull_request.number }}
+          PR_NUM=\${{ github.event.pull_request.number }}
           NAMESPACE="preview-pr-${PR_NUM}"
 
           # Create isolated namespace
@@ -733,10 +733,10 @@ jobs:
           # Deploy with PR-specific config
           helm upgrade --install myapp-pr-${PR_NUM} ./helm/myapp \
             --namespace $NAMESPACE \
-            --set image.tag=${{ github.sha }} \
+            --set image.tag=\${{ github.sha }} \
             --set ingress.host=pr-${PR_NUM}.preview.myapp.com \
-            --set database.url=${{ secrets.PREVIEW_DB_URL }}/${NAMESPACE} \
-            --set stripe.key=${{ secrets.STRIPE_TEST_KEY }}
+            --set database.url=\${{ secrets.PREVIEW_DB_URL }}/${NAMESPACE} \
+            --set stripe.key=\${{ secrets.STRIPE_TEST_KEY }}
 
       - name: Post preview URL to PR
         uses: actions/github-script@v7
@@ -746,7 +746,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '🚀 Preview deployed: https://pr-${{ github.event.pull_request.number }}.preview.myapp.com'
+              body: '🚀 Preview deployed: https://pr-\${{ github.event.pull_request.number }}.preview.myapp.com'
             })
 
   destroy-preview:
@@ -755,7 +755,7 @@ jobs:
     steps:
       - name: Tear down preview
         run: |
-          PR_NUM=${{ github.event.pull_request.number }}
+          PR_NUM=\${{ github.event.pull_request.number }}
           kubectl delete namespace preview-pr-${PR_NUM} --ignore-not-found
           # Preview database is dropped with the namespace — nothing persists
 \`
@@ -840,12 +840,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build and push image
         run: |
-          docker build -t registry.myapp.com/myapp:${{ github.sha }} .
-          docker push registry.myapp.com/myapp:${{ github.sha }}
+          docker build -t registry.myapp.com/myapp:\${{ github.sha }} .
+          docker push registry.myapp.com/myapp:\${{ github.sha }}
       - name: Deploy to dev
         run: |
           kubectl set image deployment/myapp \
-            myapp=registry.myapp.com/myapp:${{ github.sha }}
+            myapp=registry.myapp.com/myapp:\${{ github.sha }}
           kubectl rollout status deployment/myapp --timeout=120s
       - name: Smoke test
         run: curl --fail https://dev.myapp.com/health
@@ -859,7 +859,7 @@ jobs:
       - name: Deploy to production
         run: |
           kubectl set image deployment/myapp \
-            myapp=registry.myapp.com/myapp:${{ github.sha }}
+            myapp=registry.myapp.com/myapp:\${{ github.sha }}
           kubectl rollout status deployment/myapp --timeout=300s
       - name: Verify health
         run: curl --fail https://myapp.com/health
@@ -1324,8 +1324,8 @@ const show = await ldClient.variation(
 // Injected as env vars at pipeline runtime, never logged, masked in output
 //
 // env:
-//   DATABASE_URL: ${{ secrets.DATABASE_URL }}
-//   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+//   DATABASE_URL: \${{ secrets.DATABASE_URL }}
+//   STRIPE_SECRET_KEY: \${{ secrets.STRIPE_SECRET_KEY }}
 
 // ── Platform-injected secrets (recommended for production) ──
 // Stored in AWS Secrets Manager / GCP Secret Manager / Vault
