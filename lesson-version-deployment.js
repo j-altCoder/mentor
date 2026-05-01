@@ -725,17 +725,17 @@ jobs:
       - name: Deploy preview
         run: |
           PR_NUM=\${{ github.event.pull_request.number }}
-          NAMESPACE="preview-pr-${PR_NUM}"
+          NAMESPACE="preview-pr-\${PR_NUM}"
 
           # Create isolated namespace
           kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
 
           # Deploy with PR-specific config
-          helm upgrade --install myapp-pr-${PR_NUM} ./helm/myapp \
+          helm upgrade --install myapp-pr-\${PR_NUM} ./helm/myapp \
             --namespace $NAMESPACE \
             --set image.tag=\${{ github.sha }} \
-            --set ingress.host=pr-${PR_NUM}.preview.myapp.com \
-            --set database.url=\${{ secrets.PREVIEW_DB_URL }}/${NAMESPACE} \
+            --set ingress.host=pr-\${PR_NUM}.preview.myapp.com \
+            --set database.url=\${{ secrets.PREVIEW_DB_URL }}/\${NAMESPACE} \
             --set stripe.key=\${{ secrets.STRIPE_TEST_KEY }}
 
       - name: Post preview URL to PR
@@ -756,7 +756,7 @@ jobs:
       - name: Tear down preview
         run: |
           PR_NUM=\${{ github.event.pull_request.number }}
-          kubectl delete namespace preview-pr-${PR_NUM} --ignore-not-found
+          kubectl delete namespace preview-pr-\${PR_NUM} --ignore-not-found
           # Preview database is dropped with the namespace — nothing persists
 \`
 
