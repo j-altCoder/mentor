@@ -2251,6 +2251,7 @@ kbd {
 <script src="lesson-browser-security.js"      onerror="console.warn('lesson-browser-security.js not found')"></script>
 <script src="lesson-build-tooling.js"         onerror="console.warn('lesson-build-tooling.js not found')"></script>
 <script src="lesson-js-runtime.js"            onerror="console.warn('lesson-js-runtime.js not found')"></script>
+<script src="lesson-js-deepdive.js"            onerror="console.warn('lesson-js-deepdive.js not found')"></script>
 <script src="lesson-react-traps.js"           onerror="console.warn('lesson-react-traps.js not found')"></script>
 <script src="lesson-nodejs-backend.js"        onerror="console.warn('lesson-nodejs-backend.js not found')"></script>
 <script src="lesson-architecture-thinking.js" onerror="console.warn('lesson-architecture-thinking.js not found')"></script>
@@ -2452,6 +2453,7 @@ const Storage = (() => {
 const LESSON_MAP = [
   { ref: () => typeof LESSON_TOOLING               !== 'undefined' ? LESSON_TOOLING               : null, category: "Language & Framework Fundamentals", tag: "Dev Tooling" },
   { ref: () => typeof LESSON_JS_RUNTIME            !== 'undefined' ? LESSON_JS_RUNTIME            : null, category: "Language & Framework Fundamentals", tag: "JS Runtime & Async" },
+  { ref: () => typeof LESSON_JS_INTERNALS            !== 'undefined' ? LESSON_JS_INTERNALS            : null, category: "Language & Framework Fundamentals", tag: "JS Deep Dive" },
   { ref: () => typeof LESSON_NETWORKING            !== 'undefined' ? LESSON_NETWORKING            : null, category: "Language & Framework Fundamentals", tag: "Networking & HTTP" },
   { ref: () => typeof LESSON_BACKEND_LIBS          !== 'undefined' ? LESSON_BACKEND_LIBS          : null, category: "Language & Framework Fundamentals", tag: "Express & Middleware" },
   { ref: () => typeof LESSON_NODEJS_BACKEND        !== 'undefined' ? LESSON_NODEJS_BACKEND        : null, category: "Language & Framework Fundamentals", tag: "Node.js in Production" },
