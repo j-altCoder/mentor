@@ -575,7 +575,7 @@ const createShortUrlDistributed = async (originalUrl) => {
 // ── Cache-aside pattern (most common — use this as default) ──
 const redirect = async (code) => {
   // 1. Check cache
-  const cached = await redis.get(`url:${code}`);
+  const cached = await redis.get(\`url:\${code}\`);
   if (cached) {
     incrementClickAsync(code);   // fire and forget — don't block the redirect
     return cached;
@@ -586,29 +586,29 @@ const redirect = async (code) => {
   if (!url) throw new NotFoundError(code);
 
   // 3. Populate cache
-  await redis.setex(`url:${code}`, 86400, url.original_url);   // 24hr TTL
+  await redis.setex(\`url:${code}\`, 86400, url.original_url);   // 24hr TTL
   incrementClickAsync(code);
   return url.original_url;
 };
 
 // ── Thundering herd — cache lock pattern ──
 const redirectSafe = async (code) => {
-  const cached = await redis.get(`url:${code}`);
+  const cached = await redis.get(\`url:\${code}\`);
   if (cached) return cached;
 
-  const lockKey  = `lock:${code}`;
+  const lockKey  = \`lock:\${code}\`;
   const acquired = await redis.set(lockKey, '1', 'NX', 'EX', 5);   // 5s lock TTL
 
   if (!acquired) {
     // Another request is fetching — wait and retry from cache
     await new Promise(r => setTimeout(r, 50));
-    return redis.get(`url:${code}`);   // should be populated by now
+    return redis.get(\`url:\${code}\`);   // should be populated by now
   }
 
   try {
     const url = await db.urls.findOne({ code });
     if (!url) throw new NotFoundError(code);
-    await redis.setex(`url:${code}`, 86400, url.original_url);
+    await redis.setex(\`url:\${code}\`, 86400, url.original_url);
     return url.original_url;
   } finally {
     await redis.del(lockKey);
@@ -811,12 +811,13 @@ queue.subscribe('post.created', async (event) => {
   // Batch the Redis writes for efficiency
   const pipeline = redis.pipeline();
   for (const followerId of event.follower_ids) {
+    const feedKey = \`feed:\${followerId}\`;
     pipeline.zadd(
-      `feed:${followerId}`,           // sorted set per user
+      feedKey,                        // sorted set per user
       event.timestamp,                // score = timestamp → sorted chronologically
       event.post_id                   // member = post ID
     );
-    pipeline.zremrangebyrank(`feed:${followerId}`, 0, -1001);  // keep only 1000 most recent
+    pipeline.zremrangebyrank(feedKey, 0, -1001);  // keep only 1000 most recent
   }
   await pipeline.exec();
 });
@@ -824,7 +825,7 @@ queue.subscribe('post.created', async (event) => {
 // Reading the feed — single Redis query, no joins, O(log n)
 const getFeed = async (userId, page = 0, limit = 20) => {
   const postIds = await redis.zrevrange(
-    `feed:${userId}`,
+    \`feed:\${userId}\`,
     page * limit,
     page * limit + limit - 1   // paginate through the sorted set
   );
@@ -860,7 +861,7 @@ const getFeedPull = async (userId, limit = 20) => {
 //
 const getHybridFeed = async (userId, limit = 20) => {
   // 1. Get pre-built feed (fan-out on write, normal users)
-  const prebuiltPostIds = await redis.zrevrange(`feed:${userId}`, 0, limit - 1);
+  const prebuiltPostIds = await redis.zrevrange(\`feed:\${userId}\`, 0, limit - 1);
 
   // 2. Get celebrity follows for this user
   const celebFollows = await db.follows.findAll({
