@@ -4,7 +4,7 @@
 //  Format: Technical Interview (45 minutes)
 // ─────────────────────────────────────────────────────────────────
 
-const INTERVIEW_CAR_SHARING_SYSTEM_DESIGN = {
+const LESSON_INTERVIEW_CAR_SHARING_SYSTEM_DESIGN = {
   category: "Career & Interview Prep",
   tag: "Mock Interview",
   title: "Design a Car-Sharing App",
