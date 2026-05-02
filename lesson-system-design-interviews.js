@@ -586,7 +586,7 @@ const redirect = async (code) => {
   if (!url) throw new NotFoundError(code);
 
   // 3. Populate cache
-  await redis.setex(\`url:${code}\`, 86400, url.original_url);   // 24hr TTL
+  await redis.setex(\`url:\${code}\`, 86400, url.original_url);   // 24hr TTL
   incrementClickAsync(code);
   return url.original_url;
 };
