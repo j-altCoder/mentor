@@ -1393,7 +1393,7 @@ class EmailService {
   }
 
   // Private — implementation detail, subject to change
-  #sanitise(body)        { return body.replace(new RegExp('<script>', 'gi'), '') }
+  // #sanitise(body)        { return body.replace(new RegExp('<script>', 'gi'), '') }
   #validateAddress(addr) {
     if (!/\S+@\S+/.test(addr)) throw new Error('Invalid email');
     return addr.trim().toLowerCase();
